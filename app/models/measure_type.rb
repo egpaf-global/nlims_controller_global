@@ -1,0 +1,2 @@
+class MeasureType < ApplicationRecord
+end
