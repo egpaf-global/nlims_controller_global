@@ -1,0 +1,2 @@
+class TestStatusUpdate < ApplicationRecord
+end

@@ -1,0 +1,2 @@
+class TesttypeMeasure < ApplicationRecord
+end
