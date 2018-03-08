@@ -55,8 +55,8 @@ module  OrderService
                                                 health_facility_district: health_facility_district
                               )
 
-                  ward = Ward.where(name: sample_order_location)
-
+                  ward = Ward.where(name: sample_order_location).first
+      
 			sq_order = Order.create(
                                                 doc_id: c_order.id, 
                                                 tracking_number: tracking_number,
@@ -71,7 +71,7 @@ module  OrderService
                                                 target_lab: target_lab,
                                                 art_start_date: art_start_date,
                                                 health_facility: health_facility_name,
-                                                ward_id:  ward.name,
+                                                ward_id:  ward.id,
                                                 requested_by: requesting_clinician
                               )
 
@@ -84,7 +84,7 @@ module  OrderService
 	 			t = CouchTest.create(   order_id: sq_order.id, 
                                                 test_type_id: test.id, 
                                                 time_created: date_created,
-                                                test_status_id: 'Drawn'
+                                                test_status_id: '2'
                                           )
 
 	 			Test.create(
@@ -92,7 +92,7 @@ module  OrderService
                                     order_id: sq_order.id,
                                     test_type_id: test.id,
                                     time_created: date_created,
-                                    test_status_id: 'Drawn'
+                                    test_status_id: '2'
                               )
 			end
 
