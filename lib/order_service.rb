@@ -1,7 +1,7 @@
 
 module  OrderService
 
-	def self.create_order(params)
+	def self.create_order(params,tracking_number)
 		ActiveRecord::Base.transaction do 
 
 			npid = params[:national_patient_id]
@@ -38,7 +38,7 @@ module  OrderService
                   }
 
 			c_order  = CouchOrder.create(
-                                                tracking_number: "2222222",
+                                                tracking_number: tracking_number,
                                                 date_created: date_created,
                                                 priority: sample_priority,
                                                 specimen_status: specimen_status.id,
@@ -59,7 +59,7 @@ module  OrderService
 
 			sq_order = Order.create(
                                                 doc_id: c_order.id, 
-                                                tracking_number: '22222',
+                                                tracking_number: tracking_number,
                                                 patient_id: '11',
                                                 specimen_type_id: sample_type.id,
                                                 specimen_status_id: specimen_status.id,
@@ -98,7 +98,7 @@ module  OrderService
 
 
 		end			
-            return true
+            return [true,tracking_number]
 	end
 
 
@@ -112,6 +112,104 @@ module  OrderService
       end
 
       
+
+      def self.query_results_by_tracking_number(tracking_number)
+
+            r = Test.find_by_sql(   "SELECT test_types.name AS tst_type, tests.id AS tst_id FROM test_types
+                                    INNER JOIN tests ON test_types.id = tests.test_type_id
+                                    INNER JOIN orders ON orders.id = tests.order_id
+                                    WHERE orders.tracking_number='#{tracking_number}'"
+                  )
+            checker = false;
+            if r.length > 0
+                  test_re = {}
+                  r.each do |te|
+
+                        res = Order.find_by_sql( "SELECT measures.name AS measure_name, test_results.result AS result
+                                          FROM orders INNER JOIN tests ON tests.order_id = orders.id
+                                          INNER JOIN test_results ON test_results.test_id = tests.id
+                                          INNER JOIN measures ON measures.id = test_results.measure_id
+                                          WHERE orders.tracking_number = '#{tracking_number}' AND 
+                                          test_results.test_id ='#{te.tst_id}'"
+                                    )
+                        results = {}
+                       
+                        if res.length > 0
+                              res.each do |re|
+
+                                  results[re.measure_name] = re.result
+                              end
+                              test_re[te.tst_type] = results
+                              checker = true
+                        end
+
+                  end
+                  if checker == true
+                        return test_re
+                  else
+                        return checker
+                  end
+            else
+                  return false
+            end
+      end
+
+
+      def self.query_order_by_tracking_number(tracking_number)
+            res = Order.find_by_sql("SELECT specimen_types.name AS sample_type, specimen_statuses.name AS specimen_status,
+                              wards.name AS order_location, orders.date_created AS date_created, orders.priority AS priority,
+                              orders.sample_drawn_by_id AS drawer_id, orders.sample_drawn_by_name AS drawer_name,
+                              sample_drawn_by_phone_number AS drawe_number, orders.target_lab AS target_lab, 
+                              orders.health_facility AS health_facility, orders.requested_by AS requested_by,
+                              orders.date_sample_drawn AS date_drawn 
+                              FROM orders INNER JOIN specimen_statuses ON specimen_statuses.id = orders.specimen_status_id
+                              INNER JOIN specimen_types ON specimen_types.id = orders.specimen_type_id
+                              INNER JOIN wards ON wards.id = orders.ward_id
+                              WHERE orders.tracking_number ='#{tracking_number}'
+                  ")
+            tests = {}
+
+            if res.length > 0
+                  res = res[0]
+                  tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status
+                                          FROM tests
+                                          INNER JOIN orders ON orders.id = tests.order_id
+                                          INNER JOIN test_types ON test_types.id = tests.test_type_id
+                                          INNER JOIN test_statuses ON test_statuses.id = tests.test_status_id
+                                          WHERE orders.tracking_number='#{tracking_number}'"
+                              )
+
+                  if tst.length > 0
+                        tst.each do |t|
+                              tests[t.test_name] = t.test_status
+                        end
+                  end
+
+                  return { 
+
+                        gen_details:   {  sample_type: res.sample_type,
+                                          specimen_status: res.specimen_status,
+                                          ward: res.order_location,
+                                          date_created: res.date_created,
+                                          priority: res.priority,
+                                          collector: {
+                                                      id: res.drawe_number,
+                                                      name: res.drawer_name,
+                                                      phone: res.drawe_number
+                                                },
+                                          target_lab: res.target_lab,
+                                          health_facility: res.health_facility,
+                                          requested_by: res.requested_by,
+                                          date_drawn: res.date_drawn
+                                          },
+                        tests: tests
+                  }
+                  
+            else
+                  return false
+            end
+
+      end
 
 
 end
