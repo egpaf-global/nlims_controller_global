@@ -1,0 +1,2 @@
+class TesttypePanel < ApplicationRecord
+end

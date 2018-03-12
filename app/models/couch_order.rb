@@ -1,7 +1,7 @@
 class CouchOrder < CouchRest::Model::Base
 	use_database 'orders'
 
-
+	property :_id, String
 	property :tracking_number, String
 	property :patient_id, String
 	property :sample_type, String

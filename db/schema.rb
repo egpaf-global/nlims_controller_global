@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180307102754) do
+ActiveRecord::Schema.define(version: 20180311172951) do
 
   create_table "measure_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
@@ -29,12 +29,11 @@ ActiveRecord::Schema.define(version: 20180307102754) do
     t.index ["measure_type_id"], name: "index_measures_on_measure_type_id"
   end
 
-  create_table "orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "orders", id: :string, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "specimen_type_id", null: false
     t.bigint "patient_id", null: false
     t.bigint "specimen_status_id", null: false
     t.bigint "ward_id", null: false
-    t.string "tracking_number", null: false
     t.string "date_created"
     t.string "priority", null: false
     t.string "sample_drawn_by_id"
@@ -46,7 +45,6 @@ ActiveRecord::Schema.define(version: 20180307102754) do
     t.string "requested_by", null: false
     t.string "date_sample_drawn"
     t.string "health_facility_district"
-    t.string "doc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["patient_id"], name: "index_orders_on_patient_id"
@@ -60,6 +58,15 @@ ActiveRecord::Schema.define(version: 20180307102754) do
     t.string "doc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "panels", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.bigint "panel_type_id"
+    t.bigint "test_type_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["panel_type_id"], name: "index_panels_on_panel_type_id"
+    t.index ["test_type_id"], name: "index_panels_on_test_type_id"
   end
 
   create_table "patients", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -139,7 +146,7 @@ ActiveRecord::Schema.define(version: 20180307102754) do
   end
 
   create_table "tests", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.bigint "order_id"
+    t.string "order_id"
     t.bigint "test_type_id"
     t.bigint "test_status_id"
     t.string "time_created"

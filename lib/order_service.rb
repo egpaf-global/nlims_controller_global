@@ -9,11 +9,28 @@ module  OrderService
 
 			patient_obj = patient_obj.first unless patient_obj.blank?
 				if patient_obj.blank?
-					pat = CouchPatient.create()
-					patient_obj.create(patient_id: npid, name: '')
+					pat = CouchPatient.create(
+                                                patient_id: npid, 
+                                                name: params[:first_name] +" "+ params[:last_name],
+                                                email: '' ,
+                                                dob: params[:date_of_birth],
+                                                gender: params[:gender],
+                                                phone_number: params[:phone_number]
+                                                )
+
+					patient_obj.create(
+                                                patient_id: npid, 
+                                                npid: pat.id,
+                                                name: params[:first_name] +" "+ params[:last_name],
+                                                email: '' ,
+                                                dob: params[:date_of_birth],
+                                                gender: params[:gender],
+                                                phone_number: params[:phone_number]
+                                                )
 				end
 
                   #obtaining order details posted by client
+
 
 			sample_type = SpecimenType.where(name: params[:sample_type]).first
                   sample_collector_name = params[:sample_collector_first_name] + " " + params[:sample_collector_last_name]
@@ -22,7 +39,7 @@ module  OrderService
                   sample_order_location = params[:sample_order_location]
                   requesting_clinician = params[:requesting_clinician]
                   date_sample_drawn = params[:date_sample_drawn]
-                  date_created = params[:date_created]
+                  date_created = Time.now
                   sample_priority = params[:sample_priority]
                   target_lab = params[:target_lab]
                   art_start_date = params[:art_start_date]
@@ -38,7 +55,7 @@ module  OrderService
                   }
 
 			c_order  = CouchOrder.create(
-                                                tracking_number: tracking_number,
+                                                _id: tracking_number,
                                                 date_created: date_created,
                                                 priority: sample_priority,
                                                 specimen_status: specimen_status.id,
@@ -56,11 +73,11 @@ module  OrderService
                               )
 
                   ward = Ward.where(name: sample_order_location).first
-      
+                 
+                  loca_id = ward.id
 			sq_order = Order.create(
-                                                doc_id: c_order.id, 
-                                                tracking_number: tracking_number,
-                                                patient_id: '11',
+                                                id: tracking_number,
+                                                patient_id: npid,
                                                 specimen_type_id: sample_type.id,
                                                 specimen_status_id: specimen_status.id,
                                                 date_created: date_created,
@@ -71,31 +88,55 @@ module  OrderService
                                                 target_lab: target_lab,
                                                 art_start_date: art_start_date,
                                                 health_facility: health_facility_name,
-                                                ward_id:  ward.id,
+                                                health_facility_district: health_facility_district,
+                                                ward_id:  loca_id,
                                                 requested_by: requesting_clinician
                               )
 
 
+                  params[:tests].each do |ts|
 
-                 tests = TestType.where(name: params[:tests])
+                        status = check_test(ts)
 
-			(tests || []).each do |test| 
-             
-	 			t = CouchTest.create(   order_id: sq_order.id, 
-                                                test_type_id: test.id, 
-                                                time_created: date_created,
-                                                test_status_id: '2'
-                                          )
-
-	 			Test.create(
-                                    doc_id: t.id,
-                                    order_id: sq_order.id,
-                                    test_type_id: test.id,
-                                    time_created: date_created,
-                                    test_status_id: '2'
-                              )
-			end
-
+                        if status == false
+                              test = TestType.where(name: ts).first
+                 	 			t = CouchTest.create(   order_id: tracking_number, 
+                                                                  test_type_id: test.id, 
+                                                                  time_created: date_created,
+                                                                  test_status_id: '2'
+                                                            )
+                 	 			Test.create(
+                                                      doc_id: t.id,
+                                                      order_id: tracking_number,
+                                                      test_type_id: test.id,
+                                                      time_created: date_created,
+                                                      test_status_id: '2'
+                                                )
+            			
+                        else
+                              pa_id = PanelType.where(name: ts).first
+                              res =  TestType.find_by_sql("SELECT test_types.id FROM test_types INNER JOIN panels 
+                                                ON panels.test_type_id = test_types.id
+                                                INNER JOIN panel_types ON panel_types.id = panels.panel_type_id
+                                                WHERE panel_types.id ='#{pa_id.id}'")
+                              
+                              res.each do |tt|
+                                
+                                    t = CouchTest.create(   order_id: tracking_number, 
+                                                                  test_type_id: tt.id, 
+                                                                  time_created: date_created,
+                                                                  test_status_id: '2'
+                                                            )
+                                    Test.create(
+                                                      doc_id: t.id,
+                                                      order_id: tracking_number,
+                                                      test_type_id: tt.id,
+                                                      time_created: date_created,
+                                                      test_status_id: '2'
+                                                )
+                              end
+                        end
+                  end
 
 		end			
             return [true,tracking_number]
@@ -154,6 +195,17 @@ module  OrderService
             end
       end
 
+      def self.check_test(tst)
+
+            res = PanelType.find_by_sql("SELECT * FROM panel_types WHERE name ='#{tst}'")
+
+            if res.length > 0
+                  return true
+            else
+                  return false
+            end
+
+      end
 
       def self.query_order_by_tracking_number(tracking_number)
             res = Order.find_by_sql("SELECT specimen_types.name AS sample_type, specimen_statuses.name AS specimen_status,

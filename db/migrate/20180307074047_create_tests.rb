@@ -5,7 +5,8 @@ class CreateTests < ActiveRecord::Migration[5.1]
     	t.references :test_type
     	t.references :test_status
 
-    	t.string :time_created
+    	  t.string :time_created
+        t.string :order_id
        	t.string :doc_id
       	t.timestamps
     end

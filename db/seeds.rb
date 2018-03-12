@@ -84,7 +84,7 @@ test_panels.each do |tp|
 end
 
 
-test_status = ['not_received','pending','started','completed','verified','voided','not-done','test-rejected']
+test_status = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn']
 
 test_status.each do |t|
 	res = CouchTestStatus.create(name: t)
@@ -237,6 +237,19 @@ testtype_measures.each do |tm|
 
 	TesttypeMeasure.create(test_type_id: tm[1] , measure_id: tm[2])
 
+end
+
+puts '--------------loading panel tests---------------------'
+
+panel_tests =  [
+				[2,11],[2,12],[2,13],[1,3],[1,4],[1,5],[1,6],[1,7],[4,4],[4,3],[3,5],[3,4],[3,7],[3,3],[3,8]
+	]
+
+panel_tests.each do |pan|
+	Panel.create(
+			test_type_id:  pan[1],
+			panel_type_id: pan[0]
+		)
 end
 
 puts '--------------creating default user account--------------'
