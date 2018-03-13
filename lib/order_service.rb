@@ -8,7 +8,9 @@ module  OrderService
 			patient_obj = Patient.where(patient_id: npid)
 
 			patient_obj = patient_obj.first unless patient_obj.blank?
+
 				if patient_obj.blank?
+
 					pat = CouchPatient.create(
                                                 patient_id: npid, 
                                                 name: params[:first_name] +" "+ params[:last_name],
@@ -18,7 +20,7 @@ module  OrderService
                                                 phone_number: params[:phone_number]
                                                 )
 
-					patient_obj.create(
+					patient_obj = patient_obj.create(
                                                 patient_id: npid, 
                                                 npid: pat.id,
                                                 name: params[:first_name] +" "+ params[:last_name],
@@ -27,6 +29,7 @@ module  OrderService
                                                 gender: params[:gender],
                                                 phone_number: params[:phone_number]
                                                 )
+                                 
 				end
 
                   #obtaining order details posted by client
@@ -39,7 +42,7 @@ module  OrderService
                   sample_order_location = params[:sample_order_location]
                   requesting_clinician = params[:requesting_clinician]
                   date_sample_drawn = params[:date_sample_drawn]
-                  date_created = Time.now
+                  date_created = Date.today.strftime("%a %b %d %Y")
                   sample_priority = params[:sample_priority]
                   target_lab = params[:target_lab]
                   art_start_date = params[:art_start_date]
@@ -53,14 +56,14 @@ module  OrderService
                                     last_name: sample_collector_name.split(" ")[1],
                                     phone_number: sample_collector_phone_number
                   }
-
+                  
 			c_order  = CouchOrder.create(
                                                 _id: tracking_number,
                                                 date_created: date_created,
                                                 priority: sample_priority,
                                                 specimen_status: specimen_status.id,
                                                 sample_collector: sample_collector,
-                                                patient_id: npid, 
+                                                patient_id: patient_obj.id, 
                                                 sample_type: sample_type.id,
                                                 target_lab: target_lab,
                                                 art_start_date: art_start_date,
@@ -77,7 +80,7 @@ module  OrderService
                   loca_id = ward.id
 			sq_order = Order.create(
                                                 id: tracking_number,
-                                                patient_id: npid,
+                                                patient_id: patient_obj.id,
                                                 specimen_type_id: sample_type.id,
                                                 specimen_status_id: specimen_status.id,
                                                 date_created: date_created,
@@ -144,7 +147,7 @@ module  OrderService
 
 
       def self.get_order_by_tracking_number_sql(tracking_number)
-          details =   Order.where(tracking_number: tracking_number).first
+          details =   Order.where(id: tracking_number).first
             if details
                   return details
             else
@@ -159,7 +162,7 @@ module  OrderService
             r = Test.find_by_sql(   "SELECT test_types.name AS tst_type, tests.id AS tst_id FROM test_types
                                     INNER JOIN tests ON test_types.id = tests.test_type_id
                                     INNER JOIN orders ON orders.id = tests.order_id
-                                    WHERE orders.tracking_number='#{tracking_number}'"
+                                    WHERE orders.id ='#{tracking_number}'"
                   )
             checker = false;
             if r.length > 0
@@ -170,7 +173,7 @@ module  OrderService
                                           FROM orders INNER JOIN tests ON tests.order_id = orders.id
                                           INNER JOIN test_results ON test_results.test_id = tests.id
                                           INNER JOIN measures ON measures.id = test_results.measure_id
-                                          WHERE orders.tracking_number = '#{tracking_number}' AND 
+                                          WHERE orders.id  = '#{tracking_number}' AND 
                                           test_results.test_id ='#{te.tst_id}'"
                                     )
                         results = {}
@@ -195,6 +198,56 @@ module  OrderService
             end
       end
 
+      def self.query_order_by_npid(npid)
+
+    
+                  res = Order.find_by_sql("SELECT specimen_types.name AS spc_type, orders.id AS track_number, 
+                                    orders.date_created AS dat_created
+                                    FROM orders INNER JOIN specimen_types 
+                                    ON specimen_types.id = orders.specimen_type_id
+                                    INNER JOIN patients ON patients.id = orders.patient_id
+                                    WHERE patients.patient_id ='#{npid}'")
+
+                  
+                  counter = 0
+                  details =[]
+                  det = {}
+                  tste = []
+
+                  if res.length > 0
+                        res.each do |gde|
+                              tracking_number = gde['track_number']
+                              tst = Order.find_by_sql("SELECT test_types.name AS tst_name FROM test_types 
+                                          INNER JOIN tests ON tests.test_type_id = test_types.id
+                                          INNER JOIN orders  ON orders.id = tests.order_id
+                                          WHERE tests.order_id ='#{tracking_number}'")
+
+                              
+                              tst.each do |ty|
+                                    tste.push(ty['tst_name'])
+                              end
+                              
+                                    det ={
+                                          specimen_type: gde['spc_type'],
+                                          tracking_number: gde['track_number'],
+                                          date_created: gde['dat_created'],
+                                          tests: tste
+                                    }
+
+                              details[counter] =  det
+
+
+                        counter = counter + 1
+                        tste = []
+                        end   
+                        counter = 0
+                        return details
+                  else
+                        return false
+                  end
+   
+      end
+
       def self.check_test(tst)
 
             res = PanelType.find_by_sql("SELECT * FROM panel_types WHERE name ='#{tst}'")
@@ -208,17 +261,20 @@ module  OrderService
       end
 
       def self.query_order_by_tracking_number(tracking_number)
+
             res = Order.find_by_sql("SELECT specimen_types.name AS sample_type, specimen_statuses.name AS specimen_status,
                               wards.name AS order_location, orders.date_created AS date_created, orders.priority AS priority,
                               orders.sample_drawn_by_id AS drawer_id, orders.sample_drawn_by_name AS drawer_name,
                               sample_drawn_by_phone_number AS drawe_number, orders.target_lab AS target_lab, 
                               orders.health_facility AS health_facility, orders.requested_by AS requested_by,
-                              orders.date_sample_drawn AS date_drawn 
+                              orders.date_sample_drawn AS date_drawn,
+                              patients.patient_id AS pat_id, patients.name AS pat_name,
+                              patients.dob AS dob, patients.gender AS sex 
                               FROM orders INNER JOIN specimen_statuses ON specimen_statuses.id = orders.specimen_status_id
                               INNER JOIN specimen_types ON specimen_types.id = orders.specimen_type_id
                               INNER JOIN wards ON wards.id = orders.ward_id
-                              WHERE orders.tracking_number ='#{tracking_number}'
-                  ")
+                              INNER JOIN patients ON orders.patient_id = patients.id
+                              WHERE orders.id ='#{tracking_number}' ")
             tests = {}
 
             if res.length > 0
@@ -228,7 +284,7 @@ module  OrderService
                                           INNER JOIN orders ON orders.id = tests.order_id
                                           INNER JOIN test_types ON test_types.id = tests.test_type_id
                                           INNER JOIN test_statuses ON test_statuses.id = tests.test_status_id
-                                          WHERE orders.tracking_number='#{tracking_number}'"
+                                          WHERE orders.id='#{tracking_number}'"
                               )
 
                   if tst.length > 0
@@ -248,6 +304,12 @@ module  OrderService
                                                       id: res.drawe_number,
                                                       name: res.drawer_name,
                                                       phone: res.drawe_number
+                                                },
+                                          patient: {
+                                                      id: res.pat_id,
+                                                      name: res.pat_name,
+                                                      gender: res.sex,
+                                                      dob: res.dob
                                                 },
                                           target_lab: res.target_lab,
                                           health_facility: res.health_facility,

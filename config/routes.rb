@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   		post '/create_order/:token'										 => 'order#create_order'
   		get  '/query_results_by_tracking_number/:tracking_number/:token' => 'order#query_results_by_tracking_number'
   		get '/query_order_by_tracking_number/:tracking_number/:token'	 => 'order#query_order_by_tracking_number'
+      get '/query_order_by_npid/:npid/:token' => 'order#query_order_by_npid'
 		  		
 
   		#test routes

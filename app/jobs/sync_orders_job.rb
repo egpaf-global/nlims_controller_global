@@ -28,7 +28,7 @@ class OrderSync
             
               Order.where(id: re[0].id).update_all({
                                                 :id => tr['id'], 
-                                                :patient_id => '11',
+                                                :patient_id => tr['doc']['patient_id'],
                                                 :specimen_type_id => tr['doc']['sample_type'],
                                                 :specimen_status_id => tr['doc']['specimen_status'],
                                                 :date_created => tr['doc']['date_created'],
@@ -46,7 +46,7 @@ class OrderSync
               
                        sq_order = Order.create(
                                                 id: tr['id'], 
-                                                patient_id: '11',
+                                                patient_id: tr['doc']['patient_id'],
                                                 specimen_type_id: tr['doc']['sample_type'],
                                                 specimen_status_id: tr['doc']['specimen_status'],
                                                 date_created: tr['doc']['date_created'],
