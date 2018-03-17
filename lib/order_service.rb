@@ -47,7 +47,7 @@ module  OrderService
                   target_lab = params[:target_lab]
                   art_start_date = params[:art_start_date]
                   health_facility_name = params[:health_facility_name]
-                  health_facility_district = params[:health_facility_district]
+                  health_facility_district = params[:district]
                   specimen_status = SpecimenStatus.where(name: 'specimen_accepted').first
 
                   sample_collector = {

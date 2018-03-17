@@ -89,4 +89,31 @@ module TestService
         Test.update(test_id,test_status_id: status_id)
     end
 
+    def self.add_test(params)
+
+    	te_id = TestType.where(name: params[:test_name]).first
+    
+    	c_tes = CouchTest.create(
+    			order_id: params[:tracking_number],
+    			test_type_id: te_id.id,
+    			time_created: Date.today.strftime("%a %b %d %Y"),
+    			test_status_id: 2,
+    		)
+
+    	Test.create(
+    			order_id: params[:tracking_number],
+    			test_type_id: te_id.id,
+    			time_created: Date.today.strftime("%a %b %d %Y"),
+    			doc_id: c_tes.id,
+    			test_status_id: 2,
+
+    		)
+    end
+
+
+
+    def self.edit_test_result
+
+    end
+
 end

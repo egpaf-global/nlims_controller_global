@@ -5,7 +5,7 @@ class API::V1::UserController < ApplicationController
 
 
 	def create_user
-
+		
 		if params[:location] && params[:app_name] && params[:password] && params[:username] && params[:token] && params[:partner]
 			status = UserService.check_user(params[:username])
 			if status == false

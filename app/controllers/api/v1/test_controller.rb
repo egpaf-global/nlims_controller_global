@@ -68,4 +68,13 @@ class API::V1::TestController < ApplicationController
 	end
 
 
+	def edit_test_result
+
+	end
+
+	def add_test
+		res = TestService.add_test(params);
+
+	end
+
 end
