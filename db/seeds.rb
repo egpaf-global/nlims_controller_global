@@ -13,6 +13,7 @@ categories_id_look_up = {}
 measure_type_id_look_up = {}
 counter = 1
 
+puts 'loading test categories--------------'
 test_categories.each do |ca|
 	res = CouchTestCategory.create(name: ca , created_at: DateTime.now.strftime("%d/%m/%Y %H:%M"),type: 'test ategory' )
 	tca = TestCategory.create(name: ca, doc_id: res.id)	
@@ -57,7 +58,7 @@ test_types = [[1,'TB Microscopic Exam','AFB',2,'20 min'],[2,'GeneXpert','GXp',2,
 			  [70,'Von Willebrand Factor','vWf',3,'72'],[71,'Viral Load','VL',9,'30']	
 
 			]
-
+puts 'loading test types--------------'
 test_types.each do |t|
 	_id = categories_id_look_up[t[3]]
 	res = CouchTestType.create(name: t[1], short_name: t[2], test_category_id: _id, targetTAT: t[4])
@@ -70,6 +71,7 @@ specimen_types = [[1,'Sputum'],[2,'CSF'],[3,'Blood'],[4,'Pleural Fluid'],[5,'Asc
 				  [18,'Plasma'],[19,'DBS (Free drop to DBS card)'],[21,'DBS (Using capillary tube)']
 				]
 
+puts 'loading specimen types--------------'
 specimen_types.each do |sp|
 	res = CouchSpecimenType.create(name: sp[1])
 	SpecimenType.create(name:sp[1], doc_id: res.id)
@@ -78,6 +80,7 @@ end
 
 
 test_panels = ['CSF Analysis','Urinalysis','Sterile Fluid Analysis','MC&S']
+puts 'loading test panels--------------'
 test_panels.each do |tp|
 	res = CouchPanelType.create(name: tp)
 	PanelType.create(name: tp, doc_id: res.id)
@@ -86,6 +89,7 @@ end
 
 test_status = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn']
 
+puts 'loading test statuses--------------'
 test_status.each do |t|
 	res = CouchTestStatus.create(name: t)
 	TestStatus.create(name: t, doc_id: res.id)
@@ -94,6 +98,7 @@ end
 
 specimen_status = ['specimen_not_collected','specimen_accepted','specimen_rejected']
 
+puts 'loading specimen statuses--------------'
 specimen_status.each do |sps|
 	res = CouchSpecimenType.create(name: sps)
 	SpecimenStatus.create(name:sps, doc_id: res.id)
@@ -103,6 +108,7 @@ ward = ['CWC','CWC HDU','CWB','OPD 2','Facilities','OPD 1','CWA','Theatre','Dial
 		'3A','3B','Labour','Dental','Skin','Eye','Under 5 Clinic','7B','7C','GYNAE','Casulty','EM OPD','EM HDU','EM LW',
 		'ANC']
 
+puts 'loading wards--------------'
 ward.each do |w|
 	res =  CouchWard.create(name: w)
 	Ward.create(name: w, doc_id: res.id)	
@@ -111,6 +117,7 @@ end
 
 measure_type = ['Numeric Range','Alphanumeric Values','Autocomplete','Free Text']
 
+puts 'loading measure types--------------'
 measure_type.each do |mt|
 	res = CouchMeasureType.create(name: mt)
 	MeasureType.create(name: mt, doc_id: res.id)
@@ -192,7 +199,7 @@ measures = [
 	[292,1,"Von Willebrand (Antigen)",'%'],[293,1,"Von Willebrand (Activity)",'%'],[294,4,"Viral Load",'']
 
 ]
-
+puts 'loading test measures--------------'
 measures.each do |me|
 	res = CouchMeasure.create(name: me[2],unit: me[3],measure_type: 'x')
 	Measure.create(name: me[2], doc_id: res.id, unit: me[3], measure_type_id: me[1])
@@ -232,14 +239,14 @@ testtype_measures =[
 		[1091,70,293],[1093,71,294],[1094,29,125],[1095,4,60]
 
 	]
-puts '--------------loading test type measures--------------'
+puts 'loading test type measures--------------'
 testtype_measures.each do |tm|
 
 	TesttypeMeasure.create(test_type_id: tm[1] , measure_id: tm[2])
 
 end
 
-puts '--------------loading panel tests---------------------'
+puts 'loading panel tests---------------------'
 
 panel_tests =  [
 				[2,11],[2,12],[2,13],[1,3],[1,4],[1,5],[1,6],[1,7],[4,4],[4,3],[3,5],[3,4],[3,7],[3,3],[3,8]
@@ -252,17 +259,18 @@ panel_tests.each do |pan|
 		)
 end
 
-puts '--------------creating default user account--------------'
+puts 'creating default user account--------------'
 
 password_has = BCrypt::Password.create("knock_knock")
 username = 'admin'
 app_name = 'nlims'
 location = 'lilongwe'
 partner = 'api_admin'
-token = ''
-token_expiry_time = ''
+token = 'xxxxxxx'
+token_expiry_time = '000000000'
 
-User.create(password: password_has, username: username, 
+User.create(password: password_has, 
+			username: username, 
 			app_name: app_name, 
 			partner: partner, 
 			location: location,

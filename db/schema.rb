@@ -34,17 +34,21 @@ ActiveRecord::Schema.define(version: 20180311172951) do
     t.bigint "patient_id", null: false
     t.bigint "specimen_status_id", null: false
     t.bigint "ward_id", null: false
-    t.string "date_created"
+    t.datetime "date_created"
     t.string "priority", null: false
     t.string "sample_drawn_by_id"
     t.string "sample_drawn_by_name"
     t.string "sample_drawn_by_phone_number"
     t.string "target_lab", null: false
-    t.string "art_start_date"
+    t.datetime "art_start_date"
     t.string "health_facility", null: false
     t.string "requested_by", null: false
-    t.string "date_sample_drawn"
+    t.datetime "date_sample_drawn"
     t.string "health_facility_district"
+    t.string "dispatcher_id"
+    t.string "dispatcher_name"
+    t.string "dispatcher_phone_number"
+    t.datetime "date_dispatched"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["patient_id"], name: "index_orders_on_patient_id"
@@ -69,8 +73,7 @@ ActiveRecord::Schema.define(version: 20180311172951) do
     t.index ["test_type_id"], name: "index_panels_on_test_type_id"
   end
 
-  create_table "patients", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "patient_id"
+  create_table "patients", id: :string, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "npid"
     t.string "name"
     t.string "email"
@@ -107,7 +110,7 @@ ActiveRecord::Schema.define(version: 20180311172951) do
     t.bigint "measure_id"
     t.string "result"
     t.string "doc_id"
-    t.string "time_entered"
+    t.datetime "time_entered"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["measure_id"], name: "index_test_results_on_measure_id"
@@ -137,7 +140,7 @@ ActiveRecord::Schema.define(version: 20180311172951) do
   create_table "test_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "test_category_id"
     t.string "name", null: false
-    t.string "short_name"
+    t.string "short_name", limit: 200
     t.string "targetTAT"
     t.string "doc_id"
     t.datetime "created_at", null: false
@@ -149,7 +152,7 @@ ActiveRecord::Schema.define(version: 20180311172951) do
     t.string "order_id"
     t.bigint "test_type_id"
     t.bigint "test_status_id"
-    t.string "time_created"
+    t.datetime "time_created"
     t.string "doc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -173,8 +176,8 @@ ActiveRecord::Schema.define(version: 20180311172951) do
     t.string "location", null: false
     t.string "password", null: false
     t.string "username", null: false
-    t.string "token", null: false
-    t.string "token_expiry_time", null: false
+    t.string "token", default: "xxxxxxx", null: false
+    t.datetime "token_expiry_time"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
