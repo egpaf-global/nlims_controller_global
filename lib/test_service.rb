@@ -116,4 +116,53 @@ module TestService
 
     end
 
+    def self.get_order_test(params)
+    	tracking_number = params[:tracking_number]
+    	res1 = TestType.find_by_sql(
+    						"SELECT test_types.name AS test_name, test_types.id AS tes_id FROM test_types 
+    							INNER JOIN tests ON tests.test_type_id = test_types.id
+    							INNER JOIN orders ON tests.order_id = orders.id
+    							WHERE orders.id = '#{tracking_number}'"
+    		)
+
+    	details = {}
+    	measures = {}
+    	ranges = []
+    	if !res1.blank?
+
+    		res1.each do |te|
+    			
+    			res = Order.find_by_sql("SELECT measures.name AS measure_nam, measures.id AS me_id FROM measures 
+    							INNER JOIN testtype_measures ON testtype_measures.measure_id = measures.id
+    							INNER JOIN test_types ON test_types.id = testtype_measures.test_type_id
+    							WHERE test_types.id = '#{te.tes_id}'
+    						")
+
+    			if !res.blank?
+    				res.each do |me|	
+    					me_ra = MeasureRange.find_by_sql("SELECT measure_ranges.alphanumeric AS alpha FROM measure_ranges
+    											 WHERE measures_id ='#{me.me_id}'")
+    					me_ra.each do |r|
+    						if r.alpha.blank?
+    							ranges.push('free text')
+    						else    							
+    							ranges.push(r.alpha)
+    						end
+    					end   
+    					measures[me.measure_nam] = ranges
+    					ranges = []					  				
+    				end    				
+    				details[te.test_name] = measures
+    				measures = {}
+    			end
+    		end
+    	else
+    		
+    	end
+
+    	return details
+
+    end
+
+
 end

@@ -7,7 +7,12 @@ class API::V1::OrderController < ApplicationController
 
 	def create_order
 		
-		
+	f = File.open("#{Rails.root}/public/tracker.json", "a")
+
+		succes = f.flock(File::LOCK_EX)
+
+		if succes
+			begin 
 				if params[:token]
 
 						    if(!params['district'])                                      
@@ -46,19 +51,24 @@ class API::V1::OrderController < ApplicationController
 
 								status = UserService.check_token(params[:token])
 								if status == true
-									
-									st = OrderService.create_order(params)
-									if st[0] == true
-										response = {
-											status: 200,
-											error: false,
-											message: 'order created successfuly',
-											data: {
-												tracking_number: st[1]
-											}
-										}
+								
+												tracking_number = TrackingNumberService.generate_tracking_number
+												st = OrderService.create_order(params, tracking_number)
+												if st[0] == true
+													response = {
+														status: 200,
+														error: false,
+														message: 'order created successfuly',
+														data: {
+															tracking_number: st[1]
+														}
+													}
+												TrackingNumberService.prepare_next_tracking_number
+												end
+											
 										
-									end
+									
+
 								else	
 									response = {
 										status: 401,
@@ -93,10 +103,12 @@ class API::V1::OrderController < ApplicationController
 						}
 				end
 			
-
+				
 				render plain: response.to_json and return
-
-		
+			
+				
+			end
+		end
 		
 
 	end

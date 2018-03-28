@@ -198,4 +198,11 @@ class API::V1::TestController < ApplicationController
 		render plain: response.to_json and return
 	end
 
+
+	def get_order_test
+		details = TestService.get_order_test(params)
+			
+		render plain: details.to_json and return
+	end	
+
 end
