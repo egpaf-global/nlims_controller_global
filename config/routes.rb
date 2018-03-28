@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   		post '/update_test/:token'  				   					 => 'test#update_test'
       post '/add_test/:token'                           => 'test#add_test'
       put  '/edit_test_result/:token'                  => 'test#edit_test_result'
+      get  '/get_order_test/:tracking_number'          => 'test#get_order_test'
  
 
   		#user routes	

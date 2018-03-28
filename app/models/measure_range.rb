@@ -1,0 +1,2 @@
+class MeasureRange < ApplicationRecord
+end

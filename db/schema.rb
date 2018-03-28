@@ -10,7 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180311172951) do
+ActiveRecord::Schema.define(version: 20180326071034) do
+
+  create_table "measure_ranges", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.bigint "measures_id"
+    t.integer "age_min"
+    t.integer "age_max"
+    t.integer "gender"
+    t.decimal "range_lower", precision: 10
+    t.decimal "range_upper", precision: 10
+    t.string "alphanumeric"
+    t.string "interpretation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["measures_id"], name: "index_measure_ranges_on_measures_id"
+  end
 
   create_table "measure_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
