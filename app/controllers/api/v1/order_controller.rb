@@ -18,7 +18,7 @@ class API::V1::OrderController < ApplicationController
 						    if(!params['district'])                                      
 		                        msg = "district not provided";                                      
 		                    elsif(!params['health_facility_name'])
-		                        msg = "district not provided"
+		                        msg = "health facility name not provided"
 		                    elsif (!params['requesting_clinician'])
 		                    	msg = 'requesting clinician not provided'
 		                    elsif(!params['first_name'])

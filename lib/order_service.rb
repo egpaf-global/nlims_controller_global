@@ -5,7 +5,7 @@ module  OrderService
 		ActiveRecord::Base.transaction do 
 
 			npid = params[:national_patient_id]
-			patient_obj = Patient.where(patient_id: npid)
+			patient_obj = Patient.where(id: npid)
 
 			patient_obj = patient_obj.first unless patient_obj.blank?
 
@@ -21,7 +21,7 @@ module  OrderService
                                                 )
 
 					patient_obj = patient_obj.create(
-                                                patient_id: npid, 
+                                                id: npid, 
                                                 npid: pat.id,
                                                 name: params[:first_name] +" "+ params[:last_name],
                                                 email: '' ,
@@ -206,7 +206,7 @@ module  OrderService
                                     FROM orders INNER JOIN specimen_types 
                                     ON specimen_types.id = orders.specimen_type_id
                                     INNER JOIN patients ON patients.id = orders.patient_id
-                                    WHERE patients.patient_id ='#{npid}'")
+                                    WHERE patients.id ='#{npid}'")
 
                   
                   counter = 0
@@ -268,7 +268,7 @@ module  OrderService
                               sample_drawn_by_phone_number AS drawe_number, orders.target_lab AS target_lab, 
                               orders.health_facility AS health_facility, orders.requested_by AS requested_by,
                               orders.date_sample_drawn AS date_drawn,
-                              patients.patient_id AS pat_id, patients.name AS pat_name,
+                              patients.id AS pat_id, patients.name AS pat_name,
                               patients.dob AS dob, patients.gender AS sex 
                               FROM orders INNER JOIN specimen_statuses ON specimen_statuses.id = orders.specimen_status_id
                               INNER JOIN specimen_types ON specimen_types.id = orders.specimen_type_id
