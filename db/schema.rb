@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180301141033) do
+ActiveRecord::Schema.define(version: 20180306084726) do
 
   create_table "measure_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name"
@@ -31,7 +31,7 @@ ActiveRecord::Schema.define(version: 20180301141033) do
   create_table "orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "tracking_number"
     t.string "patient_id"
-    t.string "sample_type"
+    t.string "sample_type_id"
     t.string "date_created"
     t.string "priority"
     t.string "specimen_status_id"
@@ -43,6 +43,8 @@ ActiveRecord::Schema.define(version: 20180301141033) do
     t.string "health_facility"
     t.string "ward_or_location_id"
     t.string "requested_by"
+    t.string "date_sample_drawn"
+    t.string "health_facility_district"
     t.string "doc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -93,6 +95,16 @@ ActiveRecord::Schema.define(version: 20180301141033) do
     t.string "measure_id"
     t.string "result"
     t.string "doc_id"
+    t.string "time_entered"
+  end
+
+  create_table "test_status_updates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "test_id"
+    t.string "doc_id"
+    t.string "time_updated"
+    t.string "test_status_id"
+    t.string "who_updated_id"
+    t.string "who_updated_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -115,15 +127,10 @@ ActiveRecord::Schema.define(version: 20180301141033) do
   end
 
   create_table "tests", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "specimen_id"
+    t.string "order_id"
     t.string "test_type_id"
     t.string "test_status_id"
-    t.string "tested_by"
-    t.string "verified_by"
-    t.string "time_started"
     t.string "time_created"
-    t.string "time_verified"
-    t.string "time_completed"
     t.string "doc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -132,6 +139,18 @@ ActiveRecord::Schema.define(version: 20180301141033) do
   create_table "testtype_measures", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "test_type_id"
     t.string "measure_type_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "app_name"
+    t.string "partner"
+    t.string "location"
+    t.string "password"
+    t.string "username"
+    t.string "token"
+    t.string "token_expiry_time"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

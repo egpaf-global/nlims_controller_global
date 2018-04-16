@@ -3,7 +3,7 @@ class CreateOrders < ActiveRecord::Migration[5.1]
     create_table :orders do |t|
     	t.string :tracking_number
     	t.string :patient_id
-    	t.string :sample_type
+    	t.string :sample_type_id
     	t.string :date_created
     	t.string :priority
     	t.string :specimen_status_id
@@ -15,6 +15,8 @@ class CreateOrders < ActiveRecord::Migration[5.1]
     	t.string :health_facility
     	t.string :ward_or_location_id
     	t.string :requested_by
+        t.string :date_sample_drawn
+        t.string :health_facility_district
     	t.string :doc_id
       	t.timestamps
     end

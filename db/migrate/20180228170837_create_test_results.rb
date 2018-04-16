@@ -5,7 +5,7 @@ class CreateTestResults < ActiveRecord::Migration[5.1]
     	t.string :measure_id
     	t.string :result
     	t.string :doc_id
-	    t.timestamps
+    	t.string :time_entered	
     end
   end
 end
