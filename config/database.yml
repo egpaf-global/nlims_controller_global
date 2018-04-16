@@ -19,14 +19,22 @@ default: &default
 
 development:
   <<: *default
+<<<<<<< HEAD
   database: nlims
+=======
+  database: nlims_db
+>>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
   <<: *default
+<<<<<<< HEAD
   database: nlims_controller_test
+=======
+  database: nlims_test
+>>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 
 # As with config/secrets.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -49,6 +57,12 @@ test:
 #
 production:
   <<: *default
+<<<<<<< HEAD
   database: nlims_controller_production
   username: nlims_controller
   password: <%= ENV['NLIMS_CONTROLLER_DATABASE_PASSWORD'] %>
+=======
+  database: nlims_production
+  username: nlims
+  password: <%= ENV['NLIMS_DATABASE_PASSWORD'] %>
+>>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
