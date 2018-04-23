@@ -6,13 +6,7 @@ require 'thread'
 class API::V1::OrderController < ApplicationController
 
 	def create_order
-		
-	f = File.open("#{Rails.root}/public/tracker.json", "a")
 
-		succes = f.flock(File::LOCK_EX)
-
-		if succes
-			begin 
 				if params[:token]
 
 						    if(!params['district'])                                      
@@ -57,6 +51,7 @@ class API::V1::OrderController < ApplicationController
 													st = OrderService.create_order(params, tracking_number)
 													
 													if st[0] == true
+
 														response = {
 															status: 200,
 															error: false,
@@ -105,12 +100,7 @@ class API::V1::OrderController < ApplicationController
 			
 				
 				render plain: response.to_json and return
-			
-				
-			end
-		end
-		
-
+	
 	end
 
 	def query_order_by_npid
