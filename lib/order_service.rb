@@ -42,7 +42,7 @@ module  OrderService
                   sample_order_location = params[:sample_order_location]
                   requesting_clinician = params[:requesting_clinician]
                   date_sample_drawn = params[:date_sample_drawn]
-                  date_create = Date.today.strftime("%a %b %d %Y")
+                  date_created = Date.today.strftime("%a %b %d %Y")
                   sample_priority = params[:sample_priority]
                   target_lab = params[:target_lab]
                   art_start_date = params[:art_start_date]
@@ -59,7 +59,6 @@ module  OrderService
                   
                   c_order  = CouchOrder.create(
                                                 _id: tracking_number,
-                                                date_created: date_create,
                                                 priority: sample_priority,
                                                 specimen_status: specimen_status.id,
                                                 sample_collector: sample_collector,
