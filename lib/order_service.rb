@@ -1,19 +1,17 @@
 
 module  OrderService
 
+      def self.create_order(params,tracking_number)
+            ActiveRecord::Base.transaction do 
 
-	def self.create_order(params,tracking_number)
+                  npid = params[:national_patient_id]
+                  patient_obj = Patient.where(id: npid)
 
-		ActiveRecord::Base.transaction do 
+                  patient_obj = patient_obj.first unless patient_obj.blank?
 
-			npid = params[:national_patient_id]
-			patient_obj = Patient.where(id: npid)
+                        if patient_obj.blank?
 
-			patient_obj = patient_obj.first unless patient_obj.blank?
-
-				if patient_obj.blank?
-
-					pat = CouchPatient.create(
+                              pat = CouchPatient.create(
                                                 patient_id: npid, 
                                                 name: params[:first_name] +" "+ params[:last_name],
                                                 email: '' ,
@@ -22,7 +20,7 @@ module  OrderService
                                                 phone_number: params[:phone_number]
                                                 )
 
-					patient_obj = patient_obj.create(
+                              patient_obj = patient_obj.create(
                                                 id: npid, 
                                                 npid: pat.id,
                                                 name: params[:first_name] +" "+ params[:last_name],
@@ -32,23 +30,24 @@ module  OrderService
                                                 phone_number: params[:phone_number]
                                                 )
                                  
-				end
+                        end
 
                   #obtaining order details posted by client
 
-		  sample_type = SpecimenType.where(name: params[:sample_type]).first
+
+                  sample_type = SpecimenType.where(name: params[:sample_type]).first
                   sample_collector_name = params[:sample_collector_first_name] + " " + params[:sample_collector_last_name]
                   sample_collector_phone_number = params[:sample_collector_phone_number]
                   sample_collector_id = params[:sample_collector_id]
                   sample_order_location = params[:sample_order_location]
                   requesting_clinician = params[:requesting_clinician]
                   date_sample_drawn = params[:date_sample_drawn]
-                  date_create = Date.today.strftime("%a %b %d %Y")
+                  date_created = Date.today.strftime("%a %b %d %Y")
                   sample_priority = params[:sample_priority]
                   target_lab = params[:target_lab]
                   art_start_date = params[:art_start_date]
                   health_facility_name = params[:health_facility_name]
-	            health_facility_district = params[:district]
+                  health_facility_district = params[:district]
                   specimen_status = SpecimenStatus.where(name: 'specimen_accepted').first
 
                   sample_collector = {
@@ -57,15 +56,15 @@ module  OrderService
                                     last_name: sample_collector_name.split(" ")[1],
                                     phone_number: sample_collector_phone_number
                   }
-            
-			c_order  = CouchOrder.create(
+                  
+                  c_order  = CouchOrder.create(
                                                 _id: tracking_number,
-                                                date_created: date_create,
+                                                date_created: date_created,
                                                 priority: sample_priority,
                                                 specimen_status: specimen_status.id,
                                                 sample_collector: sample_collector,
-                                                patient_id: npid, 
-	                                        sample_type: sample_type.id,
+                                                patient_id: patient_obj.id, 
+                                                sample_type: sample_type.id,
                                                 target_lab: target_lab,
                                                 art_start_date: art_start_date,
                                                 health_facility: health_facility_name,
@@ -79,7 +78,7 @@ module  OrderService
                   ward = Ward.where(name: sample_order_location).first
                  
                   loca_id = ward.id
-			sq_order = Order.create(
+                  sq_order = Order.create(
                                                 id: tracking_number,
                                                 patient_id: patient_obj.id,
                                                 specimen_type_id: sample_type.id,
@@ -92,32 +91,11 @@ module  OrderService
                                                 target_lab: target_lab,
                                                 art_start_date: art_start_date,
                                                 health_facility: health_facility_name,
-	                                        health_facility_district: health_facility_district,
+                                                health_facility_district: health_facility_district,
                                                 ward_id:  loca_id,
                                                 requested_by: requesting_clinician
                               )
-	              tests = TestType.where(name: params[:tests])
 
-			(tests || []).each do |test| 
-             
-	 			t = CouchTest.create(   order_id: c_order.id, 
-                                                test_type_id: test.id, 
-                                                time_created: date_created,
-                                                test_status_id: 'Drawn'
-                                          )
-
-	 			Test.create(
-                                    doc_id: t.id,
-                                    order_id: sq_order.id,
-                                    test_type_id: test.id,
-                                    time_created: date_created,
-                                    test_status_id: 'Drawn'
-                              )
-			end
-
-
-		end			
-            return true
 
                   params[:tests].each do |ts|
 
@@ -125,19 +103,19 @@ module  OrderService
 
                         if status == false
                               test = TestType.where(name: ts).first
-                 	 			t = CouchTest.create(   order_id: tracking_number, 
+                                    t = CouchTest.create(   order_id: tracking_number, 
                                                                   test_type_id: test.id, 
                                                                   time_created: date_created,
                                                                   test_status_id: '2'
                                                             )
-                 	 			Test.create(
+                                    Test.create(
                                                       doc_id: t.id,
                                                       order_id: tracking_number,
                                                       test_type_id: test.id,
                                                       time_created: date_created,
                                                       test_status_id: '2'
                                                 )
-            			
+                              
                         else
                               pa_id = PanelType.where(name: ts).first
                               res =  TestType.find_by_sql("SELECT test_types.id FROM test_types INNER JOIN panels 
@@ -163,9 +141,9 @@ module  OrderService
                         end
                   end
 
-		end			
+            end               
             return [true,tracking_number]
-	end
+      end
 
 
       def self.get_order_by_tracking_number_sql(tracking_number)
@@ -176,6 +154,8 @@ module  OrderService
                   return false
             end
       end
+
+      
 
       def self.query_results_by_tracking_number(tracking_number)
 
@@ -337,7 +317,7 @@ module  OrderService
                                           health_facility: res.health_facility,
                                           requested_by: res.requested_by,
                                           date_drawn: res.date_drawn
-                                          }
+                                          },
                         tests: tests
                   }
                   
@@ -346,7 +326,6 @@ module  OrderService
             end
 
       end
-
 
       def self.samples_statistics_by_sample_type_by_test_type(sample_type,test_type)
 
@@ -377,7 +356,7 @@ module  OrderService
             end
       end   
 
-      def self.samples_statistics
+       def self.samples_statistics
 
             data = JSON.parse(File.read("#{Rails.root}/public/sample_statistics.json"))
    
@@ -388,9 +367,7 @@ module  OrderService
             end
       end   
 
-
 end
-
 
 
 
