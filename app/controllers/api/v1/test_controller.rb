@@ -78,7 +78,7 @@ class API::V1::TestController < ApplicationController
 				
 					if status == true
 						res = TestService.add_test(params)
-						if stat == true
+						if res == true
 							response = {
 									status: 200,
 									error: false,

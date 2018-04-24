@@ -171,7 +171,9 @@ class API::V1::OrderController < ApplicationController
 
 
 	def samples_statistics_by_sample_type_by_test_type
-		stats = OrderService.samples_statistics_by_sample_type_by_test_type('Blood', 'APTT')
+		sample_type = params[:sample_type]
+		test_type = params[:test_type]
+		stats = OrderService.samples_statistics_by_sample_type_by_test_type(sample_type, test_type)
 		if stats == false
 
 		else

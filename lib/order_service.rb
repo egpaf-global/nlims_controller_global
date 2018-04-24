@@ -185,6 +185,8 @@ module  OrderService
                               end
                               test_re[te.tst_type] = results
                               checker = true
+                        else
+                              test_re[te.tst_type] = {}
                         end
 
                   end
