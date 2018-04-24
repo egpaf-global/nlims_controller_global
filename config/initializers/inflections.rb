@@ -11,13 +11,7 @@
 # end
 
 # These inflection rules are supported but not enabled by default:
-<<<<<<< HEAD
-# ActiveSupport::Inflector.inflections(:en) do |inflect|
-#   inflect.acronym 'RESTful'
-# end
-=======
 ActiveSupport::Inflector.inflections(:en) do |inflect|
    inflect.acronym 'API'
    inflect.acronym 'V1'
 end
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920

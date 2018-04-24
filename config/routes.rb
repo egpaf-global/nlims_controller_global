@@ -1,28 +1,6 @@
 Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
-<<<<<<< HEAD
-  
-  get '/api'  => 'api#index'
-
-  post 'api/:version_number/create_order/:token' 						=> 'api#create_order'
-  get 'api/:version_number/create_order/:token' 						=> 'api#create_order'
-  post 'api/:version_number/update_order/:token'					 	=> 'api#update_order'
-  get  'api/:version_number/query_order/:tracking_number/:token'   	=> 'api#query_order'
-  post 'api/:version_number/query_orders/:start_date/:end_date/:token' => 'api#query_orders_by_date'
- 
-  post 'api/:version_number/query_orders/:npid/:token' 				=> 'api#query_orders_by_npid'
-
-
-  post 'api/:version_number/create_user/:token' 						=> 'api#create_user'
-  get 'api/:version_number/authenticate/:username/:password' 			=> 'api#authenticate_user'
-  get 'api/:version_number/check_token_validity/:token' 				=> 'api#check_token_validity'
-  put 'api/:version_number/re_authenticate/:username/:password' 		=> 'api#re_authenticate'
-  post 'api/:version_number/update_test/:token'       => 'api#update_test'
-
-
-#  root 'home#index'
-=======
 
   namespace :api do
   	namespace :v1 do
@@ -32,7 +10,7 @@ Rails.application.routes.draw do
   		get '/query_order_by_tracking_number/:tracking_number/:token'	 => 'order#query_order_by_tracking_number'
       get '/query_order_by_npid/:npid/:token' => 'order#query_order_by_npid'
       get '/query_sample_statistics' => 'order#samples_statistics'
-      get '/query_sample_statistics/:sample_type/:test_type/:token' => 'order#samples_statistics_by_sample_type_by_test_type'
+      get '/query_sample_statistics/:sample_type/:test_type' => 'order#samples_statistics_by_sample_type_by_test_type'
 		  		
 
   		#test routes
@@ -51,6 +29,5 @@ Rails.application.routes.draw do
 
   	end
   end
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 
 end

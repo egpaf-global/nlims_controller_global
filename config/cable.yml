@@ -7,8 +7,4 @@ test:
 production:
   adapter: redis
   url: redis://localhost:6379/1
-<<<<<<< HEAD
-  channel_prefix: nlims_controller_production
-=======
   channel_prefix: nlims_production
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
