@@ -51,7 +51,7 @@ module TrackingNumberService
 			fi = {}
 			fi[todate] = counter
 			File.open("#{Rails.root}/public/tracker.json", 'w') {|f|
-					f.flock(File::LOCK_UN)
+					
 	    	     	f.write(fi.to_json) } 	
 	end
 

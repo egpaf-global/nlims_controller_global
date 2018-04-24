@@ -6,19 +6,13 @@ require 'thread'
 class API::V1::OrderController < ApplicationController
 
 	def create_order
-		
-	f = File.open("#{Rails.root}/public/tracker.json", "a")
 
-		succes = f.flock(File::LOCK_EX)
-
-		if succes
-			begin 
 				if params[:token]
 
 						    if(!params['district'])                                      
 		                        msg = "district not provided";                                      
 		                    elsif(!params['health_facility_name'])
-		                        msg = "district not provided"
+		                        msg = "health facility name not provided"
 		                    elsif (!params['requesting_clinician'])
 		                    	msg = 'requesting clinician not provided'
 		                    elsif(!params['first_name'])
@@ -51,24 +45,25 @@ class API::V1::OrderController < ApplicationController
 
 								status = UserService.check_token(params[:token])
 								if status == true
-								
-												tracking_number = TrackingNumberService.generate_tracking_number
-												st = OrderService.create_order(params, tracking_number)
-												if st[0] == true
-													response = {
-														status: 200,
-														error: false,
-														message: 'order created successfuly',
-														data: {
-															tracking_number: st[1]
-														}
-													}
-												TrackingNumberService.prepare_next_tracking_number
-												end
-											
 										
-									
+										
+													tracking_number = TrackingNumberService.generate_tracking_number
+													st = OrderService.create_order(params, tracking_number)
+													
+													if st[0] == true
 
+														response = {
+															status: 200,
+															error: false,
+															message: 'order created successfuly',
+															data: {
+																tracking_number: st[1]
+															}
+														}
+													TrackingNumberService.prepare_next_tracking_number
+													end		
+																						
+										
 								else	
 									response = {
 										status: 401,
@@ -105,12 +100,7 @@ class API::V1::OrderController < ApplicationController
 			
 				
 				render plain: response.to_json and return
-			
-				
-			end
-		end
-		
-
+	
 	end
 
 	def query_order_by_npid
@@ -167,6 +157,29 @@ class API::V1::OrderController < ApplicationController
 
 		render plain: response.to_json and return
 
+	end
+
+	def samples_statistics
+		stats = OrderService.samples_statistics
+		if stats == false
+
+		else
+
+			render plain: stats.to_json and return 
+		end
+	end
+
+
+	def samples_statistics_by_sample_type_by_test_type
+		sample_type = params[:sample_type]
+		test_type = params[:test_type]
+		stats = OrderService.samples_statistics_by_sample_type_by_test_type(sample_type, test_type)
+		if stats == false
+
+		else
+
+			render plain: stats.to_json and return 
+		end
 	end
 
 

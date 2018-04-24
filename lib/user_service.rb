@@ -63,10 +63,10 @@ module UserService
 
 	def self.authenticate(username,password)
 
-		user = User.where(username: username)
-		
+		user = User.where(username: username).first
+	
 		if user 
-			secured_pass =  BCrypt::Password.new(user[0]['password'])
+			secured_pass =  BCrypt::Password.new(user['password'])
 			if secured_pass == password
 				return true
 			else

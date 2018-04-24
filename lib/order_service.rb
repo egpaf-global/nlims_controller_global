@@ -1,22 +1,15 @@
 
 module  OrderService
 
-<<<<<<< HEAD
-	def self.create_order(params)
-=======
+
 	def self.create_order(params,tracking_number)
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
+0
 		ActiveRecord::Base.transaction do 
 
 			npid = params[:national_patient_id]
-			patient_obj = Patient.where(patient_id: npid)
+			patient_obj = Patient.where(id: npid)
 
 			patient_obj = patient_obj.first unless patient_obj.blank?
-<<<<<<< HEAD
-				if patient_obj.blank?
-					pat = CouchPatient.create()
-					patient_obj.create(patient_id: npid, name: '')
-=======
 
 				if patient_obj.blank?
 
@@ -30,7 +23,7 @@ module  OrderService
                                                 )
 
 					patient_obj = patient_obj.create(
-                                                patient_id: npid, 
+                                                id: npid, 
                                                 npid: pat.id,
                                                 name: params[:first_name] +" "+ params[:last_name],
                                                 email: '' ,
@@ -39,36 +32,23 @@ module  OrderService
                                                 phone_number: params[:phone_number]
                                                 )
                                  
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 				end
 
                   #obtaining order details posted by client
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
-			sample_type = SpecimenType.where(name: params[:sample_type]).first
+		  sample_type = SpecimenType.where(name: params[:sample_type]).first
                   sample_collector_name = params[:sample_collector_first_name] + " " + params[:sample_collector_last_name]
                   sample_collector_phone_number = params[:sample_collector_phone_number]
                   sample_collector_id = params[:sample_collector_id]
                   sample_order_location = params[:sample_order_location]
                   requesting_clinician = params[:requesting_clinician]
                   date_sample_drawn = params[:date_sample_drawn]
-<<<<<<< HEAD
-                  date_created = params[:date_created]
-=======
                   date_created = Date.today.strftime("%a %b %d %Y")
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
                   sample_priority = params[:sample_priority]
                   target_lab = params[:target_lab]
                   art_start_date = params[:art_start_date]
                   health_facility_name = params[:health_facility_name]
-<<<<<<< HEAD
-                  health_facility_district = params[:health_facility_district]
-=======
-                  health_facility_district = params[:district]
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
+	          health_facility_district = params[:district]
                   specimen_status = SpecimenStatus.where(name: 'specimen_accepted').first
 
                   sample_collector = {
@@ -77,25 +57,15 @@ module  OrderService
                                     last_name: sample_collector_name.split(" ")[1],
                                     phone_number: sample_collector_phone_number
                   }
-<<<<<<< HEAD
-
-			c_order  = CouchOrder.create(
-                                                tracking_number: "2222222",
-=======
-                  
+            
 			c_order  = CouchOrder.create(
                                                 _id: tracking_number,
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
                                                 date_created: date_created,
                                                 priority: sample_priority,
                                                 specimen_status: specimen_status.id,
                                                 sample_collector: sample_collector,
-<<<<<<< HEAD
                                                 patient_id: npid, 
-=======
-                                                patient_id: patient_obj.id, 
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
-                                                sample_type: sample_type.id,
+	                                        sample_type: sample_type.id,
                                                 target_lab: target_lab,
                                                 art_start_date: art_start_date,
                                                 health_facility: health_facility_name,
@@ -106,15 +76,6 @@ module  OrderService
                                                 health_facility_district: health_facility_district
                               )
 
-<<<<<<< HEAD
-                  ward = Ward.where(name: sample_order_location)
-
-			sq_order = Order.create(
-                                                doc_id: c_order.id, 
-                                                tracking_number: '22222',
-                                                patient_id: '11',
-                                                sample_type_id: sample_type.id,
-=======
                   ward = Ward.where(name: sample_order_location).first
                  
                   loca_id = ward.id
@@ -122,7 +83,6 @@ module  OrderService
                                                 id: tracking_number,
                                                 patient_id: patient_obj.id,
                                                 specimen_type_id: sample_type.id,
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
                                                 specimen_status_id: specimen_status.id,
                                                 date_created: date_created,
                                                 priority: sample_priority,
@@ -132,19 +92,11 @@ module  OrderService
                                                 target_lab: target_lab,
                                                 art_start_date: art_start_date,
                                                 health_facility: health_facility_name,
-<<<<<<< HEAD
-                                                ward_or_location_id:  ward.name,
-=======
-                                                health_facility_district: health_facility_district,
+	                                        health_facility_district: health_facility_district,
                                                 ward_id:  loca_id,
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
                                                 requested_by: requesting_clinician
                               )
-
-
-<<<<<<< HEAD
-
-                 tests = TestType.where(name: params[:tests])
+	              tests = TestType.where(name: params[:tests])
 
 			(tests || []).each do |test| 
              
@@ -166,7 +118,7 @@ module  OrderService
 
 		end			
             return true
-=======
+
                   params[:tests].each do |ts|
 
                         status = check_test(ts)
@@ -213,16 +165,11 @@ module  OrderService
 
 		end			
             return [true,tracking_number]
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 	end
 
 
       def self.get_order_by_tracking_number_sql(tracking_number)
-<<<<<<< HEAD
-          details =   Order.where(tracking_number: tracking_number).first
-=======
           details =   Order.where(id: tracking_number).first
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
             if details
                   return details
             else
@@ -230,10 +177,6 @@ module  OrderService
             end
       end
 
-      
-
-<<<<<<< HEAD
-=======
       def self.query_results_by_tracking_number(tracking_number)
 
             r = Test.find_by_sql(   "SELECT test_types.name AS tst_type, tests.id AS tst_id FROM test_types
@@ -262,6 +205,8 @@ module  OrderService
                               end
                               test_re[te.tst_type] = results
                               checker = true
+                        else
+                              test_re[te.tst_type] = {}
                         end
 
                   end
@@ -283,7 +228,7 @@ module  OrderService
                                     FROM orders INNER JOIN specimen_types 
                                     ON specimen_types.id = orders.specimen_type_id
                                     INNER JOIN patients ON patients.id = orders.patient_id
-                                    WHERE patients.patient_id ='#{npid}'")
+                                    WHERE patients.id ='#{npid}'")
 
                   
                   counter = 0
@@ -345,7 +290,7 @@ module  OrderService
                               sample_drawn_by_phone_number AS drawe_number, orders.target_lab AS target_lab, 
                               orders.health_facility AS health_facility, orders.requested_by AS requested_by,
                               orders.date_sample_drawn AS date_drawn,
-                              patients.patient_id AS pat_id, patients.name AS pat_name,
+                              patients.id AS pat_id, patients.name AS pat_name,
                               patients.dob AS dob, patients.gender AS sex 
                               FROM orders INNER JOIN specimen_statuses ON specimen_statuses.id = orders.specimen_status_id
                               INNER JOIN specimen_types ON specimen_types.id = orders.specimen_type_id
@@ -402,7 +347,47 @@ module  OrderService
 
       end
 
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
+
+      def self.samples_statistics_by_sample_type_by_test_type(sample_type,test_type)
+
+            data = JSON.parse(File.read("#{Rails.root}/public/sample_statistics.json"))
+            undis = data['undispatched_samples']
+            undis_data = []
+            rejected_data = []
+            data_ = {}
+            rejec = data['rejected_samples']
+
+                  undis.each do |sa|
+                        next if !sa['specimen_name'] == sample_type || !sa['tests'].include?(test_type)
+                        undis_data.push(sa)
+                  end
+                  data_['undispatched_samples'] = undis_data
+
+                  rejec.each do |sa|
+                        next if !sa['specimen_name'] == sample_type || !sa['tests'].include?(test_type)
+                        rejected_data.push(sa)
+                  end
+                  data_['rejected_samples'] = rejected_data
+
+           
+            if data_.length > 0
+                  return data_
+            else
+                  return false
+            end
+      end   
+
+       def self.samples_statistics
+
+            data = JSON.parse(File.read("#{Rails.root}/public/sample_statistics.json"))
+   
+            if data.length > 0
+                  return data
+            else
+                  return false
+            end
+      end   
+
 
 end
 
