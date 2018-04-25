@@ -155,7 +155,78 @@ module  OrderService
             end
       end
 
-      
+      def self.query_results_by_npid(npid)
+
+            ord = Order.find_by_sql("SELECT orders.id AS trc, specimen_types.name AS spec_name FROM orders
+                                    INNER JOIN specimen_types ON specimen_types.id = orders.specimen_type_id
+                                    WHERE orders.patient_id='#{npid}'")
+            info = {}
+            if ord.length > 0 
+                  checker = false;
+                  ord.each do |ord_lo|
+                        r = Test.find_by_sql(   "SELECT test_types.name AS tst_type, tests.id AS tst_id FROM test_types
+                                                INNER JOIN tests ON test_types.id = tests.test_type_id
+                                                INNER JOIN orders ON orders.id = tests.order_id
+                                                WHERE orders.id ='#{ord_lo.trc}'"
+                              )
+                        
+                        if r.length > 0
+                              test_re = {}
+                              r.each do |te|
+
+                                    res = Order.find_by_sql( "SELECT measures.name AS measure_name, test_results.result AS result,
+                                                      tests.id AS tstt_id
+                                                      FROM orders INNER JOIN tests ON tests.order_id = orders.id
+                                                      INNER JOIN test_results ON test_results.test_id = tests.id
+                                                      INNER JOIN measures ON measures.id = test_results.measure_id
+                                                      WHERE orders.id  = '#{ord_lo.trc}' AND 
+                                                      test_results.test_id ='#{te.tst_id}'"
+                                                )
+                                    results = {}
+                                   
+                                    if res.length > 0
+                                          res.each do |re|
+                                                tet_id = re.tstt_id
+                                                ts = TestStatusUpdate.find_by_sql("SELECT max(test_status_updates.created_at), 
+                                                                        test_statuses.name AS st_name
+                                                                        FROM test_statuses 
+                                                                        INNER JOIN test_status_updates
+                                                                        ON test_status_updates.test_status_id = 
+                                                                        test_statuses.id 
+                                                                        INNER JOIN tests ON tests.id = 
+                                                                        test_status_updates.test_id
+                                                                        WHERE tests.id='#{tet_id}' GROUP BY test_statuses.name
+                                                                        ")
+                                               
+                                              results[re.measure_name] = {'test_result': re.result,
+                                                                          'test_status': ts[0].st_name
+                                                                        }
+                                          end
+                                          test_re[te.tst_type] = results
+                                          checker = true
+                                    else
+                                          test_re[te.tst_type] = {}
+                                    end
+
+                              end                             
+                    
+                        end
+                        info[ord_lo.trc] = { 'sample_type': ord_lo.spec_name, 
+                                             'tests': test_re
+                                          }
+                  end
+
+                  if checker == true
+                        return info
+                  else
+                        return checker
+                  end
+
+            else
+                  return false
+            end
+
+      end
 
       def self.query_results_by_tracking_number(tracking_number)
 
