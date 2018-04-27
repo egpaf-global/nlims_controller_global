@@ -187,7 +187,7 @@ module  OrderService
                                     if res.length > 0
                                           res.each do |re|
                                                 tet_id = re.tstt_id
-                                                ts = TestStatusUpdate.find_by_sql("SELECT max(test_status_updates.created_at), 
+                                                $ts = TestStatusUpdate.find_by_sql("SELECT max(test_status_updates.created_at), 
                                                                         test_statuses.name AS st_name
                                                                         FROM test_statuses 
                                                                         INNER JOIN test_status_updates
@@ -198,11 +198,11 @@ module  OrderService
                                                                         WHERE tests.id='#{tet_id}' GROUP BY test_statuses.name
                                                                         ")
                                                
-                                              results[re.measure_name] = {'test_result': re.result,
-                                                                          'test_status': ts[0].st_name
-                                                                        }
+                                              results[re.measure_name] = re.result
                                           end
-                                          test_re[te.tst_type] = results
+                                          test_re[te.tst_type] = {'test_result': results,
+                                                                  'test_status': $ts[0].st_name
+                                                                 }
                                           checker = true
                                     else
                                           test_re[te.tst_type] = {}
