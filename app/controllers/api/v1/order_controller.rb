@@ -182,6 +182,56 @@ class API::V1::OrderController < ApplicationController
 		end
 	end
 
+	def query_results_by_npid
+
+		if params[:npid] && params[:token]
+
+			status = UserService.check_token(params[:token])
+			if status == true
+				res = OrderService.query_results_by_npid(params[:npid])
+
+				if res == false
+					response = {
+						status: 401,
+						error: true,
+						message: 'results not available',
+						data: {
+						}
+					}
+				else
+					response = {
+						status: 200,
+						error: false,
+						message: 'results retrieved successfuly',
+						data: {
+							results: res
+						}
+					}
+				end
+			else	
+				response = {
+					status: 401,
+					error: true,
+					message: 'token expired',
+					data: {
+						
+					}
+				}
+			end
+
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'npid or token not provided',
+					data: {
+						
+					}
+			}
+		end
+	
+		render plain: response.to_json and return
+	end
 
 	def query_results_by_tracking_number
 

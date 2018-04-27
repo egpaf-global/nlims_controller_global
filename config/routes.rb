@@ -7,11 +7,11 @@ Rails.application.routes.draw do
   		#order routes
   		post '/create_order/:token'										 => 'order#create_order'
   		get  '/query_results_by_tracking_number/:tracking_number/:token' => 'order#query_results_by_tracking_number'
-  		get '/query_order_by_tracking_number/:tracking_number/:token'	 => 'order#query_order_by_tracking_number'
+      get '/query_order_by_tracking_number/:tracking_number/:token'	 => 'order#query_order_by_tracking_number'
       get '/query_order_by_npid/:npid/:token' => 'order#query_order_by_npid'
       get '/query_sample_statistics' => 'order#samples_statistics'
-      get '/query_sample_statistics/:sample_type/:test_type' => 'order#samples_statistics_by_sample_type_by_test_type'
-		  		
+      get '/query_sample_statistics/:sample_type/:test_type/:token' => 'order#samples_statistics_by_sample_type_by_test_type'
+      get '/query_results_by_npid/:npid/:token' => 'order#query_results_by_npid'
 
   		#test routes
   		post '/update_test/:token'  				   					 => 'test#update_test'
