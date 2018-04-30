@@ -24,9 +24,9 @@ gem 'bcrypt', '~> 3.1.7'
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
-
+gem 'passenger', '~> 5.0', '>= 5.0.30'
 gem 'couchrest_model'
-
+gem 'passenger', '~> 5.0', '>= 5.0.30'
 gem 'sucker_punch'
 
 group :development, :test do
