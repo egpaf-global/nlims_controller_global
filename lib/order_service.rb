@@ -398,6 +398,7 @@ module  OrderService
 
       end
 
+
       def self.samples_statistics_by_sample_type_by_test_type(sample_type,test_type)
 
             data = JSON.parse(File.read("#{Rails.root}/public/sample_statistics.json"))
@@ -413,7 +414,7 @@ module  OrderService
                   end
                   data_['undispatched_samples'] = undis_data
 
-                  rejec.each do |sa|
+                  rejec.each do |sa| 
                         next if !sa['specimen_name'] == sample_type || !sa['tests'].include?(test_type)
                         rejected_data.push(sa)
                   end

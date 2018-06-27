@@ -5,8 +5,8 @@ class API::V1::UserController < ApplicationController
 
 
 	def create_user
-		
-		if params[:location] && params[:app_name] && params[:password] && params[:username] && params[:token] && params[:partner]
+		token =  request.headers[:authorization]
+		if params[:location] && params[:app_name] && params[:password] && params[:username] && token && params[:partner]
 			status = UserService.check_user(params[:username])
 			if status == false
 
@@ -90,7 +90,8 @@ class API::V1::UserController < ApplicationController
 
 
 	def check_token_validity
-		if params[:token]
+		token =  request.headers[:authorization]
+		if token
 
 			status = UserService.check_token(params[:token])
 			if status == true
@@ -163,6 +164,59 @@ class API::V1::UserController < ApplicationController
 				}
 		end
 		render plain: response.to_json and return
+	end
+
+
+	def get_patients
+		token =  request.headers[:authorization]
+		if params[:search_string] && token
+
+			status = UserService.check_token(token)
+			if status == true
+				res = response = UserService.get_patients(params[:search_string])
+
+				if res == false
+					response = {
+						status: 401,
+						error: true,
+						message: 'patient(s) not available',
+						data: {
+						}
+					}
+				else
+					response = {
+						status: 200,
+						error: false,
+						message: 'patient(s) retrieved successfuly',
+						data: {
+							results: res
+						}
+					}
+				end
+			else	
+				response = {
+					status: 401,
+					error: true,
+					message: 'token expired',
+					data: {
+						
+					}
+				}
+			end
+
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'search string or token not provided',
+					data: {
+						
+					}
+			}
+		end
+
+		render plain: response.to_json and return
+
 	end
 
 

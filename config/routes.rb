@@ -18,6 +18,7 @@ Rails.application.routes.draw do
       post '/add_test/:token'                           => 'test#add_test'
       put  '/edit_test_result/:token'                  => 'test#edit_test_result'
       get  '/get_order_test/:tracking_number'          => 'test#get_order_test'
+      get  '/get_test_types/:token'                    => 'test#get_test_types'
  
 
   		#user routes	
@@ -25,6 +26,9 @@ Rails.application.routes.draw do
   		get	 '/authenticate/:username/:password' 				 		 =>	'user#authenticate_user'
   		get	 '/re_authenticate/:username/:password'						 =>	'user#re_authenticate'
   		get	 '/check_token_validity/:token' 							 =>	'user#check_token_validity'
+
+      #patient routes
+      get '/get_patients/:search_string/:token'        => 'user#get_patients'
 
 
   	end

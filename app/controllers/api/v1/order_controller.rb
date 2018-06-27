@@ -6,8 +6,8 @@ require 'thread'
 class API::V1::OrderController < ApplicationController
 
 	def create_order
-
-				if params[:token]
+		token =  request.headers[:authorization]
+				if token
 
 						    if(!params['district'])                                      
 		                        msg = "district not provided";                                      
@@ -104,9 +104,9 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def query_order_by_npid
-
-		if params[:token] && params[:npid]
-			status = UserService.check_token(params[:token])
+		token =  request.headers[:authorization]
+		if token && params[:npid]
+			status = UserService.check_token(token)
 			if status == true
 				status = OrderService.query_order_by_npid(params[:npid])
 
@@ -183,10 +183,10 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def query_results_by_npid
+		token =  request.headers[:authorization]
+		if params[:npid] && token
 
-		if params[:npid] && params[:token]
-
-			status = UserService.check_token(params[:token])
+			status = UserService.check_token(token)
 			if status == true
 				res = OrderService.query_results_by_npid(params[:npid])
 
@@ -234,10 +234,10 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def query_results_by_tracking_number
+		token =  request.headers[:authorization]
+		if params[:tracking_number] && token
 
-		if params[:tracking_number] && params[:token]
-
-			status = UserService.check_token(params[:token])
+			status = UserService.check_token(token)
 			if status == true
 				res = OrderService.query_results_by_tracking_number(params[:tracking_number])
 
@@ -286,12 +286,10 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def query_order_by_tracking_number
-			
+		token =  request.headers[:authorization]
+		if  params[:tracking_number] &&  token
 
-
-		if  params[:tracking_number] &&  params[:token]
-
-			status = UserService.check_token(params[:token])
+			status = UserService.check_token(token)
 			if status == true
 				res = OrderService.query_order_by_tracking_number(params[:tracking_number])
 				

@@ -87,9 +87,12 @@ ActiveRecord::Schema.define(version: 20180326071034) do
     t.index ["test_type_id"], name: "index_panels_on_test_type_id"
   end
 
-  create_table "patients", id: :string, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "patients", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "patient_id"
     t.string "npid"
-    t.string "name"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "middle_name"
     t.string "email"
     t.string "dob"
     t.string "phone_number"
@@ -135,7 +138,7 @@ ActiveRecord::Schema.define(version: 20180326071034) do
     t.bigint "test_id"
     t.bigint "test_status_id"
     t.string "doc_id"
-    t.string "time_updated"
+    t.datetime "time_updated"
     t.string "who_updated_id"
     t.string "who_updated_name"
     t.datetime "created_at", null: false

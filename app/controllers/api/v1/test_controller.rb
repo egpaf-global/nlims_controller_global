@@ -6,8 +6,8 @@ class API::V1::TestController < ApplicationController
 
 	def update_test
 		update_details = params
+		token =  request.headers[:authorization]
 		if update_details
-			token = update_details[:token]
 			status = UserService.check_token(token)
 			if token
 					if status == true
@@ -68,11 +68,35 @@ class API::V1::TestController < ApplicationController
 	end
 
 
+	def get_test_types
+		res = TestService.get_test_types
+		if res[1] == true
+			response = {
+					status: 200,
+					error: false,
+					message: 'test types retrieved successfuly',
+					data: {
+						test_types: res[0]
+					}
+				}
+		else
+			response = {
+					status: 200,
+					error: false,
+					message: 'no test types',
+					data: {
+					
+					}
+				}
+		end
+
+		render plain: response.to_json  and return
+	end
 
 	def add_test
 		test_details = params
+		token =  request.headers[:authorization]
 		if test_details
-			token = test_details[:token]			
 			if token
 				status = UserService.check_token(token)
 				
@@ -135,9 +159,8 @@ class API::V1::TestController < ApplicationController
 
 	def edit_test_result
 		test_details  = params
-	
-		if test_details
-			token = test_details[:token]			
+		token =  request.headers[:authorization]
+		if test_details			
 			if token
 				status = UserService.check_token(token)
 			
