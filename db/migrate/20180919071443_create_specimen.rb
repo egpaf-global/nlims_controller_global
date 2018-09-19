@@ -1,6 +1,6 @@
 class CreateSpecimen < ActiveRecord::Migration[5.1]
   def change
-    create_table :specimen id: false  do |t|
+    create_table :specimen, {:id => false} do |t|
       t.references :specimen_type
     	t.references :specimen_status   
       t.string :id, primary_key: true
