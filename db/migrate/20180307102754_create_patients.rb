@@ -2,13 +2,16 @@ class CreatePatients < ActiveRecord::Migration[5.1]
   def change
     create_table :patients, {:id => false} do |t|
     	
-    	t.string :id, primary_key: true
-	    t.string :npid
-	    t.string :name
-	    t.string :email
-	    t.string :dob
-	    t.string :phone_number
-	    t.string :gender
+    	t.string   :id, primary_key: true
+	    t.string   :patient_number
+	    t.string   :name
+	    t.string   :email
+	    t.date     :dob
+	    t.string   :phone_number
+	    t.string   :gender
+      t.string   :address
+      t.string   :external_patient_number
+      t.integer  :created_by
       t.timestamps
      
     end

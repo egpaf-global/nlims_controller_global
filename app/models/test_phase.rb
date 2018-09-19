@@ -1,0 +1,2 @@
+class TestPhase < ApplicationRecord
+end

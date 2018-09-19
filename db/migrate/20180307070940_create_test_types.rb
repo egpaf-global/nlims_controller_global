@@ -5,7 +5,8 @@ class CreateTestTypes < ActiveRecord::Migration[5.1]
     	t.string :name, null: false
     	t.string :short_name, :limit => 200
     	t.string :targetTAT
-    	t.string :doc_id
+			t.string :description
+			t.string :prevalence_threshold
      	t.timestamps
     end
   end

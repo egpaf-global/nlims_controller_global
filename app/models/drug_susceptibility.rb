@@ -1,0 +1,2 @@
+class DrugSusceptibility < ApplicationRecord
+end

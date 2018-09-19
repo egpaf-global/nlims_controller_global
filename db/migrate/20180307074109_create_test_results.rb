@@ -4,9 +4,9 @@ class CreateTestResults < ActiveRecord::Migration[5.1]
     	t.references :test
     	t.references :measure
 
-    	t.string :result
-    	t.string :doc_id
-    	t.datetime :time_entered
+    	t.string :result    
+			t.datetime :time_entered
+			t.string   :device_name
      	t.timestamps
     end
   end
