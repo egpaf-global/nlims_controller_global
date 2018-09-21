@@ -5,7 +5,7 @@ class CreateMeasures < ActiveRecord::Migration[5.1]
     	t.string :doc_id
     	t.string :unit
     	t.references :measure_type
-      	t.timestamps
+      t.timestamps
     end
   end
 end

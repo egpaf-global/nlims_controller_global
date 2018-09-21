@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 # This file should contain all the record creation needed to seed the database with its default values.
 # The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
 #
@@ -8,18 +6,13 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
-
 test_categories = ['Microbiology','Haematology','Blood Bank','Serology','Lab Reception','Biochemistry','Flow Cytometry','DNA/PCR']
 categories_id_look_up = {}
 measure_type_id_look_up = {}
 counter = 1
 
-<<<<<<< HEAD
-=======
 puts 'loading test categories--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
+
 test_categories.each do |ca|
 	res = CouchTestCategory.create(name: ca , created_at: DateTime.now.strftime("%d/%m/%Y %H:%M"),type: 'test ategory' )
 	tca = TestCategory.create(name: ca, doc_id: res.id)	
@@ -64,11 +57,9 @@ test_types = [[1,'TB Microscopic Exam','AFB',2,'20 min'],[2,'GeneXpert','GXp',2,
 			  [70,'Von Willebrand Factor','vWf',3,'72'],[71,'Viral Load','VL',9,'30']	
 
 			]
-<<<<<<< HEAD
 
-=======
 puts 'loading test types--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
+
 test_types.each do |t|
 	_id = categories_id_look_up[t[3]]
 	res = CouchTestType.create(name: t[1], short_name: t[2], test_category_id: _id, targetTAT: t[4])
@@ -81,10 +72,8 @@ specimen_types = [[1,'Sputum'],[2,'CSF'],[3,'Blood'],[4,'Pleural Fluid'],[5,'Asc
 				  [18,'Plasma'],[19,'DBS (Free drop to DBS card)'],[21,'DBS (Using capillary tube)']
 				]
 
-<<<<<<< HEAD
-=======
+
 puts 'loading specimen types--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 specimen_types.each do |sp|
 	res = CouchSpecimenType.create(name: sp[1])
 	SpecimenType.create(name:sp[1], doc_id: res.id)
@@ -93,24 +82,16 @@ end
 
 
 test_panels = ['CSF Analysis','Urinalysis','Sterile Fluid Analysis','MC&S']
-<<<<<<< HEAD
-=======
 puts 'loading test panels--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
+
 test_panels.each do |tp|
 	res = CouchPanelType.create(name: tp)
 	PanelType.create(name: tp, doc_id: res.id)
 end
 
-
-<<<<<<< HEAD
-test_status = ['not_received','pending','started','completed','verified','voided','not-done','test-rejected']
-
-=======
 test_status = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn']
 
 puts 'loading test statuses--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 test_status.each do |t|
 	res = CouchTestStatus.create(name: t)
 	TestStatus.create(name: t, doc_id: res.id)
@@ -118,11 +99,8 @@ end
 
 
 specimen_status = ['specimen_not_collected','specimen_accepted','specimen_rejected']
-
-<<<<<<< HEAD
-=======
 puts 'loading specimen statuses--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
+
 specimen_status.each do |sps|
 	res = CouchSpecimenType.create(name: sps)
 	SpecimenStatus.create(name:sps, doc_id: res.id)
@@ -132,10 +110,8 @@ ward = ['CWC','CWC HDU','CWB','OPD 2','Facilities','OPD 1','CWA','Theatre','Dial
 		'3A','3B','Labour','Dental','Skin','Eye','Under 5 Clinic','7B','7C','GYNAE','Casulty','EM OPD','EM HDU','EM LW',
 		'ANC']
 
-<<<<<<< HEAD
-=======
+
 puts 'loading wards--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 ward.each do |w|
 	res =  CouchWard.create(name: w)
 	Ward.create(name: w, doc_id: res.id)	
@@ -144,10 +120,7 @@ end
 
 measure_type = ['Numeric Range','Alphanumeric Values','Autocomplete','Free Text']
 
-<<<<<<< HEAD
-=======
 puts 'loading measure types--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 measure_type.each do |mt|
 	res = CouchMeasureType.create(name: mt)
 	MeasureType.create(name: mt, doc_id: res.id)
@@ -229,15 +202,10 @@ measures = [
 	[292,1,"Von Willebrand (Antigen)",'%'],[293,1,"Von Willebrand (Activity)",'%'],[294,4,"Viral Load",'']
 
 ]
-<<<<<<< HEAD
+
 
 measures.each do |me|
 	res = CouchMeasure.create(name: me[2],units: me[3],measure_type: 'x')
-=======
-puts 'loading test measures--------------'
-measures.each do |me|
-	res = CouchMeasure.create(name: me[2],unit: me[3],measure_type: 'x')
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 	Measure.create(name: me[2], doc_id: res.id, unit: me[3], measure_type_id: me[1])
 end
 
@@ -275,17 +243,8 @@ testtype_measures =[
 		[1091,70,293],[1093,71,294],[1094,29,125],[1095,4,60]
 
 	]
-<<<<<<< HEAD
+
 puts '--------------loading test type measures--------------'
-testtype_measures.each do |tm|
-
-	TesttypeMeasure.create(test_type_id: tm[1] , measure_type_id: tm[2])
-
-end
-
-puts '--------------creating default user account--------------'
-=======
-puts 'loading test type measures--------------'
 testtype_measures.each do |tm|
 
 	TesttypeMeasure.create(test_type_id: tm[1] , measure_id: tm[2])
@@ -838,25 +797,16 @@ ranges.each do |ra|
 end
 
 puts 'creating default user account--------------'
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
-
 password_has = BCrypt::Password.create("knock_knock")
 username = 'admin'
 app_name = 'nlims'
 location = 'lilongwe'
 partner = 'api_admin'
-<<<<<<< HEAD
-token = ''
-token_expiry_time = ''
-
-User.create(password: password_has, username: username, 
-=======
 token = 'xxxxxxx'
 token_expiry_time = '000000000'
 
 User.create(password: password_has, 
 			username: username, 
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 			app_name: app_name, 
 			partner: partner, 
 			location: location,

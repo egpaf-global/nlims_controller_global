@@ -12,9 +12,9 @@ class OrderSync
       # Method code. Do some work.
      
       begin
-          
+         
 
-          res = JSON.parse(RestClient.get("http://gibo:amin9090!@localhost:5984/nlims_orders_repo/_changes?include_docs=true&limit=20&since=#{$since_tr}"))
+          res = JSON.parse(RestClient.get("http://root:amin9090!@localhost:5984/nlims_orders_repo/_changes?include_docs=true&limit=20&since=#{$since_tr}"))
           counter = 0
           
           docs =  res['results']
@@ -74,7 +74,7 @@ class OrderSync
 
 
 
-          test_res = JSON.parse(RestClient.get("http://gibo:amin9090!@localhost:5984/nlims_test_repo/_changes?include_docs=true&limit=20&since=#{$test_seq_tracker}"))
+          test_res = JSON.parse(RestClient.get("http://root:amin9090!@localhost:5984/nlims_test_repo/_changes?include_docs=true&limit=20&since=#{$test_seq_tracker}"))
 
           test_docs =  test_res['results']
           $test_seq_tracker = test_res['last_seq']
@@ -110,7 +110,7 @@ class OrderSync
 
         #----------------------------------------------------------------------------
 
-          result_res = JSON.parse(RestClient.get("http://gibo:amin9090!@localhost:5984/nlims_test_results_repo/_changes?include_docs=true&limit=20&since=#{$result_seq_tracker}"))
+          result_res = JSON.parse(RestClient.get("http://root:amin9090!@localhost:5984/nlims_test_results_repo/_changes?include_docs=true&limit=20&since=#{$result_seq_tracker}"))
 
           result_docs =  result_res['results']
           $result_seq_tracker = result_res['last_seq']
@@ -148,7 +148,7 @@ class OrderSync
 
           #----------------------------------------------------------------------------
 
-          test_status_res = JSON.parse(RestClient.get("http://gibo:amin9090!@localhost:5984/nlims_test_statues_repo/_changes?include_docs=true&limit=20&since=#{$test_status_tracker}"))
+          test_status_res = JSON.parse(RestClient.get("http://root:amin9090!@localhost:5984/nlims_test_statues_repo/_changes?include_docs=true&limit=20&since=#{$test_status_tracker}"))
 
           status_docs =  test_status_res ['results']
           $test_status_tracker = test_status_res ['last_seq']
