@@ -35,11 +35,11 @@ class API::V1::OrderController < ApplicationController
 		                        msg = "sample priority level not provided"
 		                    elsif(!params['target_lab'])
 		                        msg = "target lab for sample not provided"
-		                    elsif(!params['sample_order_location'])
+		                    elsif(!params['order_location'])
 		                        msg = "sample order location not provided"
-		                    elsif(!params['sample_collector_first_name'])
+		                    elsif(!params['who_order_test_first_name'])
 		                        msg = "first name for person ordering not provided"
-		                    elsif(!params['sample_collector_last_name'])
+		                    elsif(!params['who_order_test_last_name'])
 		                        msg = "last name for person ordering not provided"
 		                    else
 
@@ -159,28 +159,6 @@ class API::V1::OrderController < ApplicationController
 
 	end
 
-	def samples_statistics
-		stats = OrderService.samples_statistics
-		if stats == false
-
-		else
-
-			render plain: stats.to_json and return 
-		end
-	end
-
-
-	def samples_statistics_by_sample_type_by_test_type
-		sample_type = params[:sample_type]
-		test_type = params[:test_type]
-		stats = OrderService.samples_statistics_by_sample_type_by_test_type(sample_type, test_type)
-		if stats == false
-
-		else
-
-			render plain: stats.to_json and return 
-		end
-	end
 
 	def query_results_by_npid
 
