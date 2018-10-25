@@ -7,52 +7,29 @@ class API::V1::TestController < ApplicationController
 	def update_test
 		update_details = params
 		if update_details
-			token = update_details[:token]
-			status = UserService.check_token(token)
-			if token
-					if status == true
-						stat = status = TestService.update_test(params)
-						if stat == true
-							response = {
-									status: 200,
-									error: false,
-									message: 'test updated successfuly',
-									data: {
-										
-									}
-								}
-						else
-							response = {
-									status: 401,
-									error: true,
-									message: 'update failed',
-									data: {
-										
-									}
-								}
-
-						end
-
-					else	
+			
+				stat = status = TestService.update_test(params)
+				if stat == true
 						response = {
-							status: 401,
-							error: true,
-							message: 'token expired',
-							data: {
-								
+								status: 200,
+								error: false,
+								message: 'test updated successfuly',
+								data: {
+										
+									}
 							}
-						}
-					end
-			else
-				response = {
-							status: 401,
-							error: true,
-							message: 'token not provided',
-							data: {
-								
+				else
+						response = {
+								status: 401,
+								error: true,
+								message: 'update failed',
+								data: {
+										
+									}
 							}
-						}
-			end
+
+				end
+		
 		else
 			response = {
 					status: 401,
@@ -72,53 +49,28 @@ class API::V1::TestController < ApplicationController
 	def add_test
 		test_details = params
 		if test_details
-			token = test_details[:token]			
-			if token
-				status = UserService.check_token(token)
-				
-					if status == true
-						res = TestService.add_test(params)
-						if res == true
-							response = {
-									status: 200,
-									error: false,
-									message: 'test added successfuly',
-									data: {
-										
-									}
-								}
-						else
-							response = {
-									status: 401,
-									error: true,
-									message: 'test add failed',
-									data: {
-										
-									}
-								}
-
-						end
-
-					else	
-						response = {
-							status: 401,
-							error: true,
-							message: 'token expired',
-							data: {
-								
-							}
-						}
-					end
-			else
+			
+			res = TestService.add_test(params)
+				if res == true
 					response = {
-							status: 401,
-							error: true,
-							message: 'token not provided',
-							data: {
-								
+								status: 200,
+								error: false,
+								message: 'test added successfuly',
+								data: {
+										
+								}
 							}
-						}
-			end
+				else
+					response = {
+								status: 401,
+								error: true,
+								message: 'test add failed',
+								data: {
+										
+								}
+							}
+
+				end
 		else
 			response = {
 					status: 401,
@@ -136,55 +88,29 @@ class API::V1::TestController < ApplicationController
 	def edit_test_result
 		test_details  = params
 	
-		if test_details
-			token = test_details[:token]			
-			if token
-				status = UserService.check_token(token)
-			
-					if status == true
-						stat = TestService.edit_test_result(params)
+		if test_details			
+			stat = TestService.edit_test_result(params)
 
-						if stat == true
-							response = {
-									status: 200,
-									error: false,
-									message: 'test results edited successfuly',
-									data: {
-										
-									}
-								}
-						else
-							response = {
-									status: 401,
-									error: true,
-									message: 'test result edit failed',
-									data: {
-										
-									}
-								}
-
-						end
-
-					else	
+					if stat == true
 						response = {
-							status: 401,
-							error: true,
-							message: 'token expired',
-							data: {
-								
+								status: 200,
+								error: false,
+								message: 'test results edited successfuly',
+								data: {
+										
+									}
 							}
-						}
+					else
+						response = {
+								status: 401,
+								error: true,
+								message: 'test result edit failed',
+								data: {
+										
+									}
+							}
+
 					end
-			else
-					response = {
-							status: 401,
-							error: true,
-							message: 'token not provided',
-							data: {
-								
-							}
-						}
-			end
 		else
 			response = {
 					status: 401,
@@ -197,12 +123,5 @@ class API::V1::TestController < ApplicationController
 		end
 		render plain: response.to_json and return
 	end
-
-
-	def get_order_test
-		details = TestService.get_order_test(params)
-			
-		render plain: details.to_json and return
-	end	
 
 end

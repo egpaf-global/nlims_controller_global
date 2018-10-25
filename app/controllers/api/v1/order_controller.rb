@@ -6,9 +6,7 @@ require 'thread'
 class API::V1::OrderController < ApplicationController
 
 	def create_order
-
-				if params[:token]
-
+	   
 						    if(!params['district'])                                      
 		                        msg = "district not provided";                                      
 		                    elsif(!params['health_facility_name'])
@@ -20,7 +18,7 @@ class API::V1::OrderController < ApplicationController
 		                    elsif(!params['last_name'])
 		                        msg = "patient last name not provided"
 		                    elsif(!params['phone_number'])
-		                        msg = "patient phone number nont provided"
+		                        msg = "patient phone number not provided"
 		                    elsif(!params['gender'])
 		                        msg = "patient gender not provided"
 		                    elsif(!params['national_patient_id'])
@@ -43,39 +41,22 @@ class API::V1::OrderController < ApplicationController
 		                        msg = "last name for person ordering not provided"
 		                    else
 
-								status = UserService.check_token(params[:token])
-								if status == true
-										
-										
-													tracking_number = TrackingNumberService.generate_tracking_number
-													st = OrderService.create_order(params, tracking_number)
+									tracking_number = TrackingNumberService.generate_tracking_number
+									st = OrderService.create_order(params, tracking_number)
 													
-													if st[0] == true
+									if st[0] == true
 
-														response = {
-															status: 200,
-															error: false,
-															message: 'order created successfuly',
-															data: {
-																tracking_number: st[1]
-															}
-														}
-													TrackingNumberService.prepare_next_tracking_number
-													end		
-																						
-										
-								else	
-									response = {
-										status: 401,
-										error: true,
-										message: 'token expired',
-										data: {
-											
-										}
-									}
-								end
+										response = {
+												status: 200,
+												error: false,
+												message: 'order created successfuly',
+												data: {
+														tracking_number: st[1]
+													}
+											}
+										TrackingNumberService.prepare_next_tracking_number
+									end										
 							end
-
 
 							if msg
 								response = {
@@ -86,30 +67,15 @@ class API::V1::OrderController < ApplicationController
 										
 									}
 								}
-							end
-				else
-					response = {
-							status: 401,
-							error: true,
-							message: 'token not provided',
-							data: {
-								
-							}
-						}
-				end
-			
+							end							
 				
-				render plain: response.to_json and return
-	
+				render plain: response.to_json and return	
 	end
 
 	def query_order_by_npid
 
-		if params[:token] && params[:npid]
-			status = UserService.check_token(params[:token])
-			if status == true
+		if params[:npid]
 				status = OrderService.query_order_by_npid(params[:npid])
-
 				if status == false
 					response = {
 							status: 401,
@@ -120,7 +86,7 @@ class API::V1::OrderController < ApplicationController
 							}
 					}
 				else
-					
+			
 					response = {
 								status: 200,
 								error: false,
@@ -131,24 +97,12 @@ class API::V1::OrderController < ApplicationController
 							}
 
 				end
-				
-			else
-				response = {
-					status: 401,
-					error: true,
-					message: 'token expired',
-					data: {
-						
-					}
-				}
-			end
-
-
+	
 		else
 			response = {
 					status: 401,
 					error: true,
-					message: 'patient ID or token not provided',
+					message: 'patient ID not provided',
 					data: {
 						
 					}
@@ -162,10 +116,7 @@ class API::V1::OrderController < ApplicationController
 
 	def query_results_by_npid
 
-		if params[:npid] && params[:token]
-
-			status = UserService.check_token(params[:token])
-			if status == true
+		if params[:npid]
 				res = OrderService.query_results_by_npid(params[:npid])
 
 				if res == false
@@ -185,23 +136,13 @@ class API::V1::OrderController < ApplicationController
 							results: res
 						}
 					}
-				end
-			else	
-				response = {
-					status: 401,
-					error: true,
-					message: 'token expired',
-					data: {
-						
-					}
-				}
-			end
+				end		
 
 		else
 			response = {
 					status: 401,
 					error: true,
-					message: 'npid or token not provided',
+					message: 'npid not provided',
 					data: {
 						
 					}
@@ -211,12 +152,33 @@ class API::V1::OrderController < ApplicationController
 		render plain: response.to_json and return
 	end
 
+	def update_order
+		if params['tracking_number']  && params['who_updated']	&& params['status']
+			OrderService.update_order(params)
+			response = {
+						status: 200,
+						error: false,
+						message: 'order updated successfuly',
+						data: {
+						}
+					}
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'missing parameter, please check',
+					data: {
+						
+					}
+			}
+		end		
+		render plain: response.to_json and return
+	end
+
 	def query_results_by_tracking_number
 
-		if params[:tracking_number] && params[:token]
+		if params[:tracking_number]
 
-			status = UserService.check_token(params[:token])
-			if status == true
 				res = OrderService.query_results_by_tracking_number(params[:tracking_number])
 
 				if res == false
@@ -237,23 +199,12 @@ class API::V1::OrderController < ApplicationController
 							results: res
 						}
 					}
-				end
-			else	
-				response = {
-					status: 401,
-					error: true,
-					message: 'token expired',
-					data: {
-						
-					}
-				}
-			end
-
+				end			
 		else
 			response = {
 					status: 401,
 					error: true,
-					message: 'tracking_number or token not provided',
+					message: 'tracking_number not provided',
 					data: {
 						
 					}
@@ -264,13 +215,8 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def query_order_by_tracking_number
-			
+		if  params[:tracking_number]
 
-
-		if  params[:tracking_number] &&  params[:token]
-
-			status = UserService.check_token(params[:token])
-			if status == true
 				res = OrderService.query_order_by_tracking_number(params[:tracking_number])
 				
 				if res == false
@@ -293,22 +239,11 @@ class API::V1::OrderController < ApplicationController
 						}
 					}
 				end
-			else	
-				response = {
-					status: 401,
-					error: true,
-					message: 'token expired',
-					data: {
-						
-					}
-				}
-			end
-
 		else
 			response = {
 					status: 401,
 					error: true,
-					message: 'token not provided',
+					message: 'tracking number not provided',
 					data: {
 						
 					}

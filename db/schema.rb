@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180921050519) do
+ActiveRecord::Schema.define(version: 20181024110505) do
 
   create_table "drug_susceptibilities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "user_id"
@@ -126,6 +126,29 @@ ActiveRecord::Schema.define(version: 20180921050519) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "site_sync_frequencies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "site"
+    t.boolean "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "sites", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name"
+    t.string "district"
+    t.float "x", limit: 24
+    t.float "y", limit: 24
+    t.string "region"
+    t.string "description"
+    t.boolean "enabled"
+    t.boolean "sync_status"
+    t.string "site_code"
+    t.string "application_port"
+    t.string "host_address"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "specimen", id: :string, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "specimen_type_id"
     t.bigint "specimen_status_id"
@@ -146,8 +169,16 @@ ActiveRecord::Schema.define(version: 20180921050519) do
   end
 
   create_table "specimen_status_trails", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.bigint "specimen_id"
+    t.bigint "specimen_status_id"
+    t.datetime "time_updated"
+    t.string "who_updated_id"
+    t.string "who_updated_name"
+    t.string "who_updated_phone_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["specimen_id"], name: "index_specimen_status_trails_on_specimen_id"
+    t.index ["specimen_status_id"], name: "index_specimen_status_trails_on_specimen_status_id"
   end
 
   create_table "specimen_statuses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -217,19 +248,6 @@ ActiveRecord::Schema.define(version: 20180921050519) do
     t.datetime "updated_at", null: false
     t.index ["test_id"], name: "index_test_status_trails_on_test_id"
     t.index ["test_status_id"], name: "index_test_status_trails_on_test_status_id"
-  end
-
-  create_table "test_status_updates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.bigint "test_id"
-    t.bigint "test_status_id"
-    t.string "doc_id"
-    t.datetime "time_updated"
-    t.string "who_updated_id"
-    t.string "who_updated_name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["test_id"], name: "index_test_status_updates_on_test_id"
-    t.index ["test_status_id"], name: "index_test_status_updates_on_test_status_id"
   end
 
   create_table "test_statuses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

@@ -6,7 +6,8 @@ class API::V1::UserController < ApplicationController
 
 	def create_user
 		
-		if params[:location] && params[:app_name] && params[:password] && params[:username] && params[:token] && params[:partner]
+		token = request.headers['token']
+		if params[:location] && params[:app_name] && params[:password] && params[:username] && token && params[:partner]
 			status = UserService.check_user(params[:username])
 			if status == false
 
@@ -90,9 +91,9 @@ class API::V1::UserController < ApplicationController
 
 
 	def check_token_validity
-		if params[:token]
-
-			status = UserService.check_token(params[:token])
+		token = request.headers['token']
+		if token
+			status = UserService.check_token(token)
 			if status == true
 				response = {
 					status: 200,

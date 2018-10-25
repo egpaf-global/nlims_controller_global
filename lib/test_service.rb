@@ -33,7 +33,7 @@ module TestService
 
 				details = {}
 				couch_test = {}
-				time = Time.now.strftime("%Y%m%d%m%s%h")
+				time = Time.now.strftime("%Y%m%d%H%M%S")
 				details = {
 					  "status" => params[:test_status],
 					  "updated_by":  {
@@ -64,7 +64,7 @@ module TestService
 							test_id: test_id,
 							result: result_value,	
 							device_name: '',						
-							time_entered: '2018-09-21 04:38:02'
+							time_entered: time
 							)
 						test_results_measures[measure_name] = { 'result_value': result_value }
 
@@ -115,25 +115,53 @@ module TestService
 	end
 
     def self.add_test(params)
+		tests = params['tests']
+		tracking_number = params['tracking_number']
+		updater = params['who_updated']
+		res = Test.find_by_sql("SELECT visit_id AS vst_id FROM tests WHERE specimen_id='#{tracking_number}' LIMIT 1")
+		visit_id = res[0]['vst_id']
+		order = OrderService.retrieve_order_from_couch(tracking_number)
+		tet = []
+		test_results = {}
+		details = {}
+		tet = order['tests']
+		test_results = order['test_results']
+		test_statuses = order['test_statuses']
+		tests.each do |tst|
+			te_id = TestType.where(name: tst).first
+			Test.create(
+				:specimen_id => tracking_number,
+				:test_type_id => te_id.id,
+				:visit_id => visit_id,
+				:created_by => updater['first_name'].to_s + " " + updater['lastt_name'].to_s,
+				:panel_id => '',
+				:time_created => Time.new.strftime("$Y%m%d%H%M%S"),
+				:test_status_id => TestStatus.find_by_sql("SELECT id AS sts_id FROM test_statuses WHERE name='Drawn'")[0]['sts_id']
+		  )
+			tet.push(tst)
+			test_results[tst] = {
+					'results': {},
+                    'date_result_entered': '',
+					'result_entered_by': {}  
+				}
+			time = Time.new.strftime("%Y%m%d%H%M%S")
+			details[time] = {
+				"status" => "Drawn",
+								"updated_by":  {
+                                    :first_name => updater['first_name'],
+                                    :last_name => updater['last_name'],
+                                    :phone_number => updater['phone_number'],
+                                    :id => updater['id_number'] 
+                                }
+			}
+			test_statuses[tst] = details
+		end
 
-    	te_id = TestType.where(name: params[:test_name]).first
-    
-    	c_tes = CouchTest.create(
-    			order_id: params[:tracking_number],
-    			test_type_id: te_id.id,
-    			time_created: Date.today.strftime("%a %b %d %Y"),
-    			test_status_id: 2,
-    		)
+		order['tests'] = tet	
+		order['test_results'] =  test_results
+		order['test_statuses'] = test_statuses
 
-    	Test.create(
-    			order_id: params[:tracking_number],
-    			test_type_id: te_id.id,
-    			time_created: Date.today.strftime("%a %b %d %Y"),
-    			doc_id: c_tes.id,
-    			test_status_id: 2,
-
-    		)
-
+		OrderService.update_couch_order(tracking_number,order)
         return true
     end
 
