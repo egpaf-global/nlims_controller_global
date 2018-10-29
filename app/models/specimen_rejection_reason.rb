@@ -1,0 +1,2 @@
+class SpecimenRejectionReason < ApplicationRecord
+end
