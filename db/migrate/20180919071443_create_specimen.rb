@@ -1,9 +1,9 @@
 class CreateSpecimen < ActiveRecord::Migration[5.1]
   def change
-    create_table :specimen, {:id => false} do |t|
+    create_table :specimen do |t|
       t.references :specimen_type
     	t.references :specimen_status   
-      t.string :id, primary_key: true
+      t.string :tracking_number
       t.datetime :date_created
     	t.string :priority, null: false
     	t.string :drawn_by_id

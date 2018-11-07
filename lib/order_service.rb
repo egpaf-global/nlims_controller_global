@@ -18,7 +18,7 @@ module  OrderService
                                                 dob: params[:date_of_birth],
                                                 gender: params[:gender],
                                                 phone_number: params[:phone_number],
-                                                address: "box",
+                                                address: "",
                                                 external_patient_number:  "" 
 
                                                 )
@@ -59,8 +59,8 @@ module  OrderService
                   sample_status_id = SpecimenStatus.get_specimen_status_id('specimen_not_collected')
                  
 
-                  Speciman.create(
-                        :id => tracking_number,
+            sp_obj =  Speciman.create(
+                        :tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
                         :specimen_status_id =>  sample_status_id,
                         :priority => params[:sample_priority],
@@ -75,7 +75,7 @@ module  OrderService
                         :date_created => time
                   )
 
-
+                  
                         res = Visit.create(
                                  :patient_id => npid,
                                  :visit_type_id => '',
@@ -99,7 +99,7 @@ module  OrderService
                         rst2 = TestStatus.get_test_status_id('drawn')
 
                         Test.create(
-                              :specimen_id => tracking_number,
+                              :specimen_id => sp_obj.id,
                               :test_type_id => rst,
                               :visit_id => visit_id,
                               :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
@@ -144,8 +144,8 @@ module  OrderService
       end
 
 
-      def self.get_order_by_tracking_number_sql(tracking_number)
-          details =   Speciman.where(id: tracking_number).first
+      def self.get_order_by_tracking_number_sql(track_number)
+          details =   Speciman.where(tracking_number: track_number).first
             if details
                   return details
             else
@@ -244,7 +244,7 @@ module  OrderService
             r = Test.find_by_sql(   "SELECT test_types.name AS tst_type, tests.id AS tst_id FROM test_types
                                     INNER JOIN tests ON test_types.id = tests.test_type_id
                                     INNER JOIN specimen ON specimen.id = tests.specimen_id
-                                    WHERE specimen.id ='#{tracking_number}'"
+                                    WHERE specimen.tracking_number ='#{tracking_number}'"
                   )
             checker = false;
             if r.length > 0
@@ -255,7 +255,7 @@ module  OrderService
                                           FROM specimen INNER JOIN tests ON tests.specimen_id = specimen.id
                                           INNER JOIN test_results ON test_results.test_id = tests.id
                                           INNER JOIN measures ON measures.id = test_results.measure_id
-                                          WHERE specimen.id  = '#{tracking_number}' AND 
+                                          WHERE specimen.tracking_number  = '#{tracking_number}' AND 
                                           test_results.test_id ='#{te.tst_id}'"
                                     )
                         results = {}
@@ -302,11 +302,11 @@ module  OrderService
 
                   if res.length > 0
                         res.each do |gde|
-                              tracking_number = gde['track_number']
+                              specimen_id = gde['id']
                               tst = Speciman.find_by_sql("SELECT test_types.name AS tst_name FROM test_types 
                                           INNER JOIN tests ON tests.test_type_id = test_types.id
                                           INNER JOIN specimen  ON specimen.id = tests.specimen_id
-                                          WHERE tests.specimen_id ='#{tracking_number}'")
+                                          WHERE tests.specimen_id ='#{specimen_id}'")
 
                               
                               tst.each do |ty|
@@ -351,11 +351,11 @@ module  OrderService
             rejecter = {}  
             st = SpecimenStatus.find_by_sql("SELECT id AS status_id FROM specimen_statuses WHERE name='#{status}'")
             status_id = st[0]['status_id']
-            obj = Speciman.find_by(:id => ord['tracking_number'])
+            obj = Speciman.find_by(:tracking_number => ord['tracking_number'])
             obj.specimen_status_id = status_id
             obj.save            
             SpecimenStatusTrail.create(
-                  :specimen_id => ord['tracking_number'],
+                  :specimen_id => obj.id,
                   :specimen_status_id => status_id,
                   :time_updated => Time.new.strftime("%Y%m%d%H%M%S"),
                   :who_updated_id => ord['who_updated']['id'],
@@ -407,8 +407,8 @@ module  OrderService
                               INNER JOIN visits ON visits.id = tests.visit_id
                               INNER JOIN wards ON wards.id = visits.ward_id
                               INNER JOIN patients ON visits.patient_id = patients.id
-                              WHERE specimen.id ='#{tracking_number}' ")
-            tests = {}
+                              WHERE specimen.tracking_number ='#{tracking_number}' ")
+            tsts = {}
 
             if res.length > 0
                   res = res[0]
@@ -417,12 +417,12 @@ module  OrderService
                                           INNER JOIN specimen ON specimen.id = tests.specimen_id
                                           INNER JOIN test_types ON test_types.id = tests.test_type_id
                                           INNER JOIN test_statuses ON test_statuses.id = tests.test_status_id
-                                          WHERE specimen.id='#{tracking_number}'"
+                                          WHERE specimen.tracking_number ='#{tracking_number}'"
                               )
 
                   if tst.length > 0
                         tst.each do |t|
-                              tests[t.test_name] = t.test_status
+                              tsts[t.test_name] = t.test_status
                         end
                   end
 
@@ -448,7 +448,7 @@ module  OrderService
                                           sending_lab: res.health_facility,
                                           requested_by: res.requested_by                                         
                                           },
-                        tests: tests
+                                          tests: tsts
                   }
                   
             else

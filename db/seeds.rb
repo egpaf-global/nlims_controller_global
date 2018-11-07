@@ -7,14 +7,19 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 
 test_categories = ['Microbiology','Haematology','Blood Bank','Serology','Lab Reception','Biochemistry','Flow Cytometry','DNA/PCR']
+
+
+puts 'loading test categories--------------'
 categories_id_look_up = {}
 measure_type_id_look_up = {}
 counter = 1
-
-puts 'loading test categories--------------'
-
 test_categories.each do |ca|
-	
+   # tca = TestCategory.create(name: ca, description: '') 
+    tca = TestCategory.new
+    tca.name = ca
+    tca.description = ""
+    tca.save()
+    categories_id_look_up[counter] = tca.id 
 	counter = counter + 1
 end
 
@@ -59,38 +64,38 @@ test_types = [[1,'TB Microscopic Exam','AFB',2,'20 min'],[2,'GeneXpert','GXp',2,
 
 puts 'loading test types--------------'
 data =  {}
-test_types.each do |t|
-	
+test_types.each do |t|	
 	cat = test_categories[t[3] - 1]	
 	data[t[1]] = {"short_name" => t[2], "test_category" => cat, "target_TAT" => t[4] }
-
+    TestType.create(name: t[1], short_name: t[2], test_category_id: t[3], targetTAT: t[4],description: '', prevalence_threshold: '')
 end
 TestCatelog.create(_id: "test_types", test_type: data)
+
+
 
 specimen_types = [[1,'Sputum'],[2,'CSF'],[3,'Blood'],[4,'Pleural Fluid'],[5,'Ascitic Fluid'],[6,'Pericardial Fluid'],[7,'Peritoneal Fluid'],
 				  [8,'HVS'], [9,'Swabs'], [10,'Pus'], [11,'Stool'],[12,'Urine'],[13,'Other'],[15,'Semen'],[16,'Swab'],[17,'Synovial Fluid'],
 				  [18,'Plasma'],[19,'DBS (Free drop to DBS card)'],[21,'DBS (Using capillary tube)']
 				]
-
-
 puts 'loading specimen types--------------'
 data = []
 specimen_types.each do |sp|
-	data.push(sp[1])
+    data.push(sp[1])
+    SpecimenType.create(name:sp[1], description: '')
 end
-
 TestCatelog.create(_id: "specimen_types", specimen_type: data)
+
 
 test_panels = ['CSF Analysis','Urinalysis','Sterile Fluid Analysis','MC&S']
 puts 'loading test panels--------------'
-
 test_panels.each do |tp|
-
+    PanelType.create(name: tp, short_name: '')
 end
 TestCatelog.create(_id: "test_panels", test_panel: test_panels )
 
-test_statuses = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn']
 
+
+test_statuses = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn']
 puts 'loading test statuses--------------'
 test_statuses.each do |t|
 
@@ -100,30 +105,31 @@ TestCatelog.create(_id: "test_statuses", test_status: test_statuses )
 
 specimen_statuses = ['specimen_not_collected','specimen_accepted','specimen_rejected']
 puts 'loading specimen statuses--------------'
-
 specimen_statuses.each do |sps|
-	
+	SpecimenStatus.create(name:sps)
 end
 TestCatelog.create(_id: "specimen_statuses", specimen_status: specimen_statuses )
+
 
 wards = ['CWC','CWC HDU','CWB','OPD 2','Facilities','OPD 1','CWA','Theatre','Dialysis Unit','ICU','1A','1B','2B','2A','Oncology','3A','Skin','Dental',
 		'3A','3B','Labour','Dental','Skin','Eye','Under 5 Clinic','7B','7C','GYNAE','Casulty','EM OPD','EM HDU','EM LW',
 		'ANC']
-
-
 puts 'loading wards--------------'
 wards.each do |w|
-	
+    Ward.create(name: w)
 end
 TestCatelog.create(_id: "wards", ward: wards )
 
-measure_types = ['Numeric Range','Alphanumeric Values','Autocomplete','Free Text']
 
+
+measure_types = ['Numeric Range','Alphanumeric Values','Autocomplete','Free Text']
 puts 'loading measure types--------------'
 measure_types.each do |mt|
-	
+    MeasureType.create(name: mt)
 end
 TestCatelog.create(_id: "measure_types", measure_type: measure_types )
+
+
 
 measures = [
 	[1,2,"BS for mps",],[2,2,"Grams stain",''],[3,2,"SERUM AMYLASE",''],[4,2,'calcium',''],[5,2,'SGOT',''],
@@ -204,7 +210,7 @@ measures = [
 
 
 measures.each do |me|
-
+    Measure.create(name: me[2], unit: me[3], measure_type_id: me[1],description: '')
 end
 TestCatelog.create(_id: "measures", measure: measures )
 
@@ -244,7 +250,7 @@ testtype_measures =[
 
 puts '--------------loading test type measures--------------'
 testtype_measures.each do |tm|
-
+    TesttypeMeasure.create(test_type_id: tm[1] , measure_id: tm[2])
 end
 
 puts 'loading panel tests---------------------'
@@ -778,7 +784,6 @@ ranges = [
 ranges.each do |ra|
 
 end
-raise "yes".inspect
 puts 'creating default user account--------------'
 password_has = BCrypt::Password.create("knock_knock")
 username = 'admin'
