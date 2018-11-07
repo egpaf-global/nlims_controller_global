@@ -126,32 +126,10 @@ ActiveRecord::Schema.define(version: 20181024110505) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "site_sync_frequencies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "site"
-    t.boolean "status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "sites", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "name"
-    t.string "district"
-    t.float "x", limit: 24
-    t.float "y", limit: 24
-    t.string "region"
-    t.string "description"
-    t.boolean "enabled"
-    t.boolean "sync_status"
-    t.string "site_code"
-    t.string "application_port"
-    t.string "host_address"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "specimen", id: :string, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "specimen", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "specimen_type_id"
     t.bigint "specimen_status_id"
+    t.string "tracking_number"
     t.datetime "date_created"
     t.string "priority", null: false
     t.string "drawn_by_id"
@@ -271,7 +249,7 @@ ActiveRecord::Schema.define(version: 20181024110505) do
   end
 
   create_table "tests", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "specimen_id"
+    t.bigint "specimen_id"
     t.bigint "test_type_id"
     t.bigint "test_status_id"
     t.bigint "visit_id"
@@ -333,7 +311,7 @@ ActiveRecord::Schema.define(version: 20181024110505) do
   end
 
   create_table "visits", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "patient_id"
+    t.bigint "patient_id"
     t.bigint "visit_type_id"
     t.bigint "ward_id"
     t.datetime "created_at", null: false
@@ -354,7 +332,6 @@ ActiveRecord::Schema.define(version: 20181024110505) do
 
   create_table "wards", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
-    t.string "doc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
