@@ -26,7 +26,7 @@ module TestService
 						test_status_id: test_status.id,
 						who_updated_id: params[:who_updated]['id_number'].to_s,
 						who_updated_name: params[:who_updated]['first_name'].to_s + " " + params[:who_updated]['last_name'].to_s,
-						who_updated_phone_number: '920202'				
+						who_updated_phone_number: ''				
 
 					)
 		
@@ -39,7 +39,7 @@ module TestService
 					  "updated_by":  {
 							:first_name => params[:who_updated]['first_name'],
 							:last_name => params[:who_updated]['last_name'],
-							:phone_number => '95625',
+							:phone_number => '',
 							:id => params[:who_updated]['id_number'] 
 							}
 				}
@@ -117,8 +117,9 @@ module TestService
     def self.add_test(params)
 		tests = params['tests']
 		tracking_number = params['tracking_number']
+		spec_id = Speciman.find_by_sql("SELECT id AS spc_id FROM specimen WHERE tracking_number ='#{tracking_number}'")[0]['spc_id']
 		updater = params['who_updated']
-		res = Test.find_by_sql("SELECT visit_id AS vst_id FROM tests WHERE specimen_id='#{tracking_number}' LIMIT 1")
+		res = Test.find_by_sql("SELECT visit_id AS vst_id FROM tests WHERE specimen_id='#{spec_id}' LIMIT 1")
 		visit_id = res[0]['vst_id']
 		order = OrderService.retrieve_order_from_couch(tracking_number)
 		tet = []
@@ -130,7 +131,7 @@ module TestService
 		tests.each do |tst|
 			te_id = TestType.where(name: tst).first
 			Test.create(
-				:specimen_id => tracking_number,
+				:specimen_id => spec_id,
 				:test_type_id => te_id.id,
 				:visit_id => visit_id,
 				:created_by => updater['first_name'].to_s + " " + updater['lastt_name'].to_s,
@@ -171,7 +172,7 @@ module TestService
     						"SELECT test_types.name AS test_name, test_types.id AS tes_id FROM test_types 
     							INNER JOIN tests ON tests.test_type_id = test_types.id
     							INNER JOIN specimen ON tests.specimen_id = specimen.id
-    							WHERE specimen.id = '#{tracking_number}'"
+    							WHERE specimen.tracking_number = '#{tracking_number}'"
     		)
 
     	details = {}

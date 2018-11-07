@@ -1,9 +1,9 @@
 
 class ApplicationController < ActionController::API
     before_action :authenticate_request, :except => [
-                                            "re_authenticate", "check_token_validity", "authenticate_user", 
+                                            "re_authenticate", "check_token_validity", "authenticate_user", "create_user"
                                         ]
-
+    
 
     def authenticate_request
         
@@ -36,4 +36,5 @@ class ApplicationController < ActionController::API
         end
         render plain: response.to_json and return
     end
+  
 end

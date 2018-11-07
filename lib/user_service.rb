@@ -27,7 +27,15 @@ module UserService
         return {token: token, expiry_time: expiry_time}
 	end
 
-
+	def self.check_account_creation_request(token)        
+        tokens = JSON.parse(File.read("#{Rails.root}/tmp/nlims_account_creating_token.json"))
+        if tokens['tokens'].include?(token)
+			return true
+		else
+			return false
+        end
+	end
+	
 	def self.create_token
 		token_chars  = ('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a
   		token_length = 12
@@ -77,6 +85,20 @@ module UserService
 		end
 	end
 
+	def self.prepare_token_for_account_creation(token)
+		if !File.exists?("#{Rails.root}/tmp/nlims_account_creating_token.json")
+			header = {}
+			FileUtils.touch "#{Rails.root}/tmp/nlims_account_creating_token.json"
+			header['tokens'] = ["0"]
+			File.open("#{Rails.root}/tmp/nlims_account_creating_token.json",'w') { |f|
+        	f.write(header.to_json)}
+		end
+		tokens = JSON.parse(File.read("#{Rails.root}/tmp/nlims_account_creating_token.json"))
+		tokens['tokens'].push(token)
+		File.open("#{Rails.root}/tmp/nlims_account_creating_token.json",'w') { |f|
+        f.write(tokens.to_json)
+        }
+	end
 
 	def self.check_user(username)
 		user = User.where(username: username).first
