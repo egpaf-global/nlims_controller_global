@@ -165,7 +165,7 @@ module  OrderService
 
       def self.query_results_by_npid(npid)
 
-            ord = Speciman.find_by_sql("SELECT specimen.id AS trc, specimen_types.name AS spec_name FROM specimen
+            ord = Speciman.find_by_sql("SELECT specimen.id AS trc, specimen.tracking_number AS track,specimen_types.name AS spec_name FROM specimen
                                     INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                                     INNER JOIN tests ON tests.specimen_id = specimen.id
                                     INNER JOIN visits ON visits.id = tests.visit_id
@@ -222,7 +222,7 @@ module  OrderService
                               end                             
                     
                         end
-                        info[ord_lo.trc] = { 'sample_type': ord_lo.spec_name, 
+                        info[ord_lo.track] = { 'sample_type': ord_lo.spec_name, 
                                              'tests': test_re
                                           }
                   end
@@ -285,7 +285,7 @@ module  OrderService
       def self.query_order_by_npid(npid)
 
     
-                  res = Speciman.find_by_sql("SELECT specimen_types.name AS spc_type, specimen.id AS track_number, 
+                  res = Speciman.find_by_sql("SELECT specimen_types.name AS spc_type, specimen.tracking_number AS track_number, specimen.id AS _id, 
                                     specimen.date_created AS dat_created
                                     FROM specimen INNER JOIN specimen_types 
                                     ON specimen_types.id = specimen.specimen_type_id
@@ -302,7 +302,7 @@ module  OrderService
 
                   if res.length > 0
                         res.each do |gde|
-                              specimen_id = gde['id']
+                              specimen_id = gde['_id']
                               tst = Speciman.find_by_sql("SELECT test_types.name AS tst_name FROM test_types 
                                           INNER JOIN tests ON tests.test_type_id = test_types.id
                                           INNER JOIN specimen  ON specimen.id = tests.specimen_id
