@@ -9,6 +9,7 @@ module TestService
 
 		if !sql_order == false 
 			order_id = sql_order.id
+			couch_id = sql_order.couch_id
 			test_name = params[:test_name]
 			
 			test_id = Test.find_by_sql("SELECT tests.id FROM tests INNER JOIN test_types ON tests.test_type_id = test_types.id
@@ -28,8 +29,7 @@ module TestService
 						who_updated_name: params[:who_updated]['first_name'].to_s + " " + params[:who_updated]['last_name'].to_s,
 						who_updated_phone_number: ''				
 
-					)
-		
+					)		
 
 				details = {}
 				couch_test = {}
@@ -75,7 +75,7 @@ module TestService
 				end
 
 				if !results_measure.blank?
-					retr_order = OrderService.retrieve_order_from_couch(tracking_number)
+					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					couch_test_statuses = retr_order['test_statuses'][test_name]
 					couch_test_statuses[time] =  details 
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
@@ -91,13 +91,13 @@ module TestService
 						}                             
 				    }
 		
-					OrderService.update_couch_order(tracking_number,retr_order)
+					OrderService.update_couch_order(couch_id,retr_order)
 				else
-					retr_order = OrderService.retrieve_order_from_couch(tracking_number)
+					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					couch_test_statuses = retr_order['test_statuses'][test_name]
 					couch_test_statuses[time] =  details 
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
-					OrderService.update_couch_order(tracking_number,retr_order)
+					OrderService.update_couch_order(couch_id,retr_order)
 				end
 
 
@@ -114,14 +114,15 @@ module TestService
 
 	end
 
-    def self.add_test(params)
+	def self.add_test(params)		
 		tests = params['tests']
 		tracking_number = params['tracking_number']
-		spec_id = Speciman.find_by_sql("SELECT id AS spc_id FROM specimen WHERE tracking_number ='#{tracking_number}'")[0]['spc_id']
+		sql_order = OrderService.get_order_by_tracking_number_sql(tracking_number)
+		spec_id = sql_order.id
 		updater = params['who_updated']
 		res = Test.find_by_sql("SELECT visit_id AS vst_id FROM tests WHERE specimen_id='#{spec_id}' LIMIT 1")
 		visit_id = res[0]['vst_id']
-		order = OrderService.retrieve_order_from_couch(tracking_number)
+		order = OrderService.retrieve_order_from_couch(sql_order.couch_id)		
 		tet = []
 		test_results = {}
 		details = {}
@@ -162,7 +163,7 @@ module TestService
 		order['test_results'] =  test_results
 		order['test_statuses'] = test_statuses
 
-		OrderService.update_couch_order(tracking_number,order)
+		OrderService.update_couch_order(sql_order.id,order)
         return true
     end
 

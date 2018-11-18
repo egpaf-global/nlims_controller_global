@@ -2,8 +2,10 @@ class CreateSpecimen < ActiveRecord::Migration[5.1]
   def change
     create_table :specimen do |t|
       t.references :specimen_type
-    	t.references :specimen_status   
+      t.references :specimen_status   
+      t.references :ward
       t.string :tracking_number
+      t.string :couch_id
       t.datetime :date_created
     	t.string :priority, null: false
     	t.string :drawn_by_id

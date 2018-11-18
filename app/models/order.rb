@@ -1,7 +1,7 @@
 class Order < CouchRest::Model::Base
     use_database 'order'
 
-    property :_id, String
+    property :tracking_number, String
     property :sample_status, String
     property :date_created, String
     property :sending_facility, String

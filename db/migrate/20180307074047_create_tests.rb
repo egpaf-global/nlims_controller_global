@@ -4,7 +4,7 @@ class CreateTests < ActiveRecord::Migration[5.1]
     		t.references :specimen
     		t.references :test_type
 				t.references :test_status
-				t.references :visit
+				t.references :patient
 				t.string 		 :created_by
 				t.references :panel				
     	  t.datetime :time_created

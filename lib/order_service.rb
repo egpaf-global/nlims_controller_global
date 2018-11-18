@@ -2,16 +2,16 @@
 module  OrderService
 
       def self.create_order(params,tracking_number)
+            couch_order = 0
             ActiveRecord::Base.transaction do 
 
                   npid = params[:national_patient_id]
-                  patient_obj = Patient.where(id: npid)
-
+                  patient_obj = Patient.where(:patient_number => npid)
+                
                   patient_obj = patient_obj.first unless patient_obj.blank?
 
                         if patient_obj.blank?
                               patient_obj = patient_obj.create(
-                                                id: npid, 
                                                 patient_number: npid,
                                                 name: params[:first_name] +" "+ params[:last_name],
                                                 email: '' ,
@@ -63,6 +63,8 @@ module  OrderService
                         :tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
                         :specimen_status_id =>  sample_status_id,
+                        :couch_id => '',
+                        :ward_id => Ward.get_ward_id(params[:order_location]),
                         :priority => params[:sample_priority],
                         :drawn_by_id => params[:who_order_test_id],
                         :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
@@ -101,7 +103,7 @@ module  OrderService
                         Test.create(
                               :specimen_id => sp_obj.id,
                               :test_type_id => rst,
-                              :visit_id => visit_id,
+                              :patient_id => patient_obj.id,
                               :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
                               :panel_id => '',
                               :time_created => time,
@@ -118,8 +120,8 @@ module  OrderService
                         }
                   end
 
-                  Order.create(
-                        _id: tracking_number,
+            c_order  =  Order.create(
+                        tracking_number: tracking_number,
                         sample_type: params[:sample_type],
                         date_created: params[:date_sample_drawn],
                         sending_facility: params[:health_facility_name],
@@ -136,11 +138,13 @@ module  OrderService
                         sample_status: "specimen_not_collected" 
                   )
 
-
-
+                  sp = Speciman.find_by(:tracking_number => tracking_number)
+                  sp.couch_id = c_order['_id']
+                  sp.save()
+                  couch_order = c_order['_id']
             end              
 
-            return [true,tracking_number]
+            return [true,tracking_number,couch_order]
       end
 
 
@@ -153,8 +157,8 @@ module  OrderService
             end
       end
 
-      def self.retrieve_order_from_couch(tracking_number)
-            retr_order = JSON.parse(RestClient.get("http://root:amin9090!@localhost:5984/nlims_order_repo/#{tracking_number}"))
+      def self.retrieve_order_from_couch(couch_id)
+            retr_order = JSON.parse(RestClient.get("http://root:amin9090!@localhost:5984/nlims_order_repo/#{couch_id}"))
             return retr_order
       end
 
@@ -168,9 +172,8 @@ module  OrderService
             ord = Speciman.find_by_sql("SELECT specimen.id AS trc, specimen.tracking_number AS track,specimen_types.name AS spec_name FROM specimen
                                     INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                                     INNER JOIN tests ON tests.specimen_id = specimen.id
-                                    INNER JOIN visits ON visits.id = tests.visit_id
-                                    INNER JOIN patients ON patients.id = visits.patient_id
-                                    WHERE patients.id='#{npid}'")
+                                    INNER JOIN patients ON patients.id = tests.patient_id
+                                    WHERE patients.patient_number='#{npid}'")
             info = {}
             if ord.length > 0 
                   checker = false;
@@ -259,7 +262,7 @@ module  OrderService
                                           test_results.test_id ='#{te.tst_id}'"
                                     )
                         results = {}
-                       
+                        
                         if res.length > 0
                               res.each do |re|
 
@@ -290,9 +293,8 @@ module  OrderService
                                     FROM specimen INNER JOIN specimen_types 
                                     ON specimen_types.id = specimen.specimen_type_id
                                     INNER JOIN tests ON tests.specimen_id = specimen.id
-                                    INNER JOIN visits ON visits.id = tests.visit_id
-                                    INNER JOIN patients ON patients.id = visits.patient_id
-                                    WHERE patients.id ='#{npid}'")
+                                    INNER JOIN patients ON patients.id = tests.patient_id
+                                    WHERE patients.patient_number ='#{npid}'")
 
                   
                   counter = 0
@@ -399,14 +401,13 @@ module  OrderService
                               specimen.drawn_by_phone_number AS drawe_number, specimen.target_lab AS target_lab, 
                               specimen.sending_facility AS health_facility, specimen.requested_by AS requested_by,
                               specimen.date_created AS date_drawn,
-                              patients.id AS pat_id, patients.name AS pat_name,
+                              patients.patient_number AS pat_id, patients.name AS pat_name,
                               patients.dob AS dob, patients.gender AS sex 
                               FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
                               INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                               INNER JOIN tests ON tests.specimen_id = specimen.id
-                              INNER JOIN visits ON visits.id = tests.visit_id
-                              INNER JOIN wards ON wards.id = visits.ward_id
-                              INNER JOIN patients ON visits.patient_id = patients.id
+                              INNER JOIN patients ON patients.id = tests.patient_id
+                              INNER JOIN wards ON specimen.ward_id = wards.id
                               WHERE specimen.tracking_number ='#{tracking_number}' ")
             tsts = {}
 

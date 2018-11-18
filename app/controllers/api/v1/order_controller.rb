@@ -43,7 +43,7 @@ class API::V1::OrderController < ApplicationController
 
 									tracking_number = TrackingNumberService.generate_tracking_number
 									st = OrderService.create_order(params, tracking_number)
-													
+												
 									if st[0] == true
 
 										response = {
@@ -51,7 +51,8 @@ class API::V1::OrderController < ApplicationController
 												error: false,
 												message: 'order created successfuly',
 												data: {
-														tracking_number: st[1]
+														tracking_number: st[1],
+														couch_id: st[2]
 													}
 											}
 										TrackingNumberService.prepare_next_tracking_number
