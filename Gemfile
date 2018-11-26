@@ -28,7 +28,7 @@ gem 'apipie-rails'
 gem 'couchrest_model'
 
 gem 'sucker_punch'
-
+gem 'passenger'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
