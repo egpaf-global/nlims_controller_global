@@ -98,7 +98,10 @@ TestCatelog.create(_id: "test_panels", test_panel: test_panels )
 test_statuses = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn']
 puts 'loading test statuses--------------'
 test_statuses.each do |t|
-
+	TestStatus.create(
+		name: t,
+		test_phase: 2
+	)
 end
 
 TestCatelog.create(_id: "test_statuses", test_status: test_statuses )
@@ -109,6 +112,7 @@ specimen_statuses.each do |sps|
 	SpecimenStatus.create(name:sps)
 end
 TestCatelog.create(_id: "specimen_statuses", specimen_status: specimen_statuses )
+
 
 
 wards = ['CWC','CWC HDU','CWB','OPD 2','Facilities','OPD 1','CWA','Theatre','Dialysis Unit','ICU','1A','1B','2B','2A','Oncology','3A','Skin','Dental',
