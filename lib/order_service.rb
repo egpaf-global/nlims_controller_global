@@ -158,12 +158,28 @@ module  OrderService
       end
 
       def self.retrieve_order_from_couch(couch_id)
-            retr_order = JSON.parse(RestClient.get("http://root:amin9090!@localhost:5984/nlims_order_repo/#{couch_id}"))
+            settings = YAML.load_file("#{Rails.root.to_s}/config/couchdb.yml")[Rails.env]
+            ip = settings['host']
+            protocol = settings['protocol']
+            port = settings['port']
+            username = settings['username']
+            password = settings['password']
+            db_name =  settings['prefix'].to_s + "_order_" + settings['suffix'].to_s
+
+            retr_order = JSON.parse(RestClient.get("#{protocol}://#{username}:#{password}@#{ip}:#{port}/#{db_name}/#{couch_id}"))
             return retr_order
       end
 
       def self.update_couch_order(track_number,order)
-            url = "http://root:amin9090!@localhost:5984/nlims_order_repo"
+            settings = YAML.load_file("#{Rails.root.to_s}/config/couchdb.yml")[Rails.env]
+            ip = settings['host']
+            protocol = settings['protocol']
+            port = settings['port']
+            username = settings['username']
+            password = settings['password']
+            db_name =  settings['prefix'].to_s + "_order_" + settings['suffix'].to_s
+
+            url = "#{protocol}://#{username}:#{password}@#{ip}:#{port}/#{db_name}"
             RestClient.post(url,order.to_json, :content_type => 'application/json')
       end
 
