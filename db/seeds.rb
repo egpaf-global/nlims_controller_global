@@ -100,7 +100,7 @@ puts 'loading test statuses--------------'
 test_statuses.each do |t|
 	TestStatus.create(
 		name: t,
-		test_phase: 2
+		test_phase_id: 2
 	)
 end
 
