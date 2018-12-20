@@ -29,11 +29,7 @@ module TestService
 						who_updated_name: params[:who_updated]['first_name'].to_s + " " + params[:who_updated]['last_name'].to_s,
 						who_updated_phone_number: ''				
 
-					)	
-					
-				tst_update = Test.find_by(:id => test_id)
-				tst_update.test_status_id = test_status.id
-				tst_update.save
+					)		
 
 				details = {}
 				couch_test = {}

@@ -85,7 +85,6 @@ module  OrderService
                               )
                         visit_id = res.id
 
-                  couch_tests = {}
                   params[:tests].each do |tst|
                         status = check_test(tst)
                         if status == false
@@ -112,12 +111,6 @@ module  OrderService
                                     :time_created => time,
                                     :test_status_id => rst2
                               )
-
-                              couch_tests[tst] = {
-                                    'results': {},
-                                    'date_result_entered': '',
-                                    'result_entered_by': {}                             
-                              }
                         else
                               pa_id = PanelType.where(name: tst).first
                               res = TestType.find_by_sql("SELECT test_types.id FROM test_types INNER JOIN panels 
@@ -135,8 +128,7 @@ module  OrderService
                                                 :id => params[:who_order_test_id] 
                                                 }
                                     }
-                                    tst_name  = TestType.find_by(:id => tt.id).name
-                                    test_status[tst_name] = details                  
+                                    test_status[tst] = details                  
                                     #rst = TestType.get_test_type_id(tt)
                                     rst2 = TestStatus.get_test_status_id('drawn')
                                     Test.create(
@@ -148,24 +140,18 @@ module  OrderService
                                           :time_created => time,
                                           :test_status_id => rst2
                                     )
-                                    
-                                    couch_tests[tst_name] = {
-                                          'results': {},
-                                          'date_result_entered': '',
-                                          'result_entered_by': {}                             
-                                    }
                               end
                         end
                   end
                   
-                 # couch_tests = {}
-                 # params[:tests].each do |tst|
-                 #       couch_tests[tst] = {
-                  #            'results': {},
-                   #           'date_result_entered': '',
-                    #          'result_entered_by': {}                             
-                    #    }
-                  #end
+                  couch_tests = {}
+                  params[:tests].each do |tst|
+                        couch_tests[tst] = {
+                              'results': {},
+                              'date_result_entered': '',
+                              'result_entered_by': {}                             
+                        }
+                  end
 
             c_order  =  Order.create(
                         tracking_number: tracking_number,
