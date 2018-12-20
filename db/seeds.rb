@@ -264,7 +264,10 @@ panel_tests =  [
 	]
 
 panel_tests.each do |pan|
-
+	Panel.create(
+		test_type_id:  pan[1],
+		panel_type_id: pan[0]
+	)
 end
 
 
