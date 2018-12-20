@@ -86,29 +86,62 @@ module  OrderService
                         visit_id = res.id
 
                   params[:tests].each do |tst|
-                        details = {}
-                        details[time] = {
-                              "status" => "Drawn",
-                              "updated_by":  {
-                                    :first_name => params[:who_order_test_first_name],
-                                    :last_name => params[:who_order_test_last_name],
-                                    :phone_number => params[:who_order_test_phone_number],
-                                    :id => params[:who_order_test_id] 
-                                    }
-                        }
-                        test_status[tst] = details                  
-                        rst = TestType.get_test_type_id(tst)
-                        rst2 = TestStatus.get_test_status_id('drawn')
+                        status = check_test(tst)
+                        if status == false
+                              details = {}
+                              details[time] = {
+                                    "status" => "Drawn",
+                                    "updated_by":  {
+                                          :first_name => params[:who_order_test_first_name],
+                                          :last_name => params[:who_order_test_last_name],
+                                          :phone_number => params[:who_order_test_phone_number],
+                                          :id => params[:who_order_test_id] 
+                                          }
+                              }
+                              test_status[tst] = details                  
+                              rst = TestType.get_test_type_id(tst)
+                              rst2 = TestStatus.get_test_status_id('drawn')
 
-                        Test.create(
-                              :specimen_id => sp_obj.id,
-                              :test_type_id => rst,
-                              :patient_id => patient_obj.id,
-                              :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
-                              :panel_id => '',
-                              :time_created => time,
-                              :test_status_id => rst2
-                        )
+                              Test.create(
+                                    :specimen_id => sp_obj.id,
+                                    :test_type_id => rst,
+                                    :patient_id => patient_obj.id,
+                                    :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                                    :panel_id => '',
+                                    :time_created => time,
+                                    :test_status_id => rst2
+                              )
+                        else
+                              pa_id = PanelType.where(name: tst).first
+                              res = TestType.find_by_sql("SELECT test_types.id FROM test_types INNER JOIN panels 
+                                                            ON panels.test_type_id = test_types.id
+                                                            INNER JOIN panel_types ON panel_types.id = panels.panel_type_id
+                                                            WHERE panel_types.id ='#{pa_id.id}'")
+                              res.each do |tt|
+                                    details = {}
+                                    details[time] = {
+                                          "status" => "Drawn",
+                                          "updated_by":  {
+                                                :first_name => params[:who_order_test_first_name],
+                                                :last_name => params[:who_order_test_last_name],
+                                                :phone_number => params[:who_order_test_phone_number],
+                                                :id => params[:who_order_test_id] 
+                                                }
+                                    }
+                                    test_status[tst] = details                  
+                                    #rst = TestType.get_test_type_id(tt)
+                                    rst2 = TestStatus.get_test_status_id('drawn')
+                                    Test.create(
+                                          :specimen_id => sp_obj.id,
+                                          :test_type_id => tt.id,
+                                          :patient_id => patient_obj.id,
+                                          :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                                          :panel_id => '',
+                                          :time_created => time,
+                                          :test_status_id => rst2
+                                    )
+                              end
+                        end
                   end
                   
                   couch_tests = {}
