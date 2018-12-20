@@ -31,6 +31,11 @@ module TestService
 
 					)		
 
+				tst_update = Test.find_by(:id => test_id)
+				tst_update.test_status_id = test_status.id
+				tst_update.save
+
+
 				details = {}
 				couch_test = {}
 				time = Time.now.strftime("%Y%m%d%H%M%S")

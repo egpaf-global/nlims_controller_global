@@ -2,10 +2,10 @@ development: &development
   protocol: 'http'
   host: localhost
   port: 5984
-  prefix: lims
+  prefix: nlims
   suffix: repo
   username: root
-  password: password
+  password: root
 test:
   <<: *development
   suffix: test
