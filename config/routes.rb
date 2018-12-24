@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   		post '/update_test'  				   					 									=> 'test#update_test'
       post '/add_test'                           								=> 'test#add_test'
 			put  '/edit_test_result'                  								=> 'test#edit_test_result'
+			get  '/retrieve_test_Catelog'															=> 'test#retrieve_test_catelog'
 			    
   		#user routes	
   		post '/create_user'						         		 								=>	'user#create_user'

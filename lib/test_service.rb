@@ -170,7 +170,16 @@ module TestService
 
 		OrderService.update_couch_order(sql_order.id,order)
         return true
-    end
+	end
+	
+	def self.retrieve_test_catelog
+		if File.exists?("#{Rails.root}/public/test_catelog.json")
+			dat = File.read("#{Rails.root}/public/test_catelog.json")
+			return JSON.parse(dat)
+		else
+			return false
+		end
+	end
 
     def self.get_order_test(params)
     	tracking_number = params[:tracking_number]

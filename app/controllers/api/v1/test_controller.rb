@@ -44,7 +44,30 @@ class API::V1::TestController < ApplicationController
 		render plain: response.to_json and return
 	end
 
+	def retrieve_test_catelog
 
+		dat = TestService.retrieve_test_catelog
+		if dat == false
+			response = {
+							status: 401,
+							error: true,
+							message: 'test catelog not available',
+							data: {
+										
+							}
+						}
+		else
+			response = {
+							status: 200,
+							error: false,
+							message: 'test added successfuly',
+							data: dat
+						}
+		end
+
+
+		render plain: response.to_json and return
+	end
 
 	def add_test
 		test_details = params
