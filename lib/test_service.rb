@@ -181,6 +181,17 @@ module TestService
 		end
 	end
 
+	def self.retrieve_order_location
+		re = Ward.find_by_sql("SELECT wards.name FROM wards")
+		if !re.blank?
+			r = re.collect  do |t|
+				t['name']
+			end
+		else
+			return false
+		end
+	end
+
     def self.get_order_test(params)
     	tracking_number = params[:tracking_number]
     	res1 = TestType.find_by_sql(

@@ -22,8 +22,11 @@ Rails.application.routes.draw do
   		post '/create_user'						         		 								=>	'user#create_user'
   		get	 '/authenticate/:username/:password' 				 					=>	'user#authenticate_user'
   		get	 '/re_authenticate/:username/:password'								=>	'user#re_authenticate'
-  		get	 '/check_token_validity' 							 								=>	'user#check_token_validity'
+			get	 '/check_token_validity' 							 								=>	'user#check_token_validity'
+			
 
+			#other routes
+			get '/retrieve_order_location' 															=> 'test#retrieve_order_location'
 
   	end
   end

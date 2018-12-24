@@ -182,7 +182,7 @@ module  OrderService
 
 
       def self.get_order_by_tracking_number_sql(track_number)
-          details =   Speciman.where(tracking_number: track_number).first
+            details =   Speciman.where(tracking_number: track_number).first
             if details
                   return details
             else
