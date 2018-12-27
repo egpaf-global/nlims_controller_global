@@ -192,7 +192,6 @@ module TestService
 		end
 	end
 
-
 	def self.retrieve_target_labs
 		re = Site.find_by_sql("SELECT sites.name FROM sites")
 		if !re.blank?

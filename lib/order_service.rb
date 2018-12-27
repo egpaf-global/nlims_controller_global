@@ -373,9 +373,8 @@ module  OrderService
 
                               details[counter] =  det
 
-
-                        counter = counter + 1
-                        tste = []
+                              counter = counter + 1
+                              tste = []
                         end   
                         counter = 0
                         return details
@@ -459,7 +458,7 @@ module  OrderService
                               INNER JOIN wards ON specimen.ward_id = wards.id
                               WHERE specimen.tracking_number ='#{tracking_number}' ")
             tsts = {}
-
+           
             if res.length > 0
                   res = res[0]
                   tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status

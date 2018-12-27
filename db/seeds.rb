@@ -130,7 +130,7 @@ TestCatelog.create(_id: "specimen_statuses", specimen_status: specimen_statuses 
 
 wards = ['CWC','CWC HDU','CWB','OPD 2','Facilities','OPD 1','CWA','Theatre','Dialysis Unit','ICU','1A','1B','2B','2A','Oncology','3A','Skin','Dental',
 		'3A','3B','Labour','Dental','Skin','Eye','Under 5 Clinic','7B','7C','GYNAE','Casulty','EM OPD','EM HDU','EM LW',
-		'ANC']
+		'ANC','ART']
 puts 'loading wards--------------'
 wards.each do |w|
     Ward.create(name: w)
