@@ -6,53 +6,30 @@ class API::V1::TestController < ApplicationController
 
 	def update_test
 		update_details = params
-		token =  request.headers[:authorization]
 		if update_details
-			status = UserService.check_token(token)
-			if token
-					if status == true
-						stat = status = TestService.update_test(params)
-						if stat == true
-							response = {
-									status: 200,
-									error: false,
-									message: 'test updated successfuly',
-									data: {
-										
-									}
-								}
-						else
-							response = {
-									status: 401,
-									error: true,
-									message: 'update failed',
-									data: {
-										
-									}
-								}
-
-						end
-
-					else	
+			
+				stat = status = TestService.update_test(params)
+				if stat == true
 						response = {
-							status: 401,
-							error: true,
-							message: 'token expired',
-							data: {
-								
+								status: 200,
+								error: false,
+								message: 'test updated successfuly',
+								data: {
+										
+									}
 							}
-						}
-					end
-			else
-				response = {
-							status: 401,
-							error: true,
-							message: 'token not provided',
-							data: {
-								
+				else
+						response = {
+								status: 401,
+								error: true,
+								message: 'update failed',
+								data: {
+										
+									}
 							}
-						}
-			end
+
+				end
+		
 		else
 			response = {
 					status: 401,
@@ -67,82 +44,105 @@ class API::V1::TestController < ApplicationController
 		render plain: response.to_json and return
 	end
 
-
-	def get_test_types
-		res = TestService.get_test_types
-		if res[1] == true
+	def retrieve_order_location
+		dat = TestService.retrieve_order_location
+		if dat == false
 			response = {
-					status: 200,
-					error: false,
-					message: 'test types retrieved successfuly',
-					data: {
-						test_types: res[0]
-					}
-				}
+							status: 401,
+							error: true,
+							message: 'test catelog not available',
+							data: {
+										
+							}
+						}
 		else
 			response = {
-					status: 200,
-					error: false,
-					message: 'no test types',
-					data: {
-					
-					}
-				}
+							status: 200,
+							error: false,
+							message: 'test added successfuly',
+							data: dat
+						}
 		end
 
-		render plain: response.to_json  and return
+
+		render plain: response.to_json and return
+	end
+
+
+	def retrieve_target_labs
+		dat = TestService.retrieve_target_labs
+		if dat == false
+			response = {
+							status: 401,
+							error: true,
+							message: 'test catelog not available',
+							data: {
+										
+							}
+						}
+		else
+			response = {
+							status: 200,
+							error: false,
+							message: 'test added successfuly',
+							data: dat
+						}
+		end
+
+
+		render plain: response.to_json and return
+	end
+
+	def retrieve_test_catelog
+
+		dat = TestService.retrieve_test_catelog
+		if dat == false
+			response = {
+							status: 401,
+							error: true,
+							message: 'test catelog not available',
+							data: {
+										
+							}
+						}
+		else
+			response = {
+							status: 200,
+							error: false,
+							message: 'test added successfuly',
+							data: dat
+						}
+		end
+
+
+		render plain: response.to_json and return
 	end
 
 	def add_test
 		test_details = params
-		token =  request.headers[:authorization]
 		if test_details
-			if token
-				status = UserService.check_token(token)
-				
-					if status == true
-						res = TestService.add_test(params)
-						if res == true
-							response = {
-									status: 200,
-									error: false,
-									message: 'test added successfuly',
-									data: {
-										
-									}
-								}
-						else
-							response = {
-									status: 401,
-									error: true,
-									message: 'test add failed',
-									data: {
-										
-									}
-								}
-
-						end
-
-					else	
-						response = {
-							status: 401,
-							error: true,
-							message: 'token expired',
-							data: {
-								
-							}
-						}
-					end
-			else
+			
+			res = TestService.add_test(params)
+				if res == true
 					response = {
-							status: 401,
-							error: true,
-							message: 'token not provided',
-							data: {
-								
+								status: 200,
+								error: false,
+								message: 'test added successfuly',
+								data: {
+										
+								}
 							}
-						}
-			end
+				else
+					response = {
+								status: 401,
+								error: true,
+								message: 'test add failed',
+								data: {
+										
+								}
+							}
+
+				end
 		else
 			response = {
 					status: 401,
@@ -159,55 +159,30 @@ class API::V1::TestController < ApplicationController
 
 	def edit_test_result
 		test_details  = params
-		token =  request.headers[:authorization]
+	
 		if test_details			
-			if token
-				status = UserService.check_token(token)
-			
-					if status == true
-						stat = TestService.edit_test_result(params)
+			stat = TestService.edit_test_result(params)
 
-						if stat == true
-							response = {
-									status: 200,
-									error: false,
-									message: 'test results edited successfuly',
-									data: {
-										
-									}
-								}
-						else
-							response = {
-									status: 401,
-									error: true,
-									message: 'test result edit failed',
-									data: {
-										
-									}
-								}
-
-						end
-
-					else	
+					if stat == true
 						response = {
-							status: 401,
-							error: true,
-							message: 'token expired',
-							data: {
-								
+								status: 200,
+								error: false,
+								message: 'test results edited successfuly',
+								data: {
+										
+									}
 							}
-						}
+					else
+						response = {
+								status: 401,
+								error: true,
+								message: 'test result edit failed',
+								data: {
+										
+									}
+							}
+
 					end
-			else
-					response = {
-							status: 401,
-							error: true,
-							message: 'token not provided',
-							data: {
-								
-							}
-						}
-			end
 		else
 			response = {
 					status: 401,
@@ -220,12 +195,5 @@ class API::V1::TestController < ApplicationController
 		end
 		render plain: response.to_json and return
 	end
-
-
-	def get_order_test
-		details = TestService.get_order_test(params)
-			
-		render plain: details.to_json and return
-	end	
 
 end

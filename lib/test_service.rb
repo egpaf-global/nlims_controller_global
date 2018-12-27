@@ -181,22 +181,27 @@ module TestService
 		end
 	end
 
-    def self.get_test_types
+	def self.retrieve_order_location
+		re = Ward.find_by_sql("SELECT wards.name FROM wards")
+		if !re.blank?
+			r = re.collect  do |t|
+				t['name']
+			end
+		else
+			return false
+		end
+	end
 
-        res =  TestType.find_by_sql("SELECT test_types.name AS test_name FROM test_types")
-        tst = []
-        if !res.blank? 
-            res.each do |te|
-                tst.push(te['test_name'])                
-            end
-
-            return [tst,true]
-        else
-            return ["", false]
-        end
-
-
-    end
+	def self.retrieve_target_labs
+		re = Site.find_by_sql("SELECT sites.name FROM sites")
+		if !re.blank?
+			r = re.collect  do |t|
+				t['name']
+			end
+		else
+			return false
+		end
+	end
 
     def self.get_order_test(params)
     	tracking_number = params[:tracking_number]
