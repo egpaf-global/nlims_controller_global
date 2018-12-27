@@ -26,7 +26,9 @@ Rails.application.routes.draw do
 			
 
 			#other routes
-			get '/retrieve_order_location' 															=> 'test#retrieve_order_location'
+			get '/retrieve_order_location' 														=> 'test#retrieve_order_location'
+			get '/retrieve_target_labs' 													 		=> 'test#retrieve_target_labs'
+
 
   	end
   end
