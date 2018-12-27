@@ -181,6 +181,23 @@ module TestService
 		end
 	end
 
+    def self.get_test_types
+
+        res =  TestType.find_by_sql("SELECT test_types.name AS test_name FROM test_types")
+        tst = []
+        if !res.blank? 
+            res.each do |te|
+                tst.push(te['test_name'])                
+            end
+
+            return [tst,true]
+        else
+            return ["", false]
+        end
+
+
+    end
+
     def self.get_order_test(params)
     	tracking_number = params[:tracking_number]
     	res1 = TestType.find_by_sql(

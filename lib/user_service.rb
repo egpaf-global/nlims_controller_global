@@ -140,4 +140,25 @@ module UserService
 		return BCrypt::Password.new(password)
 	end
 
+	def self.get_patients(string)
+		cret = string
+		res = Patient.find_by_sql("SELECT DISTINCT  patients.id,
+													patients.name,
+													patients.dob, 
+													patients.gender,
+													patients.created_at
+
+								FROM patients
+								WHERE 
+								(patients.id LIKE '%#{cret}%' OR patients.name LIKE '%#{cret}%' 
+   								OR dob LIKE '%#{cret}%')
+			")
+
+		if res.length > 0 
+			return res
+		else
+			return false
+		end
+	end
+
 end

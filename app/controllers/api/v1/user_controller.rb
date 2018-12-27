@@ -5,33 +5,21 @@ class API::V1::UserController < ApplicationController
 
 
 	def create_user
-		
-		token = request.headers['token']
+		token =  request.headers[:authorization]
 		if params[:location] && params[:app_name] && params[:password] && params[:username] && token && params[:partner]
 			status = UserService.check_user(params[:username])
 			if status == false
-				st = UserService.check_account_creation_request(token)
-				if st == true
-						details = UserService.create_user(params)
-						response = {
-								status: 200,
-								error: false,
-								message: 'account created successfuly',
-								data: {
-									token: details[:token],
-									expiry_time: details[:expiry_time]
-								}
-							}
-				else
-					response = {
-						status: 401,
-						error: true,
-						message: 'can not create account',
+
+				details = UserService.create_user(params)
+				response = {
+						status: 200,
+						error: false,
+						message: 'account created successfuly',
 						data: {
-						
+							token: details[:token],
+							expiry_time: details[:expiry_time]
 						}
 					}
-				end						
 			else
 				response = {
 					status: 401,
@@ -66,7 +54,7 @@ class API::V1::UserController < ApplicationController
 
 			if (status == true)
 				details = UserService.compute_expiry_time
-				UserService.prepare_token_for_account_creation(details[:token])
+			
 				response = {
 					status: 200,
 					error: false,
@@ -102,9 +90,10 @@ class API::V1::UserController < ApplicationController
 
 
 	def check_token_validity
-		token = request.headers['token']
+		token =  request.headers[:authorization]
 		if token
-			status = UserService.check_token(token)
+
+			status = UserService.check_token(params[:token])
 			if status == true
 				response = {
 					status: 200,
@@ -175,6 +164,59 @@ class API::V1::UserController < ApplicationController
 				}
 		end
 		render plain: response.to_json and return
+	end
+
+
+	def get_patients
+		token =  request.headers[:authorization]
+		if params[:search_string] && token
+
+			status = UserService.check_token(token)
+			if status == true
+				res = response = UserService.get_patients(params[:search_string])
+
+				if res == false
+					response = {
+						status: 401,
+						error: true,
+						message: 'patient(s) not available',
+						data: {
+						}
+					}
+				else
+					response = {
+						status: 200,
+						error: false,
+						message: 'patient(s) retrieved successfuly',
+						data: {
+							results: res
+						}
+					}
+				end
+			else	
+				response = {
+					status: 401,
+					error: true,
+					message: 'token expired',
+					data: {
+						
+					}
+				}
+			end
+
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'search string or token not provided',
+					data: {
+						
+					}
+			}
+		end
+
+		render plain: response.to_json and return
+
 	end
 
 
