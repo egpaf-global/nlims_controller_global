@@ -299,11 +299,12 @@ module  OrderService
                                     WHERE specimen.tracking_number ='#{tracking_number}'"
                   )
             checker = false;
+            r_date = ""
             if r.length > 0
                   test_re = {}
                   r.each do |te|
 
-                        res = Speciman.find_by_sql( "SELECT measures.name AS measure_name, test_results.result AS result
+                        res = Speciman.find_by_sql( "SELECT measures.name AS measure_name, test_results.result AS result, test_results.time_entered AS time_entered
                                           FROM specimen INNER JOIN tests ON tests.specimen_id = specimen.id
                                           INNER JOIN test_results ON test_results.test_id = tests.id
                                           INNER JOIN measures ON measures.id = test_results.measure_id
@@ -316,7 +317,9 @@ module  OrderService
                               res.each do |re|
 
                                   results[re.measure_name] = re.result
+                                  r_date =  re.time_entered
                               end
+                              results['result_date'] = r_date.to_date
                               test_re[te.tst_type] = results
                               checker = true
                         else
