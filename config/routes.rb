@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       get  '/query_order_by_npid/:npid' 												=> 'order#query_order_by_npid'
 			get  '/query_results_by_npid/:npid' 											=> 'order#query_results_by_npid'
 			post '/update_order'																			=> 'order#update_order'
+			get  '/query_requested_order_by_npid/:npid'								=> 'order#query_requested_order_by_npid'
 
   		#test routes
   		post '/update_test'  				   					 									=> 'test#update_test'
@@ -24,7 +25,6 @@ Rails.application.routes.draw do
   		get	 '/re_authenticate/:username/:password'								=>	'user#re_authenticate'
 			get	 '/check_token_validity' 							 								=>	'user#check_token_validity'
 			
-
 			#other routes
 			get '/retrieve_order_location' 														=> 'test#retrieve_order_location'
 			get '/retrieve_target_labs' 													 		=> 'test#retrieve_target_labs'

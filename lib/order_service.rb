@@ -86,6 +86,7 @@ module  OrderService
                         visit_id = res.id
 
                   params[:tests].each do |tst|
+                        tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
                         if status == false
                               details = {}
@@ -319,7 +320,7 @@ module  OrderService
                                   results[re.measure_name] = re.result
                                   r_date =  re.time_entered
                               end
-                              results['result_date'] = r_date.to_date
+                              #results['result_date'] = r_date.to_date
                               test_re[te.tst_type] = results
                               checker = true
                         else
@@ -337,36 +338,38 @@ module  OrderService
             end
       end
 
-      def self.query_order_by_npid(npid)
+      def self.query_requested_order_by_npid(npid)
 
-    
-                  res = Speciman.find_by_sql("SELECT specimen_types.name AS spc_type, specimen.tracking_number AS track_number, specimen.id AS _id, 
-                                    specimen.date_created AS dat_created
-                                    FROM specimen INNER JOIN specimen_types 
-                                    ON specimen_types.id = specimen.specimen_type_id
-                                    INNER JOIN tests ON tests.specimen_id = specimen.id
+            sp_id = SpecimenStatus.find_by(:name => 'specimen_not_collected')['id']
+
+            res = Speciman.find_by_sql("SELECT specimen_types.name AS spc_type, specimen.tracking_number AS track_number, specimen.id AS _id, 
+                              specimen.date_created AS dat_created
+                              FROM specimen INNER JOIN specimen_types 
+                              ON specimen_types.id = specimen.specimen_type_id
+                              WHERE specimen_status_id='#{sp_id}'")
+
+            
+            counter = 0
+            details =[]
+            det = {}
+            tste = []
+            got_tsts =  false
+
+            if res.length > 0
+                  res.each do |gde|
+                        specimen_id = gde['_id']
+                        tst = Speciman.find_by_sql("SELECT test_types.name AS tst_name FROM test_types 
+                                    INNER JOIN tests ON tests.test_type_id = test_types.id
+                                    INNER JOIN specimen  ON specimen.id = tests.specimen_id
                                     INNER JOIN patients ON patients.id = tests.patient_id
-                                    WHERE patients.patient_number ='#{npid}'")
+                                    WHERE tests.specimen_id ='#{specimen_id}' AND patients.patient_number ='#{npid}' ORDER BY time_created DESC")
 
-                  
-                  counter = 0
-                  details =[]
-                  det = {}
-                  tste = []
-
-                  if res.length > 0
-                        res.each do |gde|
-                              specimen_id = gde['_id']
-                              tst = Speciman.find_by_sql("SELECT test_types.name AS tst_name FROM test_types 
-                                          INNER JOIN tests ON tests.test_type_id = test_types.id
-                                          INNER JOIN specimen  ON specimen.id = tests.specimen_id
-                                          WHERE tests.specimen_id ='#{specimen_id}'")
-
-                              
-                              tst.each do |ty|
-                                    tste.push(ty['tst_name'])
-                              end
-                              
+                        
+                        tst.each do |ty|
+                              tste.push(ty['tst_name'])
+                              got_tsts = true
+                        end
+                        if got_tsts == true      
                                     det ={
                                           specimen_type: gde['spc_type'],
                                           tracking_number: gde['track_number'],
@@ -378,6 +381,60 @@ module  OrderService
 
                               counter = counter + 1
                               tste = []
+                              got_tsts =  false
+                        end
+                  end   
+                  counter = 0
+                  return details
+            else
+                  return false
+            end
+
+      end
+
+      def self.query_order_by_npid(npid)
+
+    
+                  res = Speciman.find_by_sql("SELECT specimen_types.name AS spc_type, specimen.tracking_number AS track_number, specimen.id AS _id, 
+                                    specimen.date_created AS dat_created
+                                    FROM specimen INNER JOIN specimen_types 
+                                    ON specimen_types.id = specimen.specimen_type_id")
+
+                  
+                  counter = 0
+                  details =[]
+                  det = {}
+                  tste = []
+                  got_tsts =  false
+
+                  if res.length > 0
+                        res.each do |gde|
+                              specimen_id = gde['_id']
+                              tst = Speciman.find_by_sql("SELECT test_types.name AS tst_name FROM test_types 
+                                          INNER JOIN tests ON tests.test_type_id = test_types.id
+                                          INNER JOIN specimen  ON specimen.id = tests.specimen_id
+                                          INNER JOIN patients ON patients.id = tests.patient_id
+                                          WHERE tests.specimen_id ='#{specimen_id}' AND patients.patient_number ='#{npid}'")
+
+                              
+                              tst.each do |ty|
+                                    tste.push(ty['tst_name'])
+                                    got_tsts = true
+                              end
+                              if got_tsts == true      
+                                          det ={
+                                                specimen_type: gde['spc_type'],
+                                                tracking_number: gde['track_number'],
+                                                date_created: gde['dat_created'],
+                                                tests: tste
+                                          }
+
+                                    details[counter] =  det
+
+                                    counter = counter + 1
+                                    tste = []
+                                    got_tsts =  false
+                              end
                         end   
                         counter = 0
                         return details
@@ -405,6 +462,7 @@ module  OrderService
             st = SpecimenStatus.find_by_sql("SELECT id AS status_id FROM specimen_statuses WHERE name='#{status}'")
             status_id = st[0]['status_id']
             obj = Speciman.find_by(:tracking_number => ord['tracking_number'])
+            couch_id = obj['couch_id']
             obj.specimen_status_id = status_id
             obj.save            
             SpecimenStatusTrail.create(
@@ -415,7 +473,7 @@ module  OrderService
                   :who_updated_name => ord['who_updated']['first_name'] + " " +  ord['who_updated']['last_name'],
                   :who_updated_phone_number => ord['who_updated']['phone_number'],
             )
-            retr_order = OrderService.retrieve_order_from_couch(ord['tracking_number'])          
+            retr_order = OrderService.retrieve_order_from_couch(couch_id)          
             curent_status_trail = retr_order['sample_statuses']
             curent_status_trail[Time.now.strftime("%Y%m%d%H%M%S")] = {
                   "status": status,
@@ -441,7 +499,7 @@ module  OrderService
                         
                   }
             end
-            OrderService.update_couch_order(ord['tracking_number'],retr_order)
+            OrderService.update_couch_order(couch_id,retr_order)
       end
 
       def self.query_order_by_tracking_number(tracking_number)

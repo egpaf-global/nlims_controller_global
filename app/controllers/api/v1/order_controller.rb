@@ -72,6 +72,48 @@ class API::V1::OrderController < ApplicationController
 				
 				render plain: response.to_json and return	
 	end
+	
+
+	def query_requested_order_by_npid
+
+		if params[:npid]
+				status = OrderService.query_requested_order_by_npid(params[:npid])
+				if status == false
+					response = {
+							status: 401,
+							error: true,
+							message: 'patient has Zero orders',
+							data: {
+								
+							}
+					}
+				else
+			
+					response = {
+								status: 200,
+								error: false,
+								message: 'orders retrieved successfuly',
+								data: {
+									orders: status
+								}
+							}
+
+				end
+	
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'patient ID not provided',
+					data: {
+						
+					}
+			}
+		end
+
+		render plain: response.to_json and return
+
+	end
 
 	def query_order_by_npid
 
