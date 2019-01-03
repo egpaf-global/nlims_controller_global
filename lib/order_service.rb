@@ -72,7 +72,7 @@ module  OrderService
                         :target_lab => params[:target_lab],
                         :art_start_date => Time.now,
                         :sending_facility => params[:health_facility_name],
-                        :requested_by => "",
+                        :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
                         :date_created => time
                   )
@@ -343,7 +343,7 @@ module  OrderService
             sp_id = SpecimenStatus.find_by(:name => 'specimen_not_collected')['id']
 
             res = Speciman.find_by_sql("SELECT specimen_types.name AS spc_type, specimen.tracking_number AS track_number, specimen.id AS _id, 
-                              specimen.date_created AS dat_created
+                              specimen.date_created AS dat_created, specimen.requested_by AS req_by
                               FROM specimen INNER JOIN specimen_types 
                               ON specimen_types.id = specimen.specimen_type_id
                               WHERE specimen_status_id='#{sp_id}'")
@@ -373,6 +373,7 @@ module  OrderService
                                     det ={
                                           specimen_type: gde['spc_type'],
                                           tracking_number: gde['track_number'],
+                                          requested_by: gde['req_by'],
                                           date_created: gde['dat_created'],
                                           tests: tste
                                     }
