@@ -338,15 +338,221 @@ module  OrderService
             end
       end
 
+      def self.request_order(params,tracking_number)
+            couch_order = 0
+            ActiveRecord::Base.transaction do 
+
+                  npid = params[:national_patient_id]
+                  patient_obj = Patient.where(:patient_number => npid)
+                
+                  patient_obj = patient_obj.first unless patient_obj.blank?
+
+                        if patient_obj.blank?
+                              patient_obj = patient_obj.create(
+                                                patient_number: npid,
+                                                name: params[:first_name] +" "+ params[:last_name],
+                                                email: '' ,
+                                                dob: params[:date_of_birth],
+                                                gender: params[:gender],
+                                                phone_number: params[:phone_number],
+                                                address: "",
+                                                external_patient_number:  "" 
+
+                                                )
+                                 
+                        end
+
+                                    
+                  who_order = {
+                        :first_name => params[:who_order_test_first_name],
+                        :last_name => params[:who_order_test_last_name],
+                        :phone_number => params[:who_order_test_phone_number],
+                        :id => params[:who_order_test_id]
+                  }
+
+                  patient = {
+                        :first_name => params[:first_name],
+                        :last_name => params[:last_name],
+                        :phone_number => params[:phone_number],
+                        :id => npid,
+                        :email => params[:email],
+                        :gender => params[:gender] 
+                  }
+                  sample_status =  {}
+                  test_status = {}
+                  time = Time.now.strftime("%Y%m%d%H%M%S") 
+                  sample_status[time] = {
+                        "status" => "Drawn",
+                              "updated_by":  {
+                                    :first_name => params[:who_order_test_first_name],
+                                    :last_name => params[:who_order_test_last_name],
+                                    :phone_number => params[:who_order_test_phone_number],
+                                    :id => params[:who_order_test_id] 
+                                    }
+                  }
+
+
+                  #sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
+                  sample_status_id = SpecimenStatus.get_specimen_status_id('specimen_not_collected')
+                 
+
+            sp_obj =  Speciman.create(
+                        :tracking_number => tracking_number,
+                        :specimen_type_id => 0,
+                        :specimen_status_id =>  sample_status_id,
+                        :couch_id => '',
+                        :ward_id => Ward.get_ward_id(params[:order_location]),
+                        :priority => params[:sample_priority],
+                        :drawn_by_id => params[:who_order_test_id],
+                        :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                        :drawn_by_phone_number => params[:who_order_test_phone_number],
+                        :target_lab => 'not_assigned',
+                        :art_start_date => Time.now,
+                        :sending_facility => params[:health_facility_name],
+                        :requested_by =>  params[:requesting_clinician],
+                        :district => params[:district],
+                        :date_created => time
+                  )
+
+                  
+                        res = Visit.create(
+                                 :patient_id => npid,
+                                 :visit_type_id => '',
+                                 :ward_id => Ward.get_ward_id(params[:order_location])
+                              )
+                        visit_id = res.id
+
+                  params[:tests].each do |tst|
+                        tst = tst.gsub("&amp;",'&')
+                        status = check_test(tst)
+                        if status == false
+                              details = {}
+                              details[time] = {
+                                    "status" => "Drawn",
+                                    "updated_by":  {
+                                          :first_name => params[:who_order_test_first_name],
+                                          :last_name => params[:who_order_test_last_name],
+                                          :phone_number => params[:who_order_test_phone_number],
+                                          :id => params[:who_order_test_id] 
+                                          }
+                              }
+                              test_status[tst] = details                  
+                              rst = TestType.get_test_type_id(tst)
+                              rst2 = TestStatus.get_test_status_id('drawn')
+
+                              Test.create(
+                                    :specimen_id => sp_obj.id,
+                                    :test_type_id => rst,
+                                    :patient_id => patient_obj.id,
+                                    :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                                    :panel_id => '',
+                                    :time_created => time,
+                                    :test_status_id => rst2
+                              )
+                        else
+                              pa_id = PanelType.where(name: tst).first
+                              res = TestType.find_by_sql("SELECT test_types.id FROM test_types INNER JOIN panels 
+                                                            ON panels.test_type_id = test_types.id
+                                                            INNER JOIN panel_types ON panel_types.id = panels.panel_type_id
+                                                            WHERE panel_types.id ='#{pa_id.id}'")
+                              res.each do |tt|
+                                    details = {}
+                                    details[time] = {
+                                          "status" => "Drawn",
+                                          "updated_by":  {
+                                                :first_name => params[:who_order_test_first_name],
+                                                :last_name => params[:who_order_test_last_name],
+                                                :phone_number => params[:who_order_test_phone_number],
+                                                :id => params[:who_order_test_id] 
+                                                }
+                                    }
+                                    test_status[tst] = details                  
+                                    #rst = TestType.get_test_type_id(tt)
+                                    rst2 = TestStatus.get_test_status_id('drawn')
+                                    Test.create(
+                                          :specimen_id => sp_obj.id,
+                                          :test_type_id => tt.id,
+                                          :patient_id => patient_obj.id,
+                                          :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                                          :panel_id => '',
+                                          :time_created => time,
+                                          :test_status_id => rst2
+                                    )
+                              end
+                        end
+                  end
+                  
+                  couch_tests = {}
+                  params[:tests].each do |tst|
+                        couch_tests[tst] = {
+                              'results': {},
+                              'date_result_entered': '',
+                              'result_entered_by': {}                             
+                        }
+                  end
+
+            c_order  =  Order.create(
+                        tracking_number: tracking_number,
+                        sample_type: 'not_assigned',
+                        date_created: params[:date_sample_drawn],
+                        sending_facility: params[:health_facility_name],
+                        receiving_facility: 'not_assigned',
+                        tests: params[:tests],
+                        test_results: couch_tests,
+                        patient: patient,
+                        order_location: params[:order_location] ,
+                        districy: params[:district],
+                        priority: params[:sample_priority],
+                        who_order_test: who_order,
+                        sample_statuses: sample_status,
+                        test_statuses: test_status,
+                        sample_status: "specimen_not_collected" 
+                  )
+
+                  sp = Speciman.find_by(:tracking_number => tracking_number)
+                  sp.couch_id = c_order['_id']
+                  sp.save()
+                  couch_order = c_order['_id']
+            end              
+
+            return [true,tracking_number,couch_order]
+      end
+
+
+      def self.confirm_order_request(ord)
+            specimen_type = ord['specimen_type']
+            target_lab = ord['target_lab']
+            rejecter = {}  
+            st = SpecimenType.find_by_sql("SELECT id AS type_id FROM specimen_types WHERE name='#{specimen_type}'")
+            type_id = st[0]['type_id']
+            obj = Speciman.find_by(:tracking_number => ord['tracking_number'])
+            couch_id = obj['couch_id']
+            
+            obj.specimen_type_id = type_id
+            obj.target_lab = target_lab
+            obj.specimen_status_id =  sp_id = SpecimenStatus.find_by(:name => 'specimen_collected')['id']
+            obj.save            
+        
+            retr_order = OrderService.retrieve_order_from_couch(couch_id)          
+            retr_order['sample_type'] = specimen_type
+            retr_order['receiving_facility'] = target_lab   
+            retr_order['sample_status']      = 'specimen_collected'
+            puts  "-----checking"
+   
+      
+            OrderService.update_couch_order(couch_id,retr_order)
+      end
+
+
       def self.query_requested_order_by_npid(npid)
 
             sp_id = SpecimenStatus.find_by(:name => 'specimen_not_collected')['id']
+            sp_id2 = SpecimenStatus.find_by(:name => 'specimen_collected')['id']
 
-            res = Speciman.find_by_sql("SELECT specimen_types.name AS spc_type, specimen.tracking_number AS track_number, specimen.id AS _id, 
+            res = Speciman.find_by_sql("SELECT  specimen.tracking_number AS track_number, specimen.id AS _id, 
                               specimen.date_created AS dat_created, specimen.requested_by AS req_by
-                              FROM specimen INNER JOIN specimen_types 
-                              ON specimen_types.id = specimen.specimen_type_id
-                              WHERE specimen_status_id='#{sp_id}'")
+                              FROM specimen 
+                              WHERE specimen_status_id='#{sp_id}' OR specimen_type_id=0 OR specimen_status_id='#{sp_id2}'")
 
             
             counter = 0
@@ -369,20 +575,44 @@ module  OrderService
                               tste.push(ty['tst_name'])
                               got_tsts = true
                         end
-                        if got_tsts == true      
-                                    det ={
-                                          specimen_type: gde['spc_type'],
-                                          tracking_number: gde['track_number'],
-                                          requested_by: gde['req_by'],
-                                          date_created: gde['dat_created'],
-                                          tests: tste
-                                    }
+                        r = Speciman.find_by_sql("SELECT specimen_types.name AS sp_type_name FROM specimen 
+                                                INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id 
+                                                WHERE specimen.tracking_number ='#{gde['track_number']}'
+                                                ")
 
-                              details[counter] =  det
+                    
+                        if r.length == 0
+                              if got_tsts == true      
+                                          det ={
+                                                specimen_type: 'not-assigned',
+                                                tracking_number: gde['track_number'],
+                                                requested_by: gde['req_by'],
+                                                date_created: gde['dat_created'],
+                                                tests: tste
+                                          }
 
-                              counter = counter + 1
-                              tste = []
-                              got_tsts =  false
+                                    details[counter] =  det
+
+                                    counter = counter + 1
+                                    tste = []
+                                    got_tsts =  false
+                              end
+                        else
+                              if got_tsts == true      
+                                          det ={
+                                                specimen_type: r[0]['sp_type_name'],
+                                                tracking_number: gde['track_number'],
+                                                requested_by: gde['req_by'],
+                                                date_created: gde['dat_created'],
+                                                tests: tste
+                                          }
+
+                                    details[counter] =  det
+
+                                    counter = counter + 1
+                                    tste = []
+                                    got_tsts =  false
+                              end
                         end
                   end   
                   counter = 0
