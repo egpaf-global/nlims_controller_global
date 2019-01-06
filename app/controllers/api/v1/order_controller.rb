@@ -28,7 +28,9 @@ class API::V1::OrderController < ApplicationController
 		                    elsif(!params['tests'])
 		                        msg = "tests not provided";
 		                    elsif(!params['date_sample_drawn'])
-		                        msg = "date for sample drawn not provided"
+								msg = "date for sample drawn not provided"
+							elsif(!params['sample_status'])
+								msg = "sample status not provided"
 		                    elsif(!params['sample_priority'])
 		                        msg = "sample priority level not provided"
 		                    elsif(!params['target_lab'])

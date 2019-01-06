@@ -57,7 +57,7 @@ module TestService
 				couch_test_results = ""
 				if params[:results]
 					results = params[:results]
-				
+					
 					results.each do |key, value|
 						measure_name =  key
 						result_value = value
@@ -117,6 +117,24 @@ module TestService
 		end
 
 
+	end
+
+	def self.query_test_measures(test_name)
+		test_name = test_name.gsub("_"," ")
+		test_type_id = TestType.find_by(:name => test_name)['id']
+		res = TesttypeMeasure.find_by_sql("SELECT measures.name FROM testtype_measures INNER JOIN measures
+									ON measures.id = testtype_measures.measure_id 
+									INNER JOIN test_types ON test_types.id = testtype_measures.test_type_id
+									WHERE test_types.id='#{test_type_id}'
+								")
+
+		if !res.blank?
+			r = res.collect do |t|
+				t['name']
+			end
+		else
+			return  false
+		end
 	end
 
 	def self.add_test(params)		

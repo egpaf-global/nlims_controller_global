@@ -56,7 +56,7 @@ module  OrderService
 
 
                   sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
-                  sample_status_id = SpecimenStatus.get_specimen_status_id('specimen_not_collected')
+                  sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
 
             sp_obj =  Speciman.create(
@@ -169,7 +169,7 @@ module  OrderService
                         who_order_test: who_order,
                         sample_statuses: sample_status,
                         test_statuses: test_status,
-                        sample_status: "specimen_not_collected" 
+                        sample_status: params[:sample_status] 
                   )
 
                   sp = Speciman.find_by(:tracking_number => tracking_number)
@@ -568,12 +568,14 @@ module  OrderService
                                     INNER JOIN tests ON tests.test_type_id = test_types.id
                                     INNER JOIN specimen  ON specimen.id = tests.specimen_id
                                     INNER JOIN patients ON patients.id = tests.patient_id
-                                    WHERE tests.specimen_id ='#{specimen_id}' AND patients.patient_number ='#{npid}' ORDER BY time_created DESC")
+                                    WHERE tests.specimen_id ='#{specimen_id}' AND patients.patient_number ='#{npid}' ORDER BY time_created ASC")
 
                         
                         tst.each do |ty|
                               tste.push(ty['tst_name'])
                               got_tsts = true
+                              puts "helo----------------------------"
+                              puts specimen_id
                         end
                         r = Speciman.find_by_sql("SELECT specimen_types.name AS sp_type_name FROM specimen 
                                                 INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id 
