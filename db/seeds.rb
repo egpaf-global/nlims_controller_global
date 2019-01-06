@@ -119,7 +119,7 @@ end
 
 TestCatelog.create(_id: "test_statuses", test_status: test_statuses )
 
-specimen_statuses = ['specimen_not_collected','specimen_accepted','specimen_rejected']
+specimen_statuses = ['specimen_not_collected','specimen_accepted','specimen_rejected','specimen_collected']
 puts 'loading specimen statuses--------------'
 specimen_statuses.each do |sps|
 	SpecimenStatus.create(name:sps)
