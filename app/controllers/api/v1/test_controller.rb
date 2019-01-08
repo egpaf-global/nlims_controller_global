@@ -44,6 +44,45 @@ class API::V1::TestController < ApplicationController
 		render plain: response.to_json and return
 	end
 
+	def query_test_status
+		if params[:tracking_number]
+			
+			stat = status = TestService.query_test_status(params[:tracking_number])
+			if stat[1] != false
+					response = {
+							status: 200,
+							error: false,
+							message: 'test measures retrieved successfuly',
+							data: stat[1]
+						}
+			else
+					response = {
+							status: 401,
+							error: true,
+							message: 'no tests were ordered for the specimen',
+							data: {
+									
+								}
+						}
+
+			end
+	
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'tracking number not provided',
+					data: {
+						
+					}
+				}
+			
+		end
+
+
+		render plain: response.to_json and return
+	end
+
 	def query_test_measures
 		
 		if params[:test_name]

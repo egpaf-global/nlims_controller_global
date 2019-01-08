@@ -108,7 +108,7 @@ TestCatelog.create(_id: "test_panels", test_panel: test_panels )
 
 
 
-test_statuses = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn']
+test_statuses = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn','failed',]
 puts 'loading test statuses--------------'
 test_statuses.each do |t|
 	TestStatus.create(

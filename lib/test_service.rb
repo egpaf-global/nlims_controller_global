@@ -119,6 +119,24 @@ module TestService
 
 	end
 
+	def self.query_test_status(tracking_number)
+		spc_id = Speciman.find_by(:tracking_number => tracking_number)['id']
+		status = Test.find_by_sql("SELECT test_statuses.name,test_types.name AS tst_name FROM test_statuses INNER JOIN tests ON tests.test_status_id = test_statuses.id 
+							INNER JOIN test_types ON test_types.id = tests.test_type_id
+							WHERE tests.specimen_id='#{spc_id}'
+						")
+		
+		if !status.blank?
+			st = status.collect do |s|
+					{s['tst_name'] => s['name']}
+			end
+			return [true,st]
+		else
+			return [false,'']
+		end
+
+	end
+
 	def self.query_test_measures(test_name)
 		test_name = test_name.gsub("_"," ")
 		test_type_id = TestType.find_by(:name => test_name)['id']
