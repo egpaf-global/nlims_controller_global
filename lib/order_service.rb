@@ -320,7 +320,7 @@ module  OrderService
                                   results[re.measure_name] = re.result
                                   r_date =  re.time_entered
                               end
-                              #results['result_date'] = r_date.to_date
+                              results['result_date'] = r_date.to_date
                               test_re[te.tst_type] = results
                               checker = true
                         else

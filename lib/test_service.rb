@@ -11,10 +11,10 @@ module TestService
 			order_id = sql_order.id
 			couch_id = sql_order.couch_id
 			test_name = params[:test_name]
-			
+			test_name = test_name.gsub("_"," ")
 			test_id = Test.find_by_sql("SELECT tests.id FROM tests INNER JOIN test_types ON tests.test_type_id = test_types.id
 							WHERE tests.specimen_id = '#{order_id}' AND test_types.name = '#{test_name}'")
-
+			
 			test_status = TestStatus.where(name: params[:test_status]).first
 			
 			if test_id
