@@ -338,6 +338,16 @@ module  OrderService
             end
       end
 
+      def self.dispatch_sample(tracking_number,first,last)
+            SpecimenDispatch.create(
+                  tracking_number: tracking_number,
+                  dispatcher_name: first + " "+ last,
+                  date_dispatched: Time.now.strftime("%Y%m%d%H%M%S") 
+            )
+
+            return true
+      end
+
       def self.request_order(params,tracking_number)
             couch_order = 0
             ActiveRecord::Base.transaction do 

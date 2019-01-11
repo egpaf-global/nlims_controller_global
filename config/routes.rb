@@ -12,6 +12,7 @@ Rails.application.routes.draw do
 			get  '/query_results_by_npid/:npid' 											=> 'order#query_results_by_npid'
 			post '/update_order'																			=> 'order#update_order'
 			get  '/query_requested_order_by_npid/:npid'								=> 'order#query_requested_order_by_npid'
+			post '/dispatch_sample'																		=> 'order#dispatch_sample'
 
   		#test routes
   		post '/update_test'  				   					 									=> 'test#update_test'
@@ -20,6 +21,7 @@ Rails.application.routes.draw do
 			get  '/retrieve_test_Catelog'															=> 'test#retrieve_test_catelog'
 			get	 '/query_test_measures/:test_name'										=> 'test#query_test_measures'
 			get  '/query_test_status/:tracking_number'								=> 'test#query_test_status'
+	
 			    
   		#user routes	
   		post '/create_user'						         		 								=>	'user#create_user'
