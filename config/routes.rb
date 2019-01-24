@@ -11,12 +11,17 @@ Rails.application.routes.draw do
       get  '/query_order_by_npid/:npid' 												=> 'order#query_order_by_npid'
 			get  '/query_results_by_npid/:npid' 											=> 'order#query_results_by_npid'
 			post '/update_order'																			=> 'order#update_order'
+			get  '/query_requested_order_by_npid/:npid'								=> 'order#query_requested_order_by_npid'
+			post '/dispatch_sample'																		=> 'order#dispatch_sample'
 
   		#test routes
   		post '/update_test'  				   					 									=> 'test#update_test'
       post '/add_test'                           								=> 'test#add_test'
 			put  '/edit_test_result'                  								=> 'test#edit_test_result'
 			get  '/retrieve_test_Catelog'															=> 'test#retrieve_test_catelog'
+			get	 '/query_test_measures/:test_name'										=> 'test#query_test_measures'
+			get  '/query_test_status/:tracking_number'								=> 'test#query_test_status'
+	
 			    
   		#user routes	
   		post '/create_user'						         		 								=>	'user#create_user'
@@ -24,13 +29,21 @@ Rails.application.routes.draw do
   		get	 '/re_authenticate/:username/:password'								=>	'user#re_authenticate'
 			get	 '/check_token_validity' 							 								=>	'user#check_token_validity'
 			
-
 			#other routes
 			get '/retrieve_order_location' 														=> 'test#retrieve_order_location'
 			get '/retrieve_target_labs' 													 		=> 'test#retrieve_target_labs'
 
 
-  	end
+		end
+		
+		namespace :v2 do
+			#order routes
+
+			post '/request_order'																			=> 'order#request_order'
+			post '/confirm_order_request'													 		=> 'order#confirm_order_request'
+			get  '/query_requested_order_by_npid/:npid'								=> 'order#query_requested_order_by_npid2'
+
+		end
   end
 
 end

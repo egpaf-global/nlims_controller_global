@@ -32,9 +32,10 @@ module TrackingNumberService
 			elsif counter.to_s.length == 2
 				
 				value = "0" + counter.to_s
+			else
+				value = counter.to_s
 			end
 			
-    			
 
 			tracking_number = "X" + site_code + year.to_s +  get_month(month).to_s +  get_day(day).to_s + value.to_s
 			

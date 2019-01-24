@@ -108,7 +108,7 @@ TestCatelog.create(_id: "test_panels", test_panel: test_panels )
 
 
 
-test_statuses = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn']
+test_statuses = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn','failed',]
 puts 'loading test statuses--------------'
 test_statuses.each do |t|
 	TestStatus.create(
@@ -119,7 +119,7 @@ end
 
 TestCatelog.create(_id: "test_statuses", test_status: test_statuses )
 
-specimen_statuses = ['specimen_not_collected','specimen_accepted','specimen_rejected']
+specimen_statuses = ['specimen_not_collected','specimen_accepted','specimen_rejected','specimen_collected']
 puts 'loading specimen statuses--------------'
 specimen_statuses.each do |sps|
 	SpecimenStatus.create(name:sps)

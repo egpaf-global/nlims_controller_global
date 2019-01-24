@@ -11,10 +11,10 @@ module TestService
 			order_id = sql_order.id
 			couch_id = sql_order.couch_id
 			test_name = params[:test_name]
-			
+			test_name = test_name.gsub("_"," ")
 			test_id = Test.find_by_sql("SELECT tests.id FROM tests INNER JOIN test_types ON tests.test_type_id = test_types.id
 							WHERE tests.specimen_id = '#{order_id}' AND test_types.name = '#{test_name}'")
-
+			
 			test_status = TestStatus.where(name: params[:test_status]).first
 			
 			if test_id
@@ -57,7 +57,7 @@ module TestService
 				couch_test_results = ""
 				if params[:results]
 					results = params[:results]
-				
+					
 					results.each do |key, value|
 						measure_name =  key
 						result_value = value
@@ -117,6 +117,42 @@ module TestService
 		end
 
 
+	end
+
+	def self.query_test_status(tracking_number)
+		spc_id = Speciman.find_by(:tracking_number => tracking_number)['id']
+		status = Test.find_by_sql("SELECT test_statuses.name,test_types.name AS tst_name FROM test_statuses INNER JOIN tests ON tests.test_status_id = test_statuses.id 
+							INNER JOIN test_types ON test_types.id = tests.test_type_id
+							WHERE tests.specimen_id='#{spc_id}'
+						")
+		
+		if !status.blank?
+			st = status.collect do |s|
+					{s['tst_name'] => s['name']}
+			end
+			return [true,st]
+		else
+			return [false,'']
+		end
+
+	end
+
+	def self.query_test_measures(test_name)
+		test_name = test_name.gsub("_"," ")
+		test_type_id = TestType.find_by(:name => test_name)['id']
+		res = TesttypeMeasure.find_by_sql("SELECT measures.name FROM testtype_measures INNER JOIN measures
+									ON measures.id = testtype_measures.measure_id 
+									INNER JOIN test_types ON test_types.id = testtype_measures.test_type_id
+									WHERE test_types.id='#{test_type_id}'
+								")
+
+		if !res.blank?
+			r = res.collect do |t|
+				t['name']
+			end
+		else
+			return  false
+		end
 	end
 
 	def self.add_test(params)		
