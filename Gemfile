@@ -26,7 +26,6 @@ gem 'apipie-rails'
 # gem 'rack-cors'
 gem 'passenger', '~> 5.0', '>= 5.0.30'
 gem 'couchrest_model'
-gem 'passenger', '~> 5.0', '>= 5.0.30'
 gem 'sucker_punch'
 gem 'passenger'
 group :development, :test do
