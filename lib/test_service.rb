@@ -119,6 +119,25 @@ module TestService
 
 	end
 
+	def self.test_no_results(npid)
+
+		res = Test.find_by_sql("SELECT tests.time_created,test_types.name, test_statuses.name AS test_status, tests.id AS tst_id, specimen.tracking_number 
+							FROM tests INNER JOIN test_statuses ON test_statuses.id = tests.test_status_id INNER JOIN test_types
+							ON test_types.id = tests.test_type_id
+							INNER JOIN patients ON patients.id = tests.patient_id
+							INNER JOIN specimen ON specimen.id = tests.specimen_id
+							WHERE patients.patient_number='#{npid}' AND (tests.test_status_id != '4' AND tests.test_status_id != '5')")
+		data = []
+		if !res.blank?
+			res.each do |d|
+				data.push({'tracking_number': d['tracking_number'],'test_name': d['name'],'created_at': d['time_created'].to_date,'status': d['test_status']})				
+			end
+			return [true,data]
+		else
+			return [false,'']
+		end
+	end
+
 	def self.query_test_status(tracking_number)
 		spc_id = Speciman.find_by(:tracking_number => tracking_number)['id']
 		status = Test.find_by_sql("SELECT test_statuses.name,test_types.name AS tst_name FROM test_statuses INNER JOIN tests ON tests.test_status_id = test_statuses.id 
