@@ -76,6 +76,42 @@ class API::V1::OrderController < ApplicationController
 				render plain: response.to_json and return	
 	end
 	
+	def check_if_dispatched
+	
+		if !params[:tracking_number].blank?
+			res = OrderService.check_if_dispatched(params[:tracking_number])
+			if res == false
+				response = {
+								status: 200,
+								error: false,
+								message: 'sample not dispatced',
+								data: {	}
+							}
+
+			else
+				response = {
+							status: 401,
+							error: true,
+							message: 'sample already dispatched',
+							data: {
+								
+							}
+					}
+			end
+		else
+			response = {
+							status: 401,
+							error: true,
+							message: 'tracking number not provided',
+							data: {
+								
+							}
+					}
+		end
+
+		render plain: response.to_json  and return
+	end
+
 	def dispatch_sample
 		if params[:tracking_number] && params[:dispatcher_first] && params[:dispatcher_last]
 				status = OrderService.dispatch_sample(params[:tracking_number],params[:dispatcher_first],params[:dispatcher_last])

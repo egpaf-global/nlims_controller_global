@@ -172,6 +172,7 @@ module  OrderService
                         sample_status: params[:sample_status] 
                   )
 
+                  
                   sp = Speciman.find_by(:tracking_number => tracking_number)
                   sp.couch_id = c_order['_id']
                   sp.save()
@@ -346,6 +347,15 @@ module  OrderService
             )
 
             return true
+      end
+
+      def self.check_if_dispatched(tracking_number)
+            rs = SpecimenDispatch.find_by_sql("SELECT * FROM specimen_dispatches WHERE tracking_number='#{tracking_number}'")
+            if rs.length > 0
+                  return true
+            else  
+                  return false
+            end
       end
 
       def self.request_order(params,tracking_number)

@@ -44,6 +44,30 @@ class API::V1::TestController < ApplicationController
 		render plain: response.to_json and return
 	end
 
+	def test_no_results
+		npid = params[:npid]
+		res = TestService.test_no_results(npid)
+
+			if res[0] == true
+				response = {	status: 200,
+								error: false,
+								message: 'test retrieved successfuly',
+								data: res[1]
+							}
+			else
+				response = {
+								status: 401,
+								error: true,
+								message: 'no test pending for results',
+								data: {
+										
+									}
+							}
+			end
+
+			render plain: response.to_json and return
+	end
+
 	def query_test_status
 		if params[:tracking_number]
 			
