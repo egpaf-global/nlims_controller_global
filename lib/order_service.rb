@@ -43,7 +43,8 @@ module  OrderService
                   }
                   sample_status =  {}
                   test_status = {}
-                  time = Time.now.strftime("%Y%m%d%H%M%S") 
+                  time = Time.now.strftime("%Y%m%d%H%M%S") if params[:date_sample_drawn].blank? 
+                  time = params[:date_sample_drawn] if !params[:date_sample_drawn].blank?
                   sample_status[time] = {
                         "status" => "Drawn",
                               "updated_by":  {
