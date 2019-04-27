@@ -25,6 +25,8 @@ gem 'apipie-rails'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
 
+gem 'rest-client'
+
 gem 'couchrest_model'
 
 gem 'sucker_punch'
