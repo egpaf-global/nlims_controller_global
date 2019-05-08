@@ -7,6 +7,12 @@ module TestService
 		sql_order = OrderService.get_order_by_tracking_number_sql(params[:tracking_number])
 		tracking_number = params[:tracking_number]
 
+		if params[:result_date].blank?
+			result_date = time
+		else
+			result_date = params[:result_date]
+		end 
+
 		if !sql_order == false 
 			order_id = sql_order.id
 			couch_id = sql_order.couch_id
@@ -61,12 +67,7 @@ module TestService
 					results.each do |key, value|
 						measure_name =  key
 						result_value = value
-						if params[:result_date].blank?
-							result_date = time
-						else
-							result_date = params[:result_date]
-						end 
-
+						
 						measure = Measure.where(name: measure_name).first
 
 						TestResult.create(
@@ -77,22 +78,27 @@ module TestService
 							time_entered: result_date
 							)
 						test_results_measures[measure_name] = { 'result_value': result_value }
-
+						
 					end	
-					
+
 					results_measure[test_name] = test_results_measures
+				
 
 				end
+
+				
 
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					couch_test_statuses = retr_order['test_statuses'][test_name]
 					couch_test_statuses[time] =  details 
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
+
+					
 					
 					retr_order['test_results'][test_name] = {
 						'results': test_results_measures,
-						'date_result_entered': '',
+						'date_result_entered': result_date,
 						'result_entered_by': {
 							:first_name => params[:who_updated]['first_name'],
 							:last_name => params[:who_updated]['last_name'],
