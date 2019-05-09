@@ -61,6 +61,11 @@ module TestService
 					results.each do |key, value|
 						measure_name =  key
 						result_value = value
+						if params[:result_date].blank?
+							result_date = time
+						else
+							result_date = params[:result_date]
+						end 
 
 						measure = Measure.where(name: measure_name).first
 
@@ -69,7 +74,7 @@ module TestService
 							test_id: test_id,
 							result: result_value,	
 							device_name: '',						
-							time_entered: time
+							time_entered: result_date
 							)
 						test_results_measures[measure_name] = { 'result_value': result_value }
 

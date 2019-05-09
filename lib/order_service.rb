@@ -59,7 +59,7 @@ module  OrderService
                   sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
                   sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
-
+      
             sp_obj =  Speciman.create(
                         :tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
@@ -75,7 +75,7 @@ module  OrderService
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
-                        :date_created => time
+                        :date_created => params[:date_sample_drawn]
                   )
 
                   
