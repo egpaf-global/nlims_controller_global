@@ -821,5 +821,6 @@ User.create(password: password_has,
 			token_expiry_time: token_expiry_time			
 		)
 
+TesttypeSpecimentype.where(specimen_type_id: SpecimenType.find_by(name: 'Urine').id, test_type_id: TestType.find_by(name: 'TB Tests').id).first_or_create
 
 puts '-------------done----------'
