@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181024110505) do
+ActiveRecord::Schema.define(version: 20190111175333) do
 
   create_table "drug_susceptibilities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "user_id"
@@ -94,7 +94,7 @@ ActiveRecord::Schema.define(version: 20181024110505) do
     t.index ["test_type_id"], name: "index_panels_on_test_type_id"
   end
 
-  create_table "patients", id: :string, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "patients", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "patient_number"
     t.string "name"
     t.string "email"
@@ -126,10 +126,37 @@ ActiveRecord::Schema.define(version: 20181024110505) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "site_sync_frequencies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "site"
+    t.boolean "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "sites", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name"
+    t.string "district"
+    t.float "x", limit: 24
+    t.float "y", limit: 24
+    t.string "region"
+    t.string "description"
+    t.boolean "enabled"
+    t.boolean "sync_status"
+    t.string "site_code"
+    t.string "application_port"
+    t.string "host_address"
+    t.string "couch_username"
+    t.string "couch_password"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "specimen", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "specimen_type_id"
     t.bigint "specimen_status_id"
+    t.bigint "ward_id"
     t.string "tracking_number"
+    t.string "couch_id"
     t.datetime "date_created"
     t.string "priority", null: false
     t.string "drawn_by_id"
@@ -144,6 +171,15 @@ ActiveRecord::Schema.define(version: 20181024110505) do
     t.datetime "updated_at", null: false
     t.index ["specimen_status_id"], name: "index_specimen_on_specimen_status_id"
     t.index ["specimen_type_id"], name: "index_specimen_on_specimen_type_id"
+    t.index ["ward_id"], name: "index_specimen_on_ward_id"
+  end
+
+  create_table "specimen_dispatches", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "tracking_number"
+    t.string "dispatcher_name"
+    t.datetime "date_dispatched"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "specimen_status_trails", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -252,17 +288,17 @@ ActiveRecord::Schema.define(version: 20181024110505) do
     t.bigint "specimen_id"
     t.bigint "test_type_id"
     t.bigint "test_status_id"
-    t.bigint "visit_id"
+    t.bigint "patient_id"
     t.string "created_by"
     t.bigint "panel_id"
     t.datetime "time_created"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["panel_id"], name: "index_tests_on_panel_id"
+    t.index ["patient_id"], name: "index_tests_on_patient_id"
     t.index ["specimen_id"], name: "index_tests_on_specimen_id"
     t.index ["test_status_id"], name: "index_tests_on_test_status_id"
     t.index ["test_type_id"], name: "index_tests_on_test_type_id"
-    t.index ["visit_id"], name: "index_tests_on_visit_id"
   end
 
   create_table "testtype_measures", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
