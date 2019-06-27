@@ -566,83 +566,61 @@ module  OrderService
 
 
       def self.query_requested_order_by_npid(npid)
-
+            
             sp_id = SpecimenStatus.find_by(:name => 'specimen_not_collected')['id']
             sp_id2 = SpecimenStatus.find_by(:name => 'specimen_collected')['id']
 
-            res = Speciman.find_by_sql("SELECT  specimen.tracking_number AS track_number, specimen.id AS _id, 
-                              specimen.date_created AS dat_created, specimen.requested_by AS req_by
-                              FROM specimen 
-                              WHERE specimen_status_id='#{sp_id}' OR specimen_type_id=0 OR specimen_status_id='#{sp_id2}'")
-
-            
-            counter = 0
-            details =[]
-            det = {}
-            tste = []
-            got_tsts =  false
-
-            if res.length > 0
-                  res.each do |gde|
-                        specimen_id = gde['_id']
-                        tst = Speciman.find_by_sql("SELECT test_types.name AS tst_name FROM test_types 
-                                    INNER JOIN tests ON tests.test_type_id = test_types.id
-                                    INNER JOIN specimen  ON specimen.id = tests.specimen_id
-                                    INNER JOIN patients ON patients.id = tests.patient_id
-                                    WHERE tests.specimen_id ='#{specimen_id}' AND patients.patient_number ='#{npid}' ORDER BY time_created ASC")
-
+                  r = Speciman.find_by_sql("SELECT distinct(specimen.id) FROM specimen INNER JOIN tests ON specimen.id = tests.specimen_id INNER JOIN patients ON patients.id = tests.patient_id WHERE patients.patient_number = '#{npid}'")
+                 
+                  if r.length > 0       
+                        counter = 0
+                        details =[]
+                        det = {}
+                        got_tsts =  false
+                        checker = []
+                        tste = []
+                        r.each do |data|
+                              tra_num = data['id']
+                              if !checker.include?(tra_num)
+                                    da = Speciman.find_by_sql("SELECT * FROM specimen WHERE id='#{tra_num}'")
+                                    
+                                    checker.push(tra_num)
+                                    tst = Test.find_by_sql("SELECT * FROM tests INNER JOIN test_types ON tests.test_type_id = test_types.id WHERE tests.specimen_id='#{data['id']}'")
+                                   
+                                    if tst.length > 0
+                                          tst.each do |t_name| 
+                                                                                          
+                                                tste.push(t_name['name'])
+                                          end
+                                    end
+				    puts "------------------#{da[0]['specimen_type_id']}"
+                                    puts da[0]['specimen_type_id']
+                                    puts "sample type --------------------"
+				begin
+                                    spc_type = SpecimenType.find_by_sql("SELECT name FROM specimen_types WHERE id ='#{da[0]['specimen_type_id']}'")[0]['name'] if da[0]['specimen_type_id'] != "not-assigned" && !da[0]['specimen_type_id'].blank?
+                                    spc_type = "not-assigned" if da[0]['specimen_type_id'] == "not-assigned" || da[0]['specimen_type_id'].blank?
+                                rescue
+					next
+				end
+                                    det ={   
+                                          requested_by: da[0]['requested_by'],
+                                          date_created:   da[0]['date_created'],
+                                          specimen_type: spc_type ,
+                                          tracking_number: da[0]['tracking_number'],
+                                          tests: tste
+                                    }
+                                    details[counter] = det
+                                    det = {}
+                                    tste = []
+                                    counter = counter + 1
+                              end
+                        end   
                         
-                        tst.each do |ty|
-                              tste.push(ty['tst_name'])
-                              got_tsts = true
-                              puts "helo----------------------------"
-                              puts specimen_id
-                        end
-                        r = Speciman.find_by_sql("SELECT specimen_types.name AS sp_type_name FROM specimen 
-                                                INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id 
-                                                WHERE specimen.tracking_number ='#{gde['track_number']}'
-                                                ")
-
-                    
-                        if r.length == 0
-                              if got_tsts == true      
-                                          det ={
-                                                specimen_type: 'not-assigned',
-                                                tracking_number: gde['track_number'],
-                                                requested_by: gde['req_by'],
-                                                date_created: gde['dat_created'],
-                                                tests: tste
-                                          }
-
-                                    details[counter] =  det
-
-                                    counter = counter + 1
-                                    tste = []
-                                    got_tsts =  false
-                              end
-                        else
-                              if got_tsts == true      
-                                          det ={
-                                                specimen_type: r[0]['sp_type_name'],
-                                                tracking_number: gde['track_number'],
-                                                requested_by: gde['req_by'],
-                                                date_created: gde['dat_created'],
-                                                tests: tste
-                                          }
-
-                                    details[counter] =  det
-
-                                    counter = counter + 1
-                                    tste = []
-                                    got_tsts =  false
-                              end
-                        end
-                  end   
-                  counter = 0
-                  return details
-            else
-                  return false
-            end
+                        return details  
+                        
+                  else
+                        return false
+                  end  
 
       end
 
@@ -821,6 +799,7 @@ module  OrderService
 
       end
 end
+
 
 
 
