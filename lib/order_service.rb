@@ -322,7 +322,7 @@ module  OrderService
                                   results[re.measure_name] = re.result
                                   r_date =  re.time_entered
                               end
-                              results['result_date'] = r_date.to_date
+			      results['result_date'] = r_date.to_date rescue nil
                               test_re[te.tst_type] = results
                               checker = true
                         else
@@ -593,15 +593,15 @@ module  OrderService
                                                 tste.push(t_name['name'])
                                           end
                                     end
-				    puts "------------------#{da[0]['specimen_type_id']}"
+                                    puts "------------------#{da[0]['specimen_type_id']}"
                                     puts da[0]['specimen_type_id']
                                     puts "sample type --------------------"
-				begin
+				      begin
                                     spc_type = SpecimenType.find_by_sql("SELECT name FROM specimen_types WHERE id ='#{da[0]['specimen_type_id']}'")[0]['name'] if da[0]['specimen_type_id'] != "not-assigned" && !da[0]['specimen_type_id'].blank?
                                     spc_type = "not-assigned" if da[0]['specimen_type_id'] == "not-assigned" || da[0]['specimen_type_id'].blank?
-                                rescue
-					next
-				end
+                              rescue
+					      next
+				      end
                                     det ={   
                                           requested_by: da[0]['requested_by'],
                                           date_created:   da[0]['date_created'],
