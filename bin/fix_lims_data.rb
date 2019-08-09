@@ -30,19 +30,20 @@ def update_lims(acc_num)
   updated_ac_num = 'X' + @fc_code + acc_num[4..(acc_num.length)]
   url = @couchdb['protocol'] + '://' + @couchdb['host'] \
   		+ ':' + @couchdb['port'].to_s + '/' + @couchdb['prefix'] \
-  		+ '_' + @couchdb['suffix']
+  		+ '_order_' + @couchdb['suffix']
 
   spec = Speciman.find_by(tracking_number: acc_num)
 
   if spec
 	  spec.update(tracking_number: updated_ac_num)
-
-	  couchdb_doc = `curl -XGET #{url}/#{spec.couch_id}`
+      couchdb_doc = `curl -XGET #{url}/#{spec.couch_id}`
 	  couchdb_doc = JSON.parse(couchdb_doc)
-	  couchdb_doc['tracking_number'] = updated_ac_num
-	  
-	  `curl -XPUT #{url}/#{spec.couch_id} -d #{couchdb_doc}` 
-	  exit
+	  if couchdb_doc['tracking_number'] != updated_ac_num
+		  couchdb_doc['tracking_number'] = updated_ac_num
+		  
+		  response = `curl -XPUT #{url}/#{spec.couch_id} -d '#{couchdb_doc.to_json}'` 
+		  exit
+	  end
   else
   	puts "Record not found"
   end
