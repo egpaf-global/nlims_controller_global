@@ -14,11 +14,15 @@ end
 def update_art(acc_num)
   updated_ac_num = 'X' + @fc_code + acc_num[4..(acc_num.length)]
 
+if acc_num != updated_ac_num
   ActiveRecord::Base.connection.execute <<~SQL
   UPDATE #{@art_db['development']['database']}.orders
   SET accession_number = '#{updated_ac_num}'
   WHERE accession_number = '#{acc_num}'
 SQL
+else
+  puts "Modification not required"
+end
 
 end
 
@@ -48,6 +52,16 @@ tracking_numbers = ActiveRecord::Base.connection.select_all <<~SQL
   SELECT accession_number 
   FROM #{@art_db['development']['database']}.orders 
   WHERE accession_number is not NULL;
+SQL
+puts "Adding index"
+ActiveRecord::Base.connection.execute <<~SQL
+  ALTER TABLE #{@art_db['development']['database']}.orders
+  ADD INDEX(accession_number);
+SQL
+
+ActiveRecord::Base.connection.execute <<~SQL
+  ALTER TABLE #{@art_db['development']['database']}.orders
+  ADD INDEX(accession_number);
 SQL
 
 tracking_numbers.each_with_index do |num, i|
