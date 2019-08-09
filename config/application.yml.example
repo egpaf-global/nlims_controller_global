@@ -1,10 +1,3 @@
-page_size: 40
 district: Lilongwe
-facility_name: Likuni Mission Hospital
-receiving_facility: Kamuzu Central Hospital
-bart2_address: http://192.168.5.89:5000
-facility_code: 'KAW'
-central_repo: http://192.168.5.89:3004
-national-repo-node: http://192.168.5.89:3014
-
-
+facility_name: Lighthouse
+facility_code: 'LLH'
