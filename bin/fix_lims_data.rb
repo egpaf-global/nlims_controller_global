@@ -50,7 +50,8 @@ tracking_numbers = ActiveRecord::Base.connection.select_all <<~SQL
   WHERE accession_number is not NULL;
 SQL
 
-tracking_numbers.each do |num|
+tracking_numbers.each_with_index do |num, i|
+  puts "Processing Record #{i}/#{tracking_numbers.count}"
   update_art(num['accession_number'])
   update_lims(num['accession_number'])
 end
