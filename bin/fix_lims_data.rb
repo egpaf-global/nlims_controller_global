@@ -42,7 +42,7 @@ def update_lims(acc_num)
 		  couchdb_doc['tracking_number'] = updated_ac_num
 		  
 		  response = `curl -XPUT #{url}/#{spec.couch_id} -d '#{couchdb_doc.to_json}'` 
-		  exit
+		  puts "Updated couchdb Record"
 	  end
   else
   	puts "Record not found"
