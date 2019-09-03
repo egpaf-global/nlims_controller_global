@@ -18,6 +18,7 @@ class CreateSpecimen < ActiveRecord::Migration[5.1]
       t.string :district      
       t.timestamps
     end
+    add_index :specimen, :tracking_number 
   end
 end
 
