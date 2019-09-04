@@ -748,7 +748,7 @@ module  OrderService
                               INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                               INNER JOIN tests ON tests.specimen_id = specimen.id
                               INNER JOIN patients ON patients.id = tests.patient_id
-                              INNER JOIN wards ON specimen.ward_id = wards.id
+                              LEFT JOIN wards ON specimen.ward_id = wards.id
                               WHERE specimen.tracking_number ='#{tracking_number}' ")
             tsts = {}
            
