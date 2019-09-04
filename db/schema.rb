@@ -126,31 +126,6 @@ ActiveRecord::Schema.define(version: 20190111175333) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "site_sync_frequencies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "site"
-    t.boolean "status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "sites", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "name"
-    t.string "district"
-    t.float "x", limit: 24
-    t.float "y", limit: 24
-    t.string "region"
-    t.string "description"
-    t.boolean "enabled"
-    t.boolean "sync_status"
-    t.string "site_code"
-    t.string "application_port"
-    t.string "host_address"
-    t.string "couch_username"
-    t.string "couch_password"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "specimen", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "specimen_type_id"
     t.bigint "specimen_status_id"
@@ -171,6 +146,7 @@ ActiveRecord::Schema.define(version: 20190111175333) do
     t.datetime "updated_at", null: false
     t.index ["specimen_status_id"], name: "index_specimen_on_specimen_status_id"
     t.index ["specimen_type_id"], name: "index_specimen_on_specimen_type_id"
+    t.index ["tracking_number"], name: "index_specimen_on_tracking_number"
     t.index ["ward_id"], name: "index_specimen_on_ward_id"
   end
 
