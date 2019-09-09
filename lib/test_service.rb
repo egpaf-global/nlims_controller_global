@@ -8,7 +8,7 @@ module TestService
 		tracking_number = params[:tracking_number]
 
 		if params[:result_date].blank?
-			result_date = time
+			result_date = Time.now.strftime("%Y%m%d%H%M%S")
 		else
 			result_date = params[:result_date]
 		end 
