@@ -10,7 +10,7 @@ puts 'Please enter the path to BHT-EMR-API Format/Default: /var/www/BHT-EMR-API'
 
 @bht_emr_path = gets.chomp
 
-@art_db = unless @bht_emr_path
+@art_db = unless @bht_emr_path.blank?
   YAML.load_file("#{@bht_emr_path}/config/database.yml")
 else
   YAML.load_file("/var/www/BHT-EMR-API/config/database.yml")
