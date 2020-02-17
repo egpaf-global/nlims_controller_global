@@ -3,7 +3,7 @@
 
 @url = @couchdb['protocol'] + '://' + @couchdb['host'] \
       + ':' + @couchdb['port'].to_s + '/' + @couchdb['prefix'] \
-      + '_' + @couchdb['suffix']
+      + '_order_' + @couchdb['suffix']
 
 
 puts 'Please enter the path to BHT-EMR-API Format/Default: /var/www/BHT-EMR-API'
