@@ -3,7 +3,7 @@
 
 @url = @couchdb['protocol'] + '://' + @couchdb['host'] \
       + ':' + @couchdb['port'].to_s + '/' + @couchdb['prefix'] \
-      + '_' + @couchdb['suffix']
+      + '_order_' + @couchdb['suffix']
 
 
 puts 'Please enter the path to BHT-EMR-API Format/Default: /var/www/BHT-EMR-API'
@@ -60,7 +60,7 @@ def update_couchdb_test_result_date(accession_number)
     couchdb_doc = `curl -XGET #{@url}/#{result['couch_id']}`
     couchdb_doc = JSON.parse(couchdb_doc)
     unless couchdb_doc.blank?
-      couchdb_doc['test_results'].each do |key, value|
+      (couchdb_doc['test_results'] || []).each do |key, value|
             value['date_result_entered'] = result['time_entered']
             `curl -XPUT #{@url}/#{result['couch_id']} -d '#{couchdb_doc.to_json}'` 
       end
