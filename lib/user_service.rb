@@ -28,7 +28,9 @@ module UserService
 	end
 
 	def self.check_account_creation_request(token)        
-        tokens = JSON.parse(File.read("#{Rails.root}/tmp/nlims_account_creating_token.json"))
+		tokens = JSON.parse(File.read("#{Rails.root}/tmp/nlims_account_creating_token.json"))
+		# return "on file: " + tokens[0] + "; received: " + token
+
         if tokens['tokens'].include?(token)
 			return true
 		else
@@ -54,8 +56,7 @@ module UserService
 
 
 	def self.check_token(token)
-		user = User.where(token: token).first
-
+		user = User.where(token: token).first	
 		if user 
 			if user.token_expiry_time > Time.now.strftime("%Y%m%d%H%M%S")
 				return true
@@ -65,9 +66,8 @@ module UserService
 		else
 			return false
 		end
-
+		
 	end
-
 
 	def self.authenticate(username,password)
 
@@ -113,28 +113,32 @@ module UserService
 
 	def self.re_authenticate(username,password)
 		user = User.where(username: username).first
+
+		return false if user.nil? or password_does_not_match(user.password,password)
+
 		token = create_token
 		expiry_time = compute_expiry_time
-		if user
-			secured_pass = decrypt_password(user.password)
-			if secured_pass == password
-				User.update(user.id,token: token, token_expiry_time: expiry_time[:expiry_time])
-				return {token: token, expiry_time: expiry_time[:expiry_time]}
-			else
-				return false
-			end
-		else
-			return false
-		end
+
+		User.update(
+			user.id,
+			token: token, 
+			token_expiry_time: expiry_time[:expiry_time])
+			
+		return {
+			token: token,
+			expiry_time: expiry_time[:expiry_time]
+		}
 
 	end
 
+	def self.password_does_not_match(encrypted_password, plain_password) 
+		decrypt_password(encrypted_password) != plain_password
+	end
 
 	def self.encrypt_password(password)
 
 		return BCrypt::Password.create(password)
 	end
-
 
 	def self.decrypt_password(password)
 		return BCrypt::Password.new(password)

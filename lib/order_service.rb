@@ -2,6 +2,7 @@
 module  OrderService
 
       def self.create_order(params,tracking_number)
+
             couch_order = 0
             ActiveRecord::Base.transaction do 
 
@@ -57,13 +58,13 @@ module  OrderService
 
 
                   sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
-                  sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
+                  sample_status_id = 4 #SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
       
             sp_obj =  Speciman.create(
                         :tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
-                        :specimen_status_id =>  sample_status_id,
+                        :specimen_status_id => sample_status_id,
                         :couch_id => '',
                         :ward_id => Ward.get_ward_id(params[:order_location]),
                         :priority => params[:sample_priority],
@@ -731,7 +732,14 @@ module  OrderService
                         
                   }
             end
-            OrderService.update_couch_order(couch_id,retr_order)
+            # OrderService.update_couch_order(couch_id,retr_order)
+            update_details = {
+                  "error" => false,
+                  "message" => ""
+
+            }
+
+            return update_details
       end
 
       def self.query_order_by_tracking_number(tracking_number)

@@ -25,6 +25,7 @@ class API::V1::UserController < ApplicationController
 				else
 					response = {
 						status: 401,
+						temp: token,
 						error: true,
 						message: 'can not create account',
 						data: {
@@ -116,7 +117,7 @@ class API::V1::UserController < ApplicationController
 				}
 			else	
 				response = {
-					status: 401,
+					status: status,
 					error: true,
 					message: 'token expired',
 					data: {
@@ -148,6 +149,7 @@ class API::V1::UserController < ApplicationController
 					status: 401,
 					error: true,
 					message: 'wrong password or username',
+					rester: details,
 					data: {
 						
 					}
@@ -156,6 +158,7 @@ class API::V1::UserController < ApplicationController
 				response = {
 						status: 200,
 						error: false,
+						control: details,
 						message: 're authenticated successfuly',
 						data: {
 							token: details[:token],
