@@ -55,7 +55,6 @@ module  OrderService
                                     }
                   }
 
-
                   sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
                   sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
@@ -566,7 +565,7 @@ module  OrderService
 
 
       def self.query_requested_order_by_npid(npid)
-            
+
             sp_id = SpecimenStatus.find_by(:name => 'specimen_not_collected')['id']
             sp_id2 = SpecimenStatus.find_by(:name => 'specimen_collected')['id']
 
@@ -593,12 +592,18 @@ module  OrderService
                                                 tste.push(t_name['name'])
                                           end
                                     end
-                                    puts "------------------#{da[0]['specimen_type_id']}"
-                                    puts da[0]['specimen_type_id']
+                                   
+                                    set_specimen_type_id =  da[0]['specimen_type_id'].to_i
+                                    if set_specimen_type_id == 0
+                                      set_specimen_type_id = 'not-assigned'
+                                    end
+
+                                    puts "------------------#{set_specimen_type_id}"
+                                    puts set_specimen_type_id
                                     puts "sample type --------------------"
 				      begin
-                                    spc_type = SpecimenType.find_by_sql("SELECT name FROM specimen_types WHERE id ='#{da[0]['specimen_type_id']}'")[0]['name'] if da[0]['specimen_type_id'] != "not-assigned" && !da[0]['specimen_type_id'].blank?
-                                    spc_type = "not-assigned" if da[0]['specimen_type_id'] == "not-assigned" || da[0]['specimen_type_id'].blank?
+                                    spc_type = SpecimenType.find_by_sql("SELECT name FROM specimen_types WHERE id ='#{set_specimen_type_id}'")[0]['name'] if set_specimen_type_id != "not-assigned" && !set_specimen_type_id.blank?
+                                    spc_type = "not-assigned" if set_specimen_type_id == "not-assigned" || set_specimen_type_id.blank?
                               rescue
 					      next
 				      end
@@ -745,7 +750,7 @@ module  OrderService
                               patients.patient_number AS pat_id, patients.name AS pat_name,
                               patients.dob AS dob, patients.gender AS sex 
                               FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
-                              INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
+                              LEFT JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                               INNER JOIN tests ON tests.specimen_id = specimen.id
                               INNER JOIN patients ON patients.id = tests.patient_id
                               LEFT JOIN wards ON specimen.ward_id = wards.id
