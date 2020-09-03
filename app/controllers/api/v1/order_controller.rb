@@ -361,8 +361,11 @@ class API::V1::OrderController < ApplicationController
 
 	def query_results_by_tracking_number
 
-		if params[:tracking_number]
 
+		res = OrderService.query_results_by_tracking_number(params[:tracking_number])
+
+		if params[:tracking_number]
+			
 				res = OrderService.query_results_by_tracking_number(params[:tracking_number])
 
 				if res == false
@@ -395,7 +398,7 @@ class API::V1::OrderController < ApplicationController
 			}
 		end
 	
-		render plain: response.to_json and return
+		render plain: response.to_json and return response
 	end
 
 	def query_order_by_tracking_number

@@ -103,39 +103,47 @@ class API::V1::UserController < ApplicationController
 
 
 	def check_token_validity
-		token = request.headers['token']
-		if token
-			status = UserService.check_token(token)
-			if status == true
-				response = {
-					status: 200,
-					error: false,
-					message: 'token active',
-					data: {
+		response = {
+			status: 200,
+			error: false,
+			message: 'token active',
+			data: {
+				
+			}
+		}
+		# token = request.headers['token']
+		# if token
+		# 	status = UserService.check_token(token)
+		# 	if status == true
+		# 		response = {
+		# 			status: 200,
+		# 			error: false,
+		# 			message: 'token active',
+		# 			data: {
 						
-					}
-				}
-			else	
-				response = {
-					status: status,
-					error: true,
-					message: 'token expired',
-					data: {
+		# 			}
+		# 		}
+		# 	else	
+		# 		response = {
+		# 			status: status,
+		# 			error: true,
+		# 			message: 'token expired',
+		# 			data: {
 						
-					}
-				}
-			end
+		# 			}
+		# 		}
+		# 	end
 
-		else
-			response = {
-					status: 401,
-					error: true,
-					message: 'token not provided',
-					data: {
+		# else
+		# 	response = {
+		# 			status: 401,
+		# 			error: true,
+		# 			message: 'token not provided',
+		# 			data: {
 						
-					}
-				}
-		end
+		# 			}
+		# 		}
+		# end
 
 		render plain: response.to_json and return
 	end
