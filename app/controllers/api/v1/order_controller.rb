@@ -42,9 +42,12 @@ class API::V1::OrderController < ApplicationController
 		                    elsif(!params['who_order_test_last_name'])
 		                        msg = "last name for person ordering not provided"
 		                    else
-
-									tracking_number = TrackingNumberService.generate_tracking_number
-									
+						if (params['tracking_number'])
+                                                    tracking_number = params['tracking_number']
+                                                else
+                                                    tracking_number = TrackingNumberService.generate_tracking_number
+                                                end
+														
 									st = OrderService.create_order(params, tracking_number)
 												
 									if st[0] == true
