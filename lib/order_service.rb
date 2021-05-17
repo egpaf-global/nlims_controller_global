@@ -182,6 +182,15 @@ module  OrderService
             return [true,tracking_number,couch_order]
       end
 
+      def self.check_order(track_number)
+            order = Speciman.where(tracking_number: track_number).first
+            
+            if order
+                  return true
+            else
+                  return false
+            end
+      end
 
       def self.get_order_by_tracking_number_sql(track_number)
             details =   Speciman.where(tracking_number: track_number).first
