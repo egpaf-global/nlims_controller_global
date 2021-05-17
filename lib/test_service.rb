@@ -25,6 +25,7 @@ module TestService
 			
 			if test_id
 				ts = test_id[0]
+				#raise test_name.inspect
 				test_id = ts['id']
 			
 				TestStatusTrail.create(
