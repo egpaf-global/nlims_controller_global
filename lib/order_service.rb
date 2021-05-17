@@ -182,9 +182,8 @@ module  OrderService
             return [true,tracking_number,couch_order]
       end
 
-      def self.check_order(track_number)
-            order = Speciman.where(tracking_number: track_number).first
-            
+      def self.check_order(tracking_number)
+            order = Speciman.where(tracking_number: tracking_number).first
             if order
                   return true
             else
