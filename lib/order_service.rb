@@ -702,12 +702,15 @@ module  OrderService
       end
 
       def self.update_order(ord)
-            status = ord['status']      
+            return [false,"no tracking number"] if ord['tracking_number'].blank?
+	    status = ord['status']      
             rejecter = {}  
+	    couch_id = ""
+	
             st = SpecimenStatus.find_by_sql("SELECT id AS status_id FROM specimen_statuses WHERE name='#{status}'")
             status_id = st[0]['status_id']
             obj = Speciman.find_by(:tracking_number => ord['tracking_number'])
-            couch_id = obj['couch_id']
+            couch_id = obj['couch_id'] if !obj['couch_id'].blank?
             obj.specimen_status_id = status_id
             obj.save            
             SpecimenStatusTrail.create(
@@ -745,6 +748,7 @@ module  OrderService
                   }
             end
             OrderService.update_couch_order(couch_id,retr_order)
+	   return [true,""]
       end
 
       def self.query_order_by_tracking_number(tracking_number)
