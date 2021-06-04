@@ -208,7 +208,7 @@ module  OrderService
             username = settings['username']
             password = settings['password']
             db_name =  settings['prefix'].to_s + "_order_" + settings['suffix'].to_s
-
+            
             retr_order = JSON.parse(RestClient.get("#{protocol}://#{username}:#{password}@#{ip}:#{port}/#{db_name}/#{couch_id}"))
             return retr_order
       end
