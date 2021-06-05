@@ -30,5 +30,8 @@ module Nlims
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+    config.time_zone = 'Africa/Blantyre' # Your local time zone
+    config.active_record.default_timezone = :local
+    config.active_record.time_zone_aware_attributes = false
   end
 end
