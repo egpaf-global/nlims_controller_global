@@ -6,5 +6,3 @@ bart2_address: http://192.168.5.89:5000
 facility_code: 'A18'
 central_repo: http://192.168.5.89:3004
 national-repo-node: http://192.168.5.89:3014
-
-

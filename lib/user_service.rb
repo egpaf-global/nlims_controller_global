@@ -115,6 +115,7 @@ module UserService
 		user = User.where(username: username).first
 		token = create_token
 		expiry_time = compute_expiry_time
+
 		if user
 			secured_pass = decrypt_password(user.password)
 			if secured_pass == password

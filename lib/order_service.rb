@@ -55,7 +55,6 @@ module  OrderService
                                     }
                   }
 
-
                   sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
                   sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
@@ -183,6 +182,14 @@ module  OrderService
             return [true,tracking_number,couch_order]
       end
 
+      def self.check_order(tracking_number)
+            order = Speciman.where(tracking_number: tracking_number).first
+            if order
+                  return true
+            else
+                  return false
+            end
+      end
 
       def self.get_order_by_tracking_number_sql(track_number)
             details =   Speciman.where(tracking_number: track_number).first
@@ -201,7 +208,7 @@ module  OrderService
             username = settings['username']
             password = settings['password']
             db_name =  settings['prefix'].to_s + "_order_" + settings['suffix'].to_s
-
+            
             retr_order = JSON.parse(RestClient.get("#{protocol}://#{username}:#{password}@#{ip}:#{port}/#{db_name}/#{couch_id}"))
             return retr_order
       end
@@ -566,7 +573,7 @@ module  OrderService
 
 
       def self.query_requested_order_by_npid(npid)
-            
+
             sp_id = SpecimenStatus.find_by(:name => 'specimen_not_collected')['id']
             sp_id2 = SpecimenStatus.find_by(:name => 'specimen_collected')['id']
 
@@ -593,12 +600,18 @@ module  OrderService
                                                 tste.push(t_name['name'])
                                           end
                                     end
-                                    puts "------------------#{da[0]['specimen_type_id']}"
-                                    puts da[0]['specimen_type_id']
+                                   
+                                    set_specimen_type_id =  da[0]['specimen_type_id'].to_i
+                                    if set_specimen_type_id == 0
+                                      set_specimen_type_id = 'not-assigned'
+                                    end
+
+                                    puts "------------------#{set_specimen_type_id}"
+                                    puts set_specimen_type_id
                                     puts "sample type --------------------"
 				      begin
-                                    spc_type = SpecimenType.find_by_sql("SELECT name FROM specimen_types WHERE id ='#{da[0]['specimen_type_id']}'")[0]['name'] if da[0]['specimen_type_id'] != "not-assigned" && !da[0]['specimen_type_id'].blank?
-                                    spc_type = "not-assigned" if da[0]['specimen_type_id'] == "not-assigned" || da[0]['specimen_type_id'].blank?
+                                    spc_type = SpecimenType.find_by_sql("SELECT name FROM specimen_types WHERE id ='#{set_specimen_type_id}'")[0]['name'] if set_specimen_type_id != "not-assigned" && !set_specimen_type_id.blank?
+                                    spc_type = "not-assigned" if set_specimen_type_id == "not-assigned" || set_specimen_type_id.blank?
                               rescue
 					      next
 				      end
@@ -689,12 +702,15 @@ module  OrderService
       end
 
       def self.update_order(ord)
-            status = ord['status']      
+            return [false,"no tracking number"] if ord['tracking_number'].blank?
+	    status = ord['status']      
             rejecter = {}  
+	    couch_id = ""
+	
             st = SpecimenStatus.find_by_sql("SELECT id AS status_id FROM specimen_statuses WHERE name='#{status}'")
             status_id = st[0]['status_id']
             obj = Speciman.find_by(:tracking_number => ord['tracking_number'])
-            couch_id = obj['couch_id']
+            couch_id = obj['couch_id'] if !obj['couch_id'].blank?
             obj.specimen_status_id = status_id
             obj.save            
             SpecimenStatusTrail.create(
@@ -732,6 +748,7 @@ module  OrderService
                   }
             end
             OrderService.update_couch_order(couch_id,retr_order)
+	   return [true,""]
       end
 
       def self.query_order_by_tracking_number(tracking_number)
@@ -745,7 +762,7 @@ module  OrderService
                               patients.patient_number AS pat_id, patients.name AS pat_name,
                               patients.dob AS dob, patients.gender AS sex 
                               FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
-                              INNER JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
+                              LEFT JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                               INNER JOIN tests ON tests.specimen_id = specimen.id
                               INNER JOIN patients ON patients.id = tests.patient_id
                               LEFT JOIN wards ON specimen.ward_id = wards.id
