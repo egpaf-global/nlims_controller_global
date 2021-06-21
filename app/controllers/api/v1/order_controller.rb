@@ -358,7 +358,8 @@ class API::V1::OrderController < ApplicationController
 
 	def update_order
 		if params['tracking_number']  && params['who_updated']	&& params['status']
-			OrderService.update_order(params)
+	           status = OrderService.update_order(params)
+		   if status[0] == true
 			response = {
 						status: 200,
 						error: false,
@@ -366,6 +367,16 @@ class API::V1::OrderController < ApplicationController
 						data: {
 						}
 					}
+		   else
+			
+			response = {
+                                                status: 401,
+                                                error: false,
+                                                message: 'order tracking number not provided',
+                                                data: {
+                                                }
+                                        }
+		   end
 		else
 			response = {
 					status: 401,
