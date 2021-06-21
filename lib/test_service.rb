@@ -25,7 +25,7 @@ module TestService
 			
 			if test_id
 				ts = test_id[0]
-				#raise test_name.inspect
+				
 				test_id = ts['id']
 			
 				TestStatusTrail.create(
@@ -70,7 +70,7 @@ module TestService
 						result_value = value
 						
 						measure = Measure.where(name: measure_name).first
-
+                                                
 						TestResult.create(
 							measure_id: measure.id,
 							test_id: test_id,
@@ -91,13 +91,13 @@ module TestService
 
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
-					couch_test_statuses = retr_order['test_statuses'][test_name]
+					couch_test_statuses = retr_order['test_statuses'][test_name.titleize]
 					couch_test_statuses[time] =  details 
-					retr_order['test_statuses'][test_name] =  couch_test_statuses
+					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
 
 					
 					
-					retr_order['test_results'][test_name] = {
+					retr_order['test_results'][test_name.titleize] = {
 						'results': test_results_measures,
 						'date_result_entered': result_date,
 						'result_entered_by': {
@@ -111,9 +111,10 @@ module TestService
 					OrderService.update_couch_order(couch_id,retr_order)
 				else
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
-					couch_test_statuses = retr_order['test_statuses'][test_name]
+					couch_test_statuses = retr_order['test_statuses'][test_name.titleize]
+					
 					couch_test_statuses[time] =  details 
-					retr_order['test_statuses'][test_name] =  couch_test_statuses
+					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
 					OrderService.update_couch_order(couch_id,retr_order)
 				end
 
