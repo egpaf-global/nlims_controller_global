@@ -84,7 +84,7 @@ module  OrderService
                                  :ward_id => Ward.get_ward_id(params[:order_location])
                               )
                         visit_id = res.id
-
+		couchdb_tests = []
                   params[:tests].each do |tst|
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
@@ -99,7 +99,7 @@ module  OrderService
                                           :id => params[:who_order_test_id] 
                                           }
                               }
-                              test_status[tst] = details                  
+                              test_status[tst.titleize] = details                  
                               rst = TestType.get_test_type_id(tst)
                               rst2 = TestStatus.get_test_status_id('drawn')
 
@@ -129,7 +129,7 @@ module  OrderService
                                                 :id => params[:who_order_test_id] 
                                                 }
                                     }
-                                    test_status[tst] = details                  
+                                    test_status[tst.titleize] = details                  
                                     #rst = TestType.get_test_type_id(tt)
                                     rst2 = TestStatus.get_test_status_id('drawn')
                                     Test.create(
@@ -143,10 +143,12 @@ module  OrderService
                                     )
                               end
                         end
+			couchdb_tests.push(tst.titleize)
                   end
                   
                   couch_tests = {}
                   params[:tests].each do |tst|
+			tst = tst.titleize
                         couch_tests[tst] = {
                               'results': {},
                               'date_result_entered': '',
@@ -160,7 +162,7 @@ module  OrderService
                         date_created: params[:date_sample_drawn],
                         sending_facility: params[:health_facility_name],
                         receiving_facility: params[:target_lab],
-                        tests: params[:tests],
+                        tests: couchdb_tests,
                         test_results: couch_tests,
                         patient: patient,
                         order_location: params[:order_location] ,

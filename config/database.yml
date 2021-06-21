@@ -14,8 +14,8 @@ default: &default
   encoding: utf8
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   username: root
-  password: root.letusout!
-  #socket: /var/run/mysqld/mysqld.sock
+  password: root
+  socket: /var/run/mysqld/mysqld.sock
 
 development:
   <<: *default
@@ -50,5 +50,9 @@ test:
 production:
   <<: *default
   database: lims_db
+<<<<<<< HEAD
+  username: lab_test1
+=======
   username: lab_test
+>>>>>>> e5abc85f708683f550e98d930a037d1a3b94ebf7
   password: <%= ENV['NLIMS_DATABASE_PASSWORD'] %>
