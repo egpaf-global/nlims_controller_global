@@ -84,7 +84,7 @@ module  OrderService
                                  :ward_id => Ward.get_ward_id(params[:order_location])
                               )
                         visit_id = res.id
-		couchdb_tests = []
+		      couchdb_tests = []
                   params[:tests].each do |tst|
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
@@ -156,7 +156,7 @@ module  OrderService
                         }
                   end
 
-            c_order  =  Order.create(
+                  c_order  =  Order.create(
                         tracking_number: tracking_number,
                         sample_type: params[:sample_type],
                         date_created: params[:date_sample_drawn],
@@ -173,7 +173,6 @@ module  OrderService
                         test_statuses: test_status,
                         sample_status: params[:sample_status] 
                   )
-
                   
                   sp = Speciman.find_by(:tracking_number => tracking_number)
                   sp.couch_id = c_order['_id']
@@ -308,18 +307,19 @@ module  OrderService
       end
 
       def self.query_results_by_tracking_number(tracking_number)
-
+           
             r = Test.find_by_sql(   "SELECT test_types.name AS tst_type, tests.id AS tst_id FROM test_types
                                     INNER JOIN tests ON test_types.id = tests.test_type_id
                                     INNER JOIN specimen ON specimen.id = tests.specimen_id
                                     WHERE specimen.tracking_number ='#{tracking_number}'"
                   )
+               
             checker = false;
             r_date = ""
             if r.length > 0
                   test_re = {}
                   r.each do |te|
-
+                      
                         res = Speciman.find_by_sql( "SELECT measures.name AS measure_name, test_results.result AS result, test_results.time_entered AS time_entered
                                           FROM specimen INNER JOIN tests ON tests.specimen_id = specimen.id
                                           INNER JOIN test_results ON test_results.test_id = tests.id
@@ -344,6 +344,7 @@ module  OrderService
 
                   end
                   if checker == true
+                        
                         return test_re
                   else
                         return checker
@@ -709,16 +710,26 @@ module  OrderService
       end
 
       def self.update_order(ord)
-            return [false,"no tracking number"] if ord['tracking_number'].blank?
-	    status = ord['status']      
-            rejecter = {}  
+          return [false,"no tracking number"] if ord['tracking_number'].blank?
+	    status = ord['status']     
+          
+          rejecter = {}  
 	    couch_id = ""
 	    #retr_order = OrderService.retrieve_order_from_couch(couch_id)
             #return [false,""] if retr_order == "false"
             st = SpecimenStatus.find_by_sql("SELECT id AS status_id FROM specimen_statuses WHERE name='#{status}'")
+            return [false,"wrong parameter for specimen status"] if st.blank?
             status_id = st[0]['status_id']
             obj = Speciman.find_by(:tracking_number => ord['tracking_number'])
             couch_id = obj['couch_id'] if !obj['couch_id'].blank?
+            if !ord['specimen_type'].blank? 
+                  sp_type = SpecimenType.find_by(:name => ord['specimen_type'])
+                  if(!sp_type.blank?)      
+                        obj.specimen_type_id =  sp_type['id']
+                  else
+                        return [false,"wrong parameter for specimen type"]   
+                  end
+            end
             obj.specimen_status_id = status_id
             obj.save            
             SpecimenStatusTrail.create(
@@ -731,7 +742,7 @@ module  OrderService
             )
             retr_order = OrderService.retrieve_order_from_couch(couch_id)          
             return [false,""] if retr_order == "false"
-	    curent_status_trail = retr_order['sample_statuses']
+	      curent_status_trail = retr_order['sample_statuses']
             curent_status_trail[Time.now.strftime("%Y%m%d%H%M%S")] = {
                   "status": status,
                   "updated_by":  {
@@ -743,8 +754,7 @@ module  OrderService
             }
             retr_order['sample_statuses'] = curent_status_trail
             retr_order['sample_status'] = status         
-            puts  "-----checking"
-            puts ord
+            
             if !ord['who_rejected'].blank?
                   retr_order['who_rejected'] = {
                         'first_name': ord['who_rejected']['first_name'],
