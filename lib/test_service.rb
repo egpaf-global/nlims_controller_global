@@ -3,7 +3,9 @@ module TestService
 
 
 	def self.update_test(params)
-
+		return [false,"tracking number not provided"] if params[:tracking_number].blank?
+		return [false,"test name not provided"] if params[:test_name].blank?
+		return [false,"test status not provided"] if params[:test_status].blank?
 		sql_order = OrderService.get_order_by_tracking_number_sql(params[:tracking_number])
 		tracking_number = params[:tracking_number]
 
@@ -12,18 +14,22 @@ module TestService
 		else
 			result_date = params[:result_date]
 		end 
-
+		
 		if !sql_order == false 
 			order_id = sql_order.id
 			couch_id = sql_order.couch_id
 			test_name = params[:test_name]
 			test_name = test_name.gsub("_"," ")
+			tst_name__ = TestType.find_by(:name => test_name)
+			status__ = TestStatus.find_by(:name => params[:test_status])
+			return [false,"wrong parameter on test name provided"] if tst_name__.blank?
+			return [false,"test status provided, not within scope of tests statuses"] if status__.blank?
 			test_id = Test.find_by_sql("SELECT tests.id FROM tests INNER JOIN test_types ON tests.test_type_id = test_types.id
 							WHERE tests.specimen_id = '#{order_id}' AND test_types.name = '#{test_name}'")
 			
 			test_status = TestStatus.where(name: params[:test_status]).first
 			
-			if test_id
+			if !test_id.blank?
 				ts = test_id[0]
 				
 				test_id = ts['id']
@@ -70,7 +76,7 @@ module TestService
 						result_value = value
 						
 						measure = Measure.where(name: measure_name).first
-                                                
+                        next if measure.blank?                        
 						TestResult.create(
 							measure_id: measure.id,
 							test_id: test_id,
@@ -123,14 +129,14 @@ module TestService
 				end
 
 
-				return true
+				return [true,""]
 			else
-				return false
+				return [false,"order with such test not available"]
 
 			end
 
 		else
-			return false
+			return [false, "order not available"]
 		end
 
 
