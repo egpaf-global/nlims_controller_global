@@ -8,8 +8,23 @@ class API::V1::TestController < ApplicationController
 		update_details = params
 		if update_details
 			
+			order_availability = OrderService.check_order(update_details['tracking_number'])
+										
+			if order_availability == false											
+				response = {
+					status: 200,
+					error: false,
+					message: 'order not available',
+						data: {
+								tracking_number: update_details['tracking_number']
+							}
+						}			
+				render plain: response.to_json and return			
+			end
+
+
 				stat = status = TestService.update_test(params)
-				if stat == true
+				if stat[0] == true
 						response = {
 								status: 200,
 								error: false,
@@ -22,7 +37,7 @@ class API::V1::TestController < ApplicationController
 						response = {
 								status: 401,
 								error: true,
-								message: 'update failed',
+								message: stat[1],
 								data: {
 										
 									}
