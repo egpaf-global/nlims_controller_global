@@ -91,6 +91,7 @@ module TestService
 
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
+					if retr_order != "false" 
 					couch_test_statuses = retr_order['test_statuses'][test_name.titleize]
 					couch_test_statuses[time] =  details 
 					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
@@ -109,13 +110,16 @@ module TestService
 				    }
 		
 					OrderService.update_couch_order(couch_id,retr_order)
+					end
 				else
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
+					if retr_order != "false"
 					couch_test_statuses = retr_order['test_statuses'][test_name.titleize]
 					
 					couch_test_statuses[time] =  details 
 					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
 					OrderService.update_couch_order(couch_id,retr_order)
+					end
 				end
 
 
@@ -196,6 +200,7 @@ module TestService
 		res = Test.find_by_sql("SELECT visit_id AS vst_id FROM tests WHERE specimen_id='#{spec_id}' LIMIT 1")
 		visit_id = res[0]['vst_id']
 		order = OrderService.retrieve_order_from_couch(sql_order.couch_id)		
+		return false if order == "false"
 		tet = []
 		test_results = {}
 		details = {}
