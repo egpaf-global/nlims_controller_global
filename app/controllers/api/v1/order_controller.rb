@@ -389,7 +389,7 @@ class API::V1::OrderController < ApplicationController
 			response = {
                                                 status: 401,
                                                 error: false,
-                                                message: 'order tracking number not provided',
+                                                message: status[1],
                                                 data: {
                                                 }
                                         }
