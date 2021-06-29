@@ -200,8 +200,25 @@ class API::V1::OrderController < ApplicationController
 				elsif(!params['who_order_test_last_name'])
 					msg = "last name for person ordering not provided"
 				else
-
+					order_availability = false
+					if (params['tracking_number'])
+						tracking_number = params['tracking_number']
+						order_availability = OrderService.check_order(tracking_number)
+						
+						if order_availability == true											
+							response = {
+								status: 200,
+								error: false,
+								message: 'order already available',
+								data: {
+										tracking_number: tracking_number
+									}
+							}			
+							render plain: response.to_json and return			
+						end
+					else
 						tracking_number = TrackingNumberService.generate_tracking_number
+					end								
 						st = OrderService.request_order(params, tracking_number)
 									
 						if st[0] == true
@@ -358,6 +375,20 @@ class API::V1::OrderController < ApplicationController
 
 	def update_order
 		if params['tracking_number']  && params['who_updated']	&& params['status']
+			order_availability = OrderService.check_order(params['tracking_number'])
+										
+			if order_availability == false											
+				response = {
+					status: 200,
+					error: false,
+					message: 'order not available',
+						data: {
+								tracking_number: params['tracking_number']
+							}
+						}			
+				render plain: response.to_json and return			
+			end
+
 	           status = OrderService.update_order(params)
 		   if status[0] == true
 			response = {
@@ -372,7 +403,7 @@ class API::V1::OrderController < ApplicationController
 			response = {
                                                 status: 401,
                                                 error: false,
-                                                message: 'order tracking number not provided',
+                                                message: status[1],
                                                 data: {
                                                 }
                                         }
@@ -391,7 +422,7 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def query_results_by_tracking_number
-
+		
 		if params[:tracking_number]
 
 				res = OrderService.query_results_by_tracking_number(params[:tracking_number])
