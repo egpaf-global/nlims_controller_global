@@ -200,8 +200,25 @@ class API::V1::OrderController < ApplicationController
 				elsif(!params['who_order_test_last_name'])
 					msg = "last name for person ordering not provided"
 				else
-
+					order_availability = false
+					if (params['tracking_number'])
+						tracking_number = params['tracking_number']
+						order_availability = OrderService.check_order(tracking_number)
+						
+						if order_availability == true											
+							response = {
+								status: 200,
+								error: false,
+								message: 'order already available',
+								data: {
+										tracking_number: tracking_number
+									}
+							}			
+							render plain: response.to_json and return			
+						end
+					else
 						tracking_number = TrackingNumberService.generate_tracking_number
+					end								
 						st = OrderService.request_order(params, tracking_number)
 									
 						if st[0] == true
@@ -391,7 +408,7 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def query_results_by_tracking_number
-
+		
 		if params[:tracking_number]
 
 				res = OrderService.query_results_by_tracking_number(params[:tracking_number])
