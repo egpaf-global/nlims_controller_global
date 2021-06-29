@@ -304,18 +304,19 @@ module  OrderService
       end
 
       def self.query_results_by_tracking_number(tracking_number)
-
+           
             r = Test.find_by_sql(   "SELECT test_types.name AS tst_type, tests.id AS tst_id FROM test_types
                                     INNER JOIN tests ON test_types.id = tests.test_type_id
                                     INNER JOIN specimen ON specimen.id = tests.specimen_id
                                     WHERE specimen.tracking_number ='#{tracking_number}'"
                   )
+               
             checker = false;
             r_date = ""
             if r.length > 0
                   test_re = {}
                   r.each do |te|
-
+                      
                         res = Speciman.find_by_sql( "SELECT measures.name AS measure_name, test_results.result AS result, test_results.time_entered AS time_entered
                                           FROM specimen INNER JOIN tests ON tests.specimen_id = specimen.id
                                           INNER JOIN test_results ON test_results.test_id = tests.id
@@ -340,6 +341,7 @@ module  OrderService
 
                   end
                   if checker == true
+                        
                         return test_re
                   else
                         return checker
