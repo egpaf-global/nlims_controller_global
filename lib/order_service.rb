@@ -210,9 +210,13 @@ module  OrderService
             username = settings['username']
             password = settings['password']
             db_name =  settings['prefix'].to_s + "_order_" + settings['suffix'].to_s
-            
-            retr_order = JSON.parse(RestClient.get("#{protocol}://#{username}:#{password}@#{ip}:#{port}/#{db_name}/#{couch_id}"))
-            return retr_order
+            retr_order = "false"
+	    begin
+              retr_order = JSON.parse(RestClient.get("#{protocol}://#{username}:#{password}@#{ip}:#{port}/#{db_name}/#{couch_id}"))
+            rescue 
+
+	    end
+		return retr_order
       end
 
       def self.update_couch_order(track_number,order)
@@ -566,13 +570,14 @@ module  OrderService
             obj.save            
         
             retr_order = OrderService.retrieve_order_from_couch(couch_id)          
-            retr_order['sample_type'] = specimen_type
-            retr_order['receiving_facility'] = target_lab   
-            retr_order['sample_status']      = 'specimen_collected'
-            puts  "-----checking"
-   
-      
-            OrderService.update_couch_order(couch_id,retr_order)
+            if retr_order != "false"
+	    	retr_order['sample_type'] = specimen_type
+            	retr_order['receiving_facility'] = target_lab   
+            	retr_order['sample_status']      = 'specimen_collected'
+            	puts  "-----checking"
+     
+            	OrderService.update_couch_order(couch_id,retr_order)
+            end
       end
 
 
@@ -710,7 +715,8 @@ module  OrderService
 	    status = ord['status']      
             rejecter = {}  
 	    couch_id = ""
-	
+	    #retr_order = OrderService.retrieve_order_from_couch(couch_id)
+            #return [false,""] if retr_order == "false"
             st = SpecimenStatus.find_by_sql("SELECT id AS status_id FROM specimen_statuses WHERE name='#{status}'")
             status_id = st[0]['status_id']
             obj = Speciman.find_by(:tracking_number => ord['tracking_number'])
@@ -726,7 +732,8 @@ module  OrderService
                   :who_updated_phone_number => ord['who_updated']['phone_number'],
             )
             retr_order = OrderService.retrieve_order_from_couch(couch_id)          
-            curent_status_trail = retr_order['sample_statuses']
+            return [false,""] if retr_order == "false"
+	    curent_status_trail = retr_order['sample_statuses']
             curent_status_trail[Time.now.strftime("%Y%m%d%H%M%S")] = {
                   "status": status,
                   "updated_by":  {
