@@ -33,7 +33,7 @@ gem 'apipie-rails'
 gem 'rest-client'
 
 gem 'couchrest_model'
-
+gem 'socket.io-client-simple'
 gem 'sucker_punch'
 gem 'passenger'
 group :development, :test do

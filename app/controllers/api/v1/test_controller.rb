@@ -33,6 +33,24 @@ class API::V1::TestController < ApplicationController
 										
 									}
 							}
+
+					if update_details['results']
+						settings = YAML.load_file("#{Rails.root.to_s}/config/results_channel_socket.yml")
+						socket = SocketIO::Client::Simple.connect "http://#{settings['host']}:#{settings['port']}"
+						socket.on :connect do
+							puts "connect!!!"
+							puts 'Putting result on socket'
+							response = socket.emit :results, {"tracking_number": update_details['tracking_number'], 
+																"results": update_details['results'],
+																"test_status": update_details['test_status'],
+																"test_name": update_details['test_status'],
+																"date_updated": update_details['test_status'],
+																"who_updated": update_details['who_updated']
+															}				   
+							puts response
+							socket.disconnect
+						end					
+					end
 				else
 						response = {
 								status: 401,
