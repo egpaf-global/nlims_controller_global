@@ -1,24 +1,25 @@
-# README
+# nlims_controller
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Requirements
 
-Things you may want to cover:
+- Ruby 2.5.3
+- MySQL 8 preferred
 
-* Ruby version
+## System Dependencies
 
-* System dependencies
+- MySQL
 
-* Configuration
+## Configuration
+Checkout into sqa2 branch  
+Make sure you configure your database connection through the Database config file in config folder.  
 
-* Database creation
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+## Database creation
+      rake db:create
+      rake db:migrate
+      rake db:seed 
+      
+## Run locally
+      $ bundle install # install packages  
+      $ rails s  
+      
