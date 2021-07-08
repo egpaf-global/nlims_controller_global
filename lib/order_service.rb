@@ -741,7 +741,7 @@ module  OrderService
                   :who_updated_phone_number => ord['who_updated']['phone_number'],
             )
             retr_order = OrderService.retrieve_order_from_couch(couch_id)          
-            return [false,""] if retr_order == "false"
+            return [false,"order not available -c"] if retr_order == "false"
 	      curent_status_trail = retr_order['sample_statuses']
             curent_status_trail[Time.now.strftime("%Y%m%d%H%M%S")] = {
                   "status": status,
