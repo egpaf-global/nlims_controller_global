@@ -120,8 +120,8 @@ module TestService
 				else
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false"
-					couch_test_statuses = retr_order['test_statuses'][test_name.titleize]
-					
+					couch_test_statuses = retr_order['test_statuses'][test_name.titleize] if test_name != "Cross-match"
+					couch_test_statuses = retr_order['test_statuses'][test_name] if test_name == "Cross-match"
 					couch_test_statuses[time] =  details 
 					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
 					OrderService.update_couch_order(couch_id,retr_order)
