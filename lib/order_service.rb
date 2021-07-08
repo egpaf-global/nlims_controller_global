@@ -99,7 +99,8 @@ module  OrderService
                                           :id => params[:who_order_test_id] 
                                           }
                               }
-                              test_status[tst.titleize] = details                  
+                              test_status[tst.titleize] = details  if tst != "Cross-match" 
+			      test_status[tst] = details  if tst == "Cross-match"           
                               rst = TestType.get_test_type_id(tst)
                               rst2 = TestStatus.get_test_status_id('drawn')
 
@@ -129,8 +130,9 @@ module  OrderService
                                                 :id => params[:who_order_test_id] 
                                                 }
                                     }
-                                    test_status[tst.titleize] = details                  
-                                    #rst = TestType.get_test_type_id(tt)
+                                    test_status[tst.titleize] = details if tst == "Cross-match"                 
+                                    test_status[tst.titleize] = details  if tst != "Cross-match"
+					#rst = TestType.get_test_type_id(tt)
                                     rst2 = TestStatus.get_test_status_id('drawn')
                                     Test.create(
                                           :specimen_id => sp_obj.id,
@@ -143,12 +145,14 @@ module  OrderService
                                     )
                               end
                         end
-			couchdb_tests.push(tst.titleize)
+			couchdb_tests.push(tst.titleize) if tst != "Cross-match"
+			couchdb_tests.push(tst) if tst == "Cross-match"
                   end
                   
                   couch_tests = {}
                   params[:tests].each do |tst|
-			tst = tst.titleize
+			tst = tst.titleize if tst != "Cross-match"
+			tst = tst if tst == "Cross-match"
                         couch_tests[tst] = {
                               'results': {},
                               'date_result_entered': '',
