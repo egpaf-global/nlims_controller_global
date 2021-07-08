@@ -272,7 +272,7 @@ class API::V1::TestController < ApplicationController
 					response = {
 								status: 401,
 								error: true,
-								message: 'test add failed',
+								message: res[1],
 								data: {
 										
 								}

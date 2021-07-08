@@ -201,12 +201,13 @@ module TestService
 		tests = params['tests']
 		tracking_number = params['tracking_number']
 		sql_order = OrderService.get_order_by_tracking_number_sql(tracking_number)
+		return [false,'order not available'] if sql_order == false
 		spec_id = sql_order.id
 		updater = params['who_updated']
-		res = Test.find_by_sql("SELECT visit_id AS vst_id FROM tests WHERE specimen_id='#{spec_id}' LIMIT 1")
-		visit_id = res[0]['vst_id']
-		order = OrderService.retrieve_order_from_couch(sql_order.couch_id)		
-		return false if order == "false"
+		res = Test.find_by_sql("SELECT patient_id AS patient_id FROM tests WHERE specimen_id='#{spec_id}' LIMIT 1")
+		patient_id = res[0]['patient_id']
+		order = OrderService.retrieve_order_from_couch(sql_order.couch_id)	
+		return [false,'order not available -c'] if order == "false"
 		tet = []
 		test_results = {}
 		details = {}
@@ -215,13 +216,14 @@ module TestService
 		test_statuses = order['test_statuses']
 		tests.each do |tst|
 			te_id = TestType.where(name: tst).first
+			return [false, 'test name not available at national lims'] if te_id.blank?
 			Test.create(
 				:specimen_id => spec_id,
 				:test_type_id => te_id.id,
-				:visit_id => visit_id,
 				:created_by => updater['first_name'].to_s + " " + updater['lastt_name'].to_s,
 				:panel_id => '',
-				:time_created => Time.new.strftime("$Y%m%d%H%M%S"),
+				:patient_id => patient_id,
+				:time_created => Time.now.strftime("%Y%m%d%H%M%S"),
 				:test_status_id => TestStatus.find_by_sql("SELECT id AS sts_id FROM test_statuses WHERE name='Drawn'")[0]['sts_id']
 		  )
 			tet.push(tst)
