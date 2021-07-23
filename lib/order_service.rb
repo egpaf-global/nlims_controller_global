@@ -99,8 +99,8 @@ module  OrderService
                                           :id => params[:who_order_test_id] 
                                           }
                               }
-                              test_status[tst.titleize] = details  if tst != "Cross-match" 
-			      test_status[tst] = details  if tst == "Cross-match"           
+                              test_status[tst.titleize] = details  if !tst.include?("-") 
+			      test_status[tst] = details  if tst.include?("-")           
                               rst = TestType.get_test_type_id(tst)
                               rst2 = TestStatus.get_test_status_id('drawn')
 
@@ -130,8 +130,8 @@ module  OrderService
                                                 :id => params[:who_order_test_id] 
                                                 }
                                     }
-                                    test_status[tst.titleize] = details if tst == "Cross-match"                 
-                                    test_status[tst.titleize] = details  if tst != "Cross-match"
+                                    test_status[tst.titleize] = details if !tst.include?("-")                 
+                                    test_status[tst] = details  if tst.include?("-")
 					#rst = TestType.get_test_type_id(tt)
                                     rst2 = TestStatus.get_test_status_id('drawn')
                                     Test.create(
@@ -145,14 +145,14 @@ module  OrderService
                                     )
                               end
                         end
-			couchdb_tests.push(tst.titleize) if tst != "Cross-match"
-			couchdb_tests.push(tst) if tst == "Cross-match"
+			couchdb_tests.push(tst.titleize) if !tst.include?("-")
+			couchdb_tests.push(tst) if tst.include?("-")
                   end
                   
                   couch_tests = {}
                   params[:tests].each do |tst|
-			tst = tst.titleize if tst != "Cross-match"
-			tst = tst if tst == "Cross-match"
+			tst = tst.titleize if !tst.include?("-")
+			tst = tst if tst.include?("-")
                         couch_tests[tst] = {
                               'results': {},
                               'date_result_entered': '',
