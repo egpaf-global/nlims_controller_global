@@ -98,9 +98,14 @@ module TestService
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false" 
-					couch_test_statuses = retr_order['test_statuses'][test_name.titleize]
+					couch_tests = retr_order['tests']
+					test_name = "Sars Cov 2 Rapid Antigen" if couch_tests.include?("Sars Cov 2 Rapid Antigen") && test_name == "SARS COV-2 Rapid Antigen"
+					test_name = "Cross Match" if couch_tests.include?("Cross Match")
+					couch_test_statuses = retr_order['test_statuses'][test_name.titleize] if !test_name.include?("-")
+					couch_test_statuses = retr_order['test_statuses'][test_name] if test_name.include?("-")
 					couch_test_statuses[time] =  details 
-					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
+					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses if !test_name.include?("-")
+					retr_order['test_statuses'][test_name] =  couch_test_statuses if test_name.include?("-")
 
 					
 					
@@ -122,11 +127,15 @@ module TestService
 					if retr_order != "false"
 					couch_tests = retr_order['tests']
 					test_name = "Cross Match" if couch_tests.include?("Cross Match")					
-					puts test_name
+					test_name = "Sars Cov 2 Rapid Antigen" if couch_tests.include?("Sars Cov 2 Rapid Antigen") && test_name == "SARS COV-2 Rapid Antigen"
+					#raise test_name.inspect
 					couch_test_statuses = retr_order['test_statuses'][test_name.titleize] if !test_name.include?("-")
+					#raise test_name.titleize.inspect
 					couch_test_statuses = retr_order['test_statuses'][test_name] if test_name.include?("-")
+					#raise couch_test_statuses.inspect
 					couch_test_statuses[time] =  details 
-					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
+					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses if !test_name.include?("-")
+					retr_order['test_statuses'][test_name] =  couch_test_statuses if test_name.include?("-")
 					OrderService.update_couch_order(couch_id,retr_order)
 					end
 				end
