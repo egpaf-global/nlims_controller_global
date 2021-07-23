@@ -4,8 +4,8 @@ development: &development
   port: 5984
   prefix: nlims
   suffix: repo_
-  username: admin
-  password: password
+  username: root
+  password: letmein9090
 test:
   <<: *development
   suffix: test
