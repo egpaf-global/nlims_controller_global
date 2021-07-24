@@ -24,6 +24,7 @@ class API::V1::TestController < ApplicationController
 
 
 				stat = status = TestService.update_test(params)
+				
 				if stat[0] == true
 						response = {
 								status: 200,

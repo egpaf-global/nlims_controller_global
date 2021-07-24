@@ -6,6 +6,7 @@ development: &development
   suffix: repo_
   username: admin
   password: password
+
 test:
   <<: *development
   suffix: test
