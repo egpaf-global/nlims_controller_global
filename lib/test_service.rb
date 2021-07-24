@@ -87,13 +87,10 @@ module TestService
 						test_results_measures[measure_name] = { 'result_value': result_value }
 						
 					end	
-
-					results_measure[test_name] = test_results_measures
-				
+					results_measure[test_name] = test_results_measures				
 
 				end
-
-				
+			
 
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
@@ -101,8 +98,6 @@ module TestService
 					couch_test_statuses = retr_order['test_statuses'][test_name]
 					couch_test_statuses[time] =  details 
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
-
-					
 					
 					retr_order['test_results'][test_name] = {
 						'results': test_results_measures,
@@ -120,7 +115,6 @@ module TestService
 				else
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false"
-					couch_tests = retr_order['tests']
 					couch_test_statuses = retr_order['test_statuses'][test_name]
 					couch_test_statuses[time] =  details 
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
