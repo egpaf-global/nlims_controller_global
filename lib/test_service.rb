@@ -87,30 +87,25 @@ module TestService
 						test_results_measures[measure_name] = { 'result_value': result_value }
 						
 					end	
-
-					results_measure[test_name] = test_results_measures
-				
+					results_measure[test_name] = test_results_measures				
 
 				end
-
-				
+			
 
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false" 
-					couch_test_statuses = retr_order['test_statuses'][test_name.titleize]
+					couch_test_statuses = retr_order['test_statuses'][test_name]
 					couch_test_statuses[time] =  details 
-					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
-
+					retr_order['test_statuses'][test_name] =  couch_test_statuses
 					
-					
-					retr_order['test_results'][test_name.titleize] = {
+					retr_order['test_results'][test_name] = {
 						'results': test_results_measures,
 						'date_result_entered': result_date,
 						'result_entered_by': {
 							:first_name => params[:who_updated]['first_name'],
 							:last_name => params[:who_updated]['last_name'],
-							:phone_number => '95625',
+							:phone_number => '',
 							:id => params[:who_updated]['id_number'] 
 						}                             
 				    }
@@ -120,13 +115,9 @@ module TestService
 				else
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false"
-					couch_tests = retr_order['tests']
-					test_name = "Cross Match" if couch_tests.include?("Cross Match")					
-					puts test_name
-					couch_test_statuses = retr_order['test_statuses'][test_name.titleize] if !test_name.include?("-")
-					couch_test_statuses = retr_order['test_statuses'][test_name] if test_name.include?("-")
+					couch_test_statuses = retr_order['test_statuses'][test_name]
 					couch_test_statuses[time] =  details 
-					retr_order['test_statuses'][test_name.titleize] =  couch_test_statuses
+					retr_order['test_statuses'][test_name] =  couch_test_statuses
 					OrderService.update_couch_order(couch_id,retr_order)
 					end
 				end
