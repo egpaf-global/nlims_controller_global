@@ -86,6 +86,7 @@ module  OrderService
                         visit_id = res.id
 		      couchdb_tests = []
                   params[:tests].each do |tst|
+			tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
                         if status == false
@@ -154,7 +155,7 @@ module  OrderService
                  
                   couch_tests = {}
                   params[:tests].each do |tst|
-                        
+            		tst =  check_test_name(tst)            
                               couch_tests[tst] = {
                                     'results': {},
                                     'date_result_entered': '',
@@ -196,6 +197,13 @@ module  OrderService
             else
                   return false
             end
+      end
+
+      def self.check_test_name(test)
+	  tst = TestType.find_by_sql("SELECT name AS tst_name FROM test_types WHERE name ='#{test}' LIMIT 1")
+	  if tst
+		return tst[0].tst_name;
+	  end
       end
 
       def self.get_order_by_tracking_number_sql(track_number)
