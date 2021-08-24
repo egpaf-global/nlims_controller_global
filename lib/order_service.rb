@@ -4,7 +4,14 @@ module  OrderService
       def self.create_order(params,tracking_number)
             couch_order = 0
             ActiveRecord::Base.transaction do 
-
+		  params[:tests].each do |tst|
+			tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+                        tst =  "CD4" if tst == "Cd4 Count"
+			tst = "TB Tests" if tst == "Gene Xpert"
+			tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                        tst =  check_test_name(tst)
+                        return [false,"test name not available in nlims"] if tst == false
+                  end
                   npid = params[:national_patient_id]
                   patient_obj = Patient.where(:patient_number => npid)
                 
@@ -86,6 +93,11 @@ module  OrderService
                         visit_id = res.id
 		      couchdb_tests = []
                   params[:tests].each do |tst|
+			tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+			tst = "TB Tests" if tst == "Gene Xpert"
+			tst =  "CD4" if tst == "Cd4 Count"
+                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+			tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
                         if status == false
@@ -154,7 +166,11 @@ module  OrderService
                  
                   couch_tests = {}
                   params[:tests].each do |tst|
-                        
+			tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+			tst =  "CD4" if tst == "Cd4 Count"
+                        tst = "TB Tests" if tst == "Gene Xpert"
+			tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+			tst =  check_test_name(tst)            
                               couch_tests[tst] = {
                                     'results': {},
                                     'date_result_entered': '',
@@ -196,6 +212,16 @@ module  OrderService
             else
                   return false
             end
+      end
+
+      def self.check_test_name(test)
+	  tst = TestType.find_by_sql("SELECT name AS tst_name FROM test_types WHERE name ='#{test}' LIMIT 1")
+          if tst.length > 0
+                return tst[0].tst_name
+          else
+                return false
+          end
+
       end
 
       def self.get_order_by_tracking_number_sql(track_number)
