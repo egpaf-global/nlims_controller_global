@@ -4,11 +4,11 @@ module  OrderService
       def self.create_order(params,tracking_number)
             couch_order = 0
             ActiveRecord::Base.transaction do 
-		  params[:tests].each do |tst|
-			tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+		      params[:tests].each do |tst|
+			      tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
                         tst =  "CD4" if tst == "Cd4 Count"
-			tst = "TB Tests" if tst == "Gene Xpert"
-			tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+			      tst = "TB Tests" if tst == "Gene Xpert"
+			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
