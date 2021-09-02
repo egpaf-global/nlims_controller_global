@@ -9,9 +9,33 @@ module  OrderService
                         tst =  "CD4" if tst == "Cd4 Count"
 			      tst = "TB Tests" if tst == "Gene Xpert"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                        tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
+                        tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
+                        tst =  "calcium" if tst == "Serum calcium"
+                        tst =  "TB Tests" if tst == "GeneXpert"
+                        tst =  "FBC" if tst == "FBS"
+                        tst =  "Direct Coombs Test" if tst == "D/Coombs"
+                        tst =  "Creatinine" if tst == "creat"
+                        tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
+                        tst =  "Urine Microscopy" if tst == "Urine micro"
+                        tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
+                        tst =  "Anti Streptolysis O" if tst == "ASOT"
+                        tst =  "Culture & Sensitivity" if tst == "Blood C/S"
+                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
+                        tst =  "India Ink" if tst == "I/Ink"
+                        tst =  "Culture & Sensitivity" if tst == "C_S"
+                        tst =  "Hepatitis B Test" if tst == "hep"
+                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                        tst =  "Sickling Test" if tst == "Sickle"
+                        tst =  "Protein" if tst == "Protein and Sugar"
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
+                  spc = SpecimenType.find_by(:name => params[:sample_type])
+                  return [false,"specimen type not available in nlims"] if spc.blank?
+                  spc = SpecimenStatus.find_by(:name => params[:sample_status])
+                  return [false,"specimen status not available in nlims"] if spc.blank?
+
                   npid = params[:national_patient_id]
                   patient_obj = Patient.where(:patient_number => npid)
                 
@@ -93,11 +117,30 @@ module  OrderService
                         visit_id = res.id
 		      couchdb_tests = []
                   params[:tests].each do |tst|
-			tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
-			tst = "TB Tests" if tst == "Gene Xpert"
-			tst =  "CD4" if tst == "Cd4 Count"
+                        tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+                        tst =  "CD4" if tst == "Cd4 Count"
+			      tst = "TB Tests" if tst == "Gene Xpert"
+			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                        tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
+                        tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
+                        tst =  "calcium" if tst == "Serum calcium"
+                        tst =  "TB Tests" if tst == "GeneXpert"
+                        tst =  "FBC" if tst == "FBS"
+                        tst =  "Direct Coombs Test" if tst == "D/Coombs"
+                        tst =  "Creatinine" if tst == "creat"
+                        tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
+                        tst =  "Urine Microscopy" if tst == "Urine micro"
+                        tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
+                        tst =  "Anti Streptolysis O" if tst == "ASOT"
+                        tst =  "Culture & Sensitivity" if tst == "Blood C/S"
+                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
+                        tst =  "India Ink" if tst == "I/Ink"
+                        tst =  "Culture & Sensitivity" if tst == "C_S"
+                        tst =  "Hepatitis B Test" if tst == "hep"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
-			tst =  check_test_name(tst)
+                        tst =  "Sickling Test" if tst == "Sickle"
+                        tst =  "Protein" if tst == "Protein and Sugar"
+			      tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
                         if status == false
@@ -166,11 +209,30 @@ module  OrderService
                  
                   couch_tests = {}
                   params[:tests].each do |tst|
-			tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
-			tst =  "CD4" if tst == "Cd4 Count"
-                        tst = "TB Tests" if tst == "Gene Xpert"
-			tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
-			tst =  check_test_name(tst)            
+                        tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+                        tst =  "CD4" if tst == "Cd4 Count"
+			      tst = "TB Tests" if tst == "Gene Xpert"
+			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                        tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
+                        tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
+                        tst =  "calcium" if tst == "Serum calcium"
+                        tst =  "TB Tests" if tst == "GeneXpert"
+                        tst =  "FBC" if tst == "FBS"
+                        tst =  "Direct Coombs Test" if tst == "D/Coombs"
+                        tst =  "Creatinine" if tst == "creat"
+                        tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
+                        tst =  "Urine Microscopy" if tst == "Urine micro"
+                        tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
+                        tst =  "Anti Streptolysis O" if tst == "ASOT"
+                        tst =  "Culture & Sensitivity" if tst == "Blood C/S"
+                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
+                        tst =  "India Ink" if tst == "I/Ink"
+                        tst =  "Culture & Sensitivity" if tst == "C_S"
+                        tst =  "Hepatitis B Test" if tst == "hep"
+                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                        tst =  "Sickling Test" if tst == "Sickle"
+                        tst =  "Protein" if tst == "Protein and Sugar"
+			      tst =  check_test_name(tst)            
                               couch_tests[tst] = {
                                     'results': {},
                                     'date_result_entered': '',
