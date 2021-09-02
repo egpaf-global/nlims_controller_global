@@ -20,6 +20,31 @@ module TestService
 			couch_id = sql_order.couch_id
 			test_name = params[:test_name]
 			test_name = test_name.gsub("_"," ")
+
+			test_name = "Cryptococcus Antigen Test"  if test_name == "Cr Ag"
+			test_name =  "CD4" if test_name == "Cd4 Count"
+			test_name = "TB Tests" if test_name == "Gene Xpert"
+			test_name =  "Cryptococcus Antigen Test" if test_name == "Cryptococcal Antigen"
+			test_name =  "TB Microscopic Exam" if test_name == "AFB sputum smear"
+			test_name =  "Beta Human Chorionic Gonatropin" if test_name == "B-HCG"
+			test_name =  "calcium" if test_name == "Serum calcium"
+			test_name =  "TB Tests" if test_name == "GeneXpert"
+			test_name =  "FBC" if test_name == "FBS"
+			test_name =  "Direct Coombs Test" if test_name == "D/Coombs"
+			test_name =  "Creatinine" if test_name == "creat"
+			test_name =  "TB Microscopic Exam" if test_name == "AAFB (3rd)"
+			test_name =  "Urine Microscopy" if test_name == "Urine micro"
+			test_name =  "TB Microscopic Exam" if test_name == "AAFB (1st)"
+			test_name =  "Anti Streptolysis O" if test_name == "ASOT"
+			test_name =  "Culture & Sensitivity" if test_name == "Blood C/S"
+			test_name =  "Cryptococcus Antigen Test" if test_name == "Cryptococcal Ag"
+			test_name =  "India Ink" if test_name == "I/Ink"
+			test_name =  "Culture & Sensitivity" if test_name == "C_S"
+			test_name =  "Hepatitis B Test" if test_name == "hep"
+			test_name =  "Cryptococcus Antigen Test" if test_name == "Cryptococcal Antigen"
+			test_name =  "Sickling Test" if test_name == "Sickle"
+			test_name =  "Protein" if test_name == "Protein and Sugar"
+
 			tst_name__ = TestType.find_by(:name => test_name)
 			status__ = TestStatus.find_by(:name => params[:test_status])
 			return [false,"wrong parameter on test name provided"] if tst_name__.blank?
