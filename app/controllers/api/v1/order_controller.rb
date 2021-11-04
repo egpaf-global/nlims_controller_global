@@ -43,7 +43,7 @@ class API::V1::OrderController < ApplicationController
 		                        msg = "last name for person ordering not provided"
 		                    else
 								order_availability = false
-									if (params['tracking_number'])
+									if (params['tracking_number'] && !params['tracking_number'].blank?)
                                         tracking_number = params['tracking_number']
 										order_availability = OrderService.check_order(tracking_number)
 										
@@ -76,6 +76,16 @@ class API::V1::OrderController < ApplicationController
 													}
 											}
 										TrackingNumberService.prepare_next_tracking_number
+									else
+									      response = {
+                                                       					status: 401,
+                                                        				error: true,
+                                                        				message: st[1],
+                                                        				data: {
+
+        			                                	                }
+	                        				                }
+
 									end										
 							end
 
