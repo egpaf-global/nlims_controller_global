@@ -20,7 +20,9 @@ module TestService
 			couch_id = sql_order.couch_id
 			test_name = params[:test_name]
 			test_name = test_name.gsub("_"," ")
-
+			
+			test_name = "CD4" if test_name == "PIMA CD4"
+                        test_name = "Viral Load" if test_name == "Viral Load Gene X-per"
 			test_name = "Cryptococcus Antigen Test"  if test_name == "Cr Ag"
 			test_name =  "CD4" if test_name == "Cd4 Count"
 			test_name = "TB Tests" if test_name == "Gene Xpert"
@@ -58,7 +60,7 @@ module TestService
 				ts = test_id[0]
 				
 				test_id = ts['id']
-			
+				
 				TestStatusTrail.create(
 						test_id: test_id,
 						time_updated: params[:time_updated],
@@ -68,7 +70,7 @@ module TestService
 						who_updated_phone_number: ''				
 
 					)		
-
+				
 				tst_update = Test.find_by(:id => test_id)
 				tst_update.test_status_id = test_status.id
 				tst_update.save
@@ -133,7 +135,7 @@ module TestService
 							:phone_number => '',
 							:id => params[:who_updated]['id_number'] 
 						}                             
-				    }
+				        }
 		
 					OrderService.update_couch_order(couch_id,retr_order)
 					end

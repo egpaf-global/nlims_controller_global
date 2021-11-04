@@ -6,7 +6,9 @@ module  OrderService
             ActiveRecord::Base.transaction do 
 		      params[:tests].each do |tst|
 			      tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
-                        tst =  "CD4" if tst == "Cd4 Count"
+			tst = "CD4" if tst == "PIMA CD4"
+                        tst = "Viral Load" if tst == "Viral Load Gene X-per"
+			tst =  "CD4" if tst == "Cd4 Count"
 			      tst = "TB Tests" if tst == "Gene Xpert"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
@@ -119,7 +121,9 @@ module  OrderService
                   params[:tests].each do |tst|
                         tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
                         tst =  "CD4" if tst == "Cd4 Count"
-			      tst = "TB Tests" if tst == "Gene Xpert"
+			tst = "CD4" if tst == "PIMA CD4"
+                        tst = "Viral Load" if tst == "Viral Load Gene X-per" 
+			     tst = "TB Tests" if tst == "Gene Xpert"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
                         tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
@@ -212,6 +216,8 @@ module  OrderService
                         tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
                         tst =  "CD4" if tst == "Cd4 Count"
 			      tst = "TB Tests" if tst == "Gene Xpert"
+			tst = "CD4" if tst == "PIMA CD4"
+                        tst = "Viral Load" if tst == "Viral Load Gene X-per"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
                         tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
