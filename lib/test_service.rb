@@ -40,6 +40,7 @@ module TestService
 			test_name =  "Anti Streptolysis O" if test_name == "ASOT"
 			test_name =  "Culture & Sensitivity" if test_name == "Blood C/S"
 			test_name =  "Cryptococcus Antigen Test" if test_name == "Cryptococcal Ag"
+			test_name = "Viral Load" if test_name == "Gene Xpert Viral"
 			test_name =  "India Ink" if test_name == "I/Ink"
 			test_name =  "Culture & Sensitivity" if test_name == "C_S"
 			test_name =  "Hepatitis B Test" if test_name == "hep"
@@ -123,7 +124,7 @@ module TestService
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false" 
 					couch_test_statuses = retr_order['test_statuses'][test_name]
-					couch_test_statuses[time] =  details 
+					couch_test_statuses[time] =  details if !couch_test_statuses.blank?
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
 					
 					retr_order['test_results'][test_name] = {
@@ -143,7 +144,7 @@ module TestService
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false"
 					couch_test_statuses = retr_order['test_statuses'][test_name]
-					couch_test_statuses[time] =  details 
+					couch_test_statuses[time] =  details if !couch_test_statuses.blank?
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
 					OrderService.update_couch_order(couch_id,retr_order)
 					end

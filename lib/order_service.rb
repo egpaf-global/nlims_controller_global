@@ -29,12 +29,18 @@ module  OrderService
                         tst =  "Hepatitis B Test" if tst == "hep"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
-                        tst =  "Protein" if tst == "Protein and Sugar"
+                        tst = "Viral Load" if tst == "Gene Xpert Viral"
+	                tst =  "Protein" if tst == "Protein and Sugar"
+			tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
-                  spc = SpecimenType.find_by(:name => params[:sample_type])
-                  return [false,"specimen type not available in nlims"] if spc.blank?
+                  if params[:sample_type] == "Nasopharyngeal"
+		     spc = SpecimenType.find_by(:name => "Nasopharyngeal swab")
+		  else
+		      spc = SpecimenType.find_by(:name => params[:sample_type])
+                  end
+		  return [false,"specimen type not available in nlims"] if spc.blank?
                   spc = SpecimenStatus.find_by(:name => params[:sample_status])
                   return [false,"specimen status not available in nlims"] if spc.blank?
 
@@ -88,16 +94,34 @@ module  OrderService
                                     }
                   }
 
-                  sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
+		 if params[:sample_type] == "Nasopharyngeal"
+                     sample_type_id = SpecimenType.get_specimen_type_id("Nasopharyngeal swab") 
+		 else
+		      sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
+                  end
+
+                 #sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
                   sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
-      
+      		if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
+			order_ward = Ward.get_ward_id("Bwaila Hospital")
+		elsif "Kawale Health Center" == params[:order_location]
+			order_ward = Ward.get_ward_id("Kawale Health Centre")
+		elsif "Mitundu Hospital" == params[:order_location]
+			order_ward = Ward.get_ward_id("Mitundu Rural Hospital")	
+		elsif "Area 18 Health Center" ==  params[:order_location]
+			order_ward = Ward.get_ward_id("Area 18 Urban Health Centre")
+		elsif "Chileka (Lilongwe) Health Center" ==  params[:order_location]
+			order_ward = Ward.get_ward_id("Chileka Health Centre (Lilongwe)")
+		else
+			order_ward = Ward.get_ward_id(params[:order_location])
+		end
             sp_obj =  Speciman.create(
                         :tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
                         :specimen_status_id =>  sample_status_id,
                         :couch_id => '',
-                        :ward_id => Ward.get_ward_id(params[:order_location]),
+                        :ward_id => order_ward,
                         :priority => params[:sample_priority],
                         :drawn_by_id => params[:who_order_test_id],
                         :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
@@ -141,9 +165,11 @@ module  OrderService
                         tst =  "India Ink" if tst == "I/Ink"
                         tst =  "Culture & Sensitivity" if tst == "C_S"
                         tst =  "Hepatitis B Test" if tst == "hep"
+			tst = "Viral Load" if tst == "Gene Xpert Viral"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
                         tst =  "Protein" if tst == "Protein and Sugar"
+			tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
 			      tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
@@ -235,9 +261,11 @@ module  OrderService
                         tst =  "India Ink" if tst == "I/Ink"
                         tst =  "Culture & Sensitivity" if tst == "C_S"
                         tst =  "Hepatitis B Test" if tst == "hep"
+			tst = "Viral Load" if tst == "Gene Xpert Viral"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
-                        tst =  "Protein" if tst == "Protein and Sugar"
+                        tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+			tst =  "Protein" if tst == "Protein and Sugar"
 			      tst =  check_test_name(tst)            
                               couch_tests[tst] = {
                                     'results': {},
