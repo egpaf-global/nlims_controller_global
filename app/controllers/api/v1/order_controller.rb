@@ -139,8 +139,9 @@ class API::V1::OrderController < ApplicationController
 		render plain: response.to_json  and return
 	end
 	
-	def retrieve_undispatched_samples
+	def retrieve_undispatched_samples		
 		facilities = params[:facilities]
+		
 		if facilities.blank?
 			msg = "please provide facilities in order to have undispatched samples"
 		elsif !facilities.kind_of?(Array)
@@ -156,9 +157,7 @@ class API::V1::OrderController < ApplicationController
 								status: 200,
 								error: false,
 								message: 'undispatching samples successfuly retrieved',
-								data: {
-									orders: status
-								}
+								data: res[1]
 							}
 			else
 				response = {
