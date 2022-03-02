@@ -482,6 +482,12 @@ module  OrderService
             end
       end
 
+      def self.retrieve_undispatched_samples(facilities)
+            facilities.each do |facility|
+                  
+            end
+      end
+
       def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)
             SpecimenDispatch.create(
                   tracking_number: tracking_number,
