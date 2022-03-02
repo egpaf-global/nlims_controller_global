@@ -138,6 +138,53 @@ class API::V1::OrderController < ApplicationController
 
 		render plain: response.to_json  and return
 	end
+	
+	def retrieve_undispatched_samples
+		facilities = params[:facilities]
+		if facilities.blank?
+			msg = "please provide facilities in order to have undispatched samples"
+		elsif !facilities.kind_of?(Array)
+			msg = "data parameter format is incorrect, Array format is accepted only"
+		elsif facilities.length > 5
+			msg = "can not request undispatcahed samples for more than FIVE facilities"
+		else
+
+			res =OrderService.retrieve_undispatched_samples(facilities)
+			
+			if res[0] == true
+					response = {
+								status: 200,
+								error: false,
+								message: 'undispatching samples successfuly retrieved',
+								data: {
+									orders: status
+								}
+							}
+			else
+				response = {
+							status: 401,
+							error: true,
+							message: "error",
+							data: {
+								
+							}
+					}
+			end
+		end
+
+		if msg
+			response = {
+							status: 401,
+							error: true,
+							message: msg,
+							data: {
+								
+							}
+					}
+		end
+
+		render plain: response.to_json  and return
+	end
 
 	def dispatch_sample
 		if params[:tracking_number] && params[:dispatcher] && params[:date_dispatcher] && params[:dispatcher_type]
