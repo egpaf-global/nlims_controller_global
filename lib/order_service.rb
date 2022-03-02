@@ -483,9 +483,87 @@ module  OrderService
       end
 
       def self.retrieve_undispatched_samples(facilities)
-            facilities.each do |facility|
+            master_facility = {}
+            facility_samples = []
+            facilities.each do |facility|                  
+                  res = Site.find_by_sql("SELECT name AS site_name FROM sites WHERE id='#{facility}'")
                   
+                  if !res.blank?
+                        res_ = Speciman.find_by_sql("SELECT specimen.tracking_number AS tracking_number, specimen_types.name AS sample_type, specimen_statuses.name AS specimen_status,
+                                                      wards.name AS order_location, specimen.date_created AS date_created, specimen.priority AS priority,
+                                                      specimen.drawn_by_id AS drawer_id, specimen.drawn_by_name AS drawer_name,
+                                                      specimen.drawn_by_phone_number AS drawe_number, specimen.target_lab AS target_lab, 
+                                                      specimen.sending_facility AS health_facility, specimen.requested_by AS requested_by,
+                                                      specimen.date_created AS date_drawn,
+                                                      patients.patient_number AS pat_id, patients.name AS pat_name,
+                                                      patients.dob AS dob, patients.gender AS sex 
+                                                      FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
+                                                      LEFT JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
+                                                      INNER JOIN tests ON tests.specimen_id = specimen.id
+                                                      INNER JOIN patients ON patients.id = tests.patient_id
+                                                      LEFT JOIN wards ON specimen.ward_id = wards.id
+                                                      LEFT JOIN specimen_dispatches ON specimen_dispatches.tracking_number = specimen.tracking_number
+                                                      WHERE specimen.sending_facility ='#{res[0]['site_name']}'")
+                                                      tsts = {}
+                       
+                        if res_.length > 0
+                              res_.each do |ress|                                    
+                                    tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status
+                                                      FROM tests
+                                                      INNER JOIN specimen ON specimen.id = tests.specimen_id
+                                                      INNER JOIN test_types ON test_types.id = tests.test_type_id
+                                                      INNER JOIN test_statuses ON test_statuses.id = tests.test_status_id
+                                                      WHERE specimen.tracking_number ='#{ress.tracking_number}'"
+                                                )
+                                          
+                                          if tst.length > 0
+                                                tst.each do |t|
+                                                      tsts[t.test_name] = t.test_status
+                                                end
+                                          end
+                                               
+                                          facility_samples.push(
+                                                {     tracking_number: ress.tracking_number,
+                                                      sample_type: ress.sample_type,
+                                                                  specimen_status: ress.specimen_status,
+                                                                  order_location: ress.order_location,
+                                                                  date_created: ress.date_created,
+                                                                  priority: ress.priority,
+                                                                  receiving_lab: ress.target_lab,
+                                                                  sending_lab: ress.health_facility,
+                                                                  requested_by: ress.requested_by,
+                                                                  sample_created_by: {
+                                                                                    id: ress.drawe_number,
+                                                                                    name: ress.drawer_name,
+                                                                                    phone: ress.drawe_number
+                                                                                    },
+                                                                  patient: {
+                                                                              id: ress.pat_id,
+                                                                              name: ress.pat_name,
+                                                                              gender: ress.sex,
+                                                                              dob: ress.dob
+                                                                        },
+                                                                                                           
+                                                            
+                                                      tests: tsts
+                                                }
+                                          )
+                                          tsts = {}
+                                                
+                              end
+                                                            
+                        else
+                              facility_samples.push("N/A"
+                              )
+                        end
+                        
+                  else
+
+                  end
+                  master_facility["#{facility}"] = facility_samples     
+                  facility_samples = []             
             end
+            return [true,master_facility]
       end
 
       def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)
