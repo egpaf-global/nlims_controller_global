@@ -482,11 +482,12 @@ module  OrderService
             end
       end
 
-      def self.dispatch_sample(tracking_number,first,last)
+      def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)
             SpecimenDispatch.create(
                   tracking_number: tracking_number,
-                  dispatcher_name: first + " "+ last,
-                  date_dispatched: Time.now.strftime("%Y%m%d%H%M%S") 
+                  dispatcher: dispatcher,
+                  date_dispatched: date_dispatched,
+                  dispatcher_type: dispatcher_type 
             )
 
             return true
