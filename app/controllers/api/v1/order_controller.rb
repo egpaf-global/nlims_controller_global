@@ -140,8 +140,8 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def dispatch_sample
-		if params[:tracking_number] && params[:dispatcher_first] && params[:dispatcher_last]
-				status = OrderService.dispatch_sample(params[:tracking_number],params[:dispatcher_first],params[:dispatcher_last])
+		if params[:tracking_number] && params[:dispatcher] && params[:date_dispatcher] && params[:dispatcher_type]
+				status = OrderService.dispatch_sample(params[:tracking_number],params[:dispatcher],params[:date_dispatcher],params[:dispatcher_type])
 				if status == false
 					response = {
 							status: 401,
@@ -168,7 +168,7 @@ class API::V1::OrderController < ApplicationController
 			response = {
 					status: 401,
 					error: true,
-					message: 'tracking number or dispatcher details not provided',
+					message: 'tracking number or dispatch details not provided',
 					data: {
 						
 					}
