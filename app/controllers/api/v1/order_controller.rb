@@ -187,29 +187,40 @@ class API::V1::OrderController < ApplicationController
 
 	def dispatch_sample
 		if params[:tracking_number] && params[:dispatcher] && params[:date_dispatcher] && params[:dispatcher_type]
-				status = OrderService.dispatch_sample(params[:tracking_number],params[:dispatcher],params[:date_dispatcher],params[:dispatcher_type])
-				if status == false
-					response = {
-							status: 401,
-							error: true,
-							message: 'patient has Zero orders',
-							data: {
-								
-							}
-					}
-				else
-			
-					response = {
-								status: 200,
-								error: false,
-								message: 'dispatching successfuly done',
+			dispatcher_type_id = SpecimenDispatchType.find_by(name: params[:dispatcher_type])
+            
+			if !dispatcher_type_id.id.blank?
+				res = OrderService.check_if_dispatched(params[:tracking_number],dispatcher_type_id.id)
+				
+				if res == false
+					status = OrderService.dispatch_sample(params[:tracking_number],params[:dispatcher],params[:date_dispatcher],dispatcher_type_id.id)
+					if status == false
+						response = {
+								status: 401,
+								error: true,
+								message: 'patient has Zero orders',
 								data: {
-									orders: status
+									
 								}
-							}
+						}
+					else
+				
+						response = {
+									status: 200,
+									error: false,
+									message: 'dispatching successfuly done',
+									data: {
+										orders: status
+									}
+								}
 
+					end
+				else
+					msg = "sample already dispatched from the given location (dispatch type)"
 				end
-
+			else
+				msg = "dispatcher type provided not recognised"
+			end
 		else
 			response = {
 					status: 401,
@@ -219,6 +230,17 @@ class API::V1::OrderController < ApplicationController
 						
 					}
 			}
+		end
+
+		if msg
+			response = {
+				status: 401,
+				error: true,
+				message: msg,
+				data: {
+					
+				}
+		}
 		end
 
 		render plain: response.to_json and return
