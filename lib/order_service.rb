@@ -567,11 +567,14 @@ module  OrderService
       end
 
       def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)
+            dispatcher_type_id = SpecimenDispatchType.find_by(name: dispatcher_type)
+            raise dispatcher_type_id.inspect
+
             SpecimenDispatch.create(
                   tracking_number: tracking_number,
                   dispatcher: dispatcher,
                   date_dispatched: date_dispatched,
-                  dispatcher_type: dispatcher_type 
+                  dispatcher_type_id: dispatcher_type 
             )
 
             return true
