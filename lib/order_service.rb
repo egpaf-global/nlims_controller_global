@@ -566,22 +566,19 @@ module  OrderService
             return [true,master_facility]
       end
 
-      def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)
-            dispatcher_type_id = SpecimenDispatchType.find_by(name: dispatcher_type)
-            raise dispatcher_type_id.inspect
-
+      def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)          
             SpecimenDispatch.create(
                   tracking_number: tracking_number,
                   dispatcher: dispatcher,
                   date_dispatched: date_dispatched,
-                  dispatcher_type_id: dispatcher_type 
+                  dispatcher_type_id: dispatcher_type
             )
 
             return true
       end
 
-      def self.check_if_dispatched(tracking_number)
-            rs = SpecimenDispatch.find_by_sql("SELECT * FROM specimen_dispatches WHERE tracking_number='#{tracking_number}'")
+      def self.check_if_dispatched(tracking_number,dispatcher_type)
+            rs = SpecimenDispatch.find_by_sql("SELECT * FROM specimen_dispatches WHERE tracking_number='#{tracking_number}' AND dispatcher_type_id='#{dispatcher_type}'")
             if rs.length > 0
                   return true
             else  
