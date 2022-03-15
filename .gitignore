@@ -13,10 +13,10 @@
 !/log/.keep
 !/tmp/.keep
 
-<<<<<<< HEAD
 /node_modules
 /yarn-error.log
 
-=======
->>>>>>> 6dca82065ac6ac9c61e5b39195bbe0b4574ba920
 .byebug_history
+
+#Ignore yml files in config
+config/*.yml
