@@ -502,10 +502,9 @@ module  OrderService
                                                       INNER JOIN tests ON tests.specimen_id = specimen.id
                                                       INNER JOIN patients ON patients.id = tests.patient_id
                                                       LEFT JOIN wards ON specimen.ward_id = wards.id
-                                                      LEFT JOIN specimen_dispatches ON specimen_dispatches.tracking_number = specimen.tracking_number
-                                                      WHERE specimen.sending_facility ='#{res[0]['site_name']}'")
+                                                      WHERE specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)")
                                                       tsts = {}
-                       
+                        
                         if res_.length > 0
                               res_.each do |ress|                                    
                                     tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status
