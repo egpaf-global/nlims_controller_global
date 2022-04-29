@@ -186,51 +186,127 @@ class API::V1::OrderController < ApplicationController
 	end
 
 	def dispatch_sample
-		if params[:tracking_number] && params[:dispatcher] && params[:date_dispatcher] && params[:dispatcher_type]
-			dispatcher_type_id = SpecimenDispatchType.find_by(name: params[:dispatcher_type])
-            
-			if !dispatcher_type_id.id.blank?
-				res = OrderService.check_if_dispatched(params[:tracking_number],dispatcher_type_id.id)
-				
-				if res == false
-					status = OrderService.dispatch_sample(params[:tracking_number],params[:dispatcher],params[:date_dispatcher],dispatcher_type_id.id)
-					if status == false
-						response = {
-								status: 401,
-								error: true,
-								message: 'patient has Zero orders',
-								data: {
-									
-								}
-						}
-					else
-				
-						response = {
-									status: 200,
-									error: false,
-									message: 'dispatching successfuly done',
-									data: {
-										orders: status
-									}
-								}
+		#authentication should go here------------------------------------------------------------------------
 
+
+
+		if !params[:properties].blank?
+			case_type = params[:properties]["case_type"]
+			if case_type == "r4h_sample"
+				tracking_number = params[:properties]["tracking_number"]
+				date_dispatched = params[:properties]["date_sample_picked_up_by_courier"]
+				delivery_type = "sample_dispatched_from_facility"
+				dispatcher = "rh4"
+				if tracking_number && date_dispatched
+					dispatcher_type_id = SpecimenDispatchType.find_by(name: delivery_type)
+					res = OrderService.check_if_dispatched(tracking_number,dispatcher_type_id.id)
+					if res == false
+						status = OrderService.dispatch_sample(tracking_number,dispatcher,date_dispatched,dispatcher_type_id.id)
+						if status == false
+							response = {
+									status: 401,
+									error: true,
+									message: 'patient has Zero orders',
+									data: {
+										
+									}
+							}
+						else
+					
+							response = {
+										status: 200,
+										error: false,
+										message: 'dispatching successfuly done',
+										data: {
+											orders: status
+										}
+									}
+
+						end
+					else
+						msg = "sample already dispatched from the given location (dispatch type)"
 					end
 				else
-					msg = "sample already dispatched from the given location (dispatch type)"
+					response = {
+						status: 401,
+						error: true,
+						message: 'tracking number or dispatch details not provided',
+						data: {
+							
+						}
+					}
 				end
-			else
-				msg = "dispatcher type provided not recognised"
+
+
+
+
+
+
+
+
+
+
+
+			elsif case_type == "delivery"
+				tracking_numbers = params[:properties]["tracking_numbers"]
+				date_dispatched = params[:properties]["date_of_delivery"]
+				delivery_type = params[:properties]["delivery_type"]
+				dispatcher = "rh4"
+				if tracking_numbers && date_dispatched && delivery_type
+					dispatcher_type_id = SpecimenDispatchType.find_by(name: delivery_type)
+					msg = ""
+					tracking_numbers.split(" ").each do |tracking_number|
+						res = OrderService.check_if_dispatched(tracking_number,dispatcher_type_id.id)
+						if res == false
+							status = OrderService.dispatch_sample(tracking_number,dispatcher,date_dispatched,dispatcher_type_id.id)
+							if status == false
+								response = {
+										status: 401,
+										error: true,
+										message: 'patient has Zero orders',
+										data: {
+											
+										}
+								}
+							else
+						
+								response = {
+											status: 200,
+											error: false,
+											message: 'dispatching successfuly done',
+											data: {
+												orders: status
+											}
+										}
+
+							end
+						else
+							msg = + "sample already dispatched from the given location (dispatch type) samples # #{tracking_number}"
+						end
+					end
+				else
+					response = {
+						status: 401,
+						error: true,
+						message: 'tracking number or dispatch details not provided',
+						data: {
+							
+						}
+					}
+				end
+
 			end
 		else
 			response = {
-					status: 401,
-					error: true,
-					message: 'tracking number or dispatch details not provided',
-					data: {
-						
+						status: 401,
+						error: true,
+						message: 'dispatching details not available',
+						data: {
+							
 					}
 			}
 		end
+	
 
 		if msg
 			response = {
