@@ -98,8 +98,10 @@ class API::V1::OrderController < ApplicationController
 										
 									}
 								}
-							end							
-				
+							end
+				puts "-------------------"							
+				puts response.to_json
+				puts "-------------------"
 				render plain: response.to_json and return	
 	end
 	
