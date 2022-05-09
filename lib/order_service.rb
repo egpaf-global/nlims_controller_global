@@ -1028,7 +1028,8 @@ module  OrderService
                               specimen.date_created AS date_drawn,
                               patients.patient_number AS pat_id, patients.name AS pat_name,
                               patients.dob AS dob, patients.gender AS sex,
-                              art_regimen AS art_regi, arv_number AS arv_number 
+                              art_regimen AS art_regi, arv_number AS arv_number,
+                              art_start_date AS art_start_date 
                               FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
                               LEFT JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                               INNER JOIN tests ON tests.specimen_id = specimen.id
@@ -1061,8 +1062,9 @@ module  OrderService
                                           date_created: res.date_created,
                                           priority: res.priority,
                                           art_regimen: res.art_regi,
-                                          arv_number: arv_number,
+                                          arv_number: res.arv_number,
                                           site_code_number: site_code_number,
+                                          art_start_date: res.art_start_date
                                           sample_created_by: {
                                                       id: res.drawe_number,
                                                       name: res.drawer_name,
