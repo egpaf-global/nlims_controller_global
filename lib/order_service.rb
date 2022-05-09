@@ -328,6 +328,13 @@ module  OrderService
             end
       end
 
+      def self.get_site_code_number(site_code_alpha)
+            site_code_alpha = site_code_alpha[1..3]
+
+
+            retun site_code_number
+      end
+
       def self.check_test_name(test)
 	  tst = TestType.find_by_sql("SELECT name AS tst_name FROM test_types WHERE name ='#{test}' LIMIT 1")
           if tst.length > 0
@@ -1045,7 +1052,7 @@ module  OrderService
                               tsts[t.test_name] = t.test_status
                         end
                   end
-
+                 
                   return { 
 
                         gen_details:   {  sample_type: res.sample_type,
@@ -1055,6 +1062,7 @@ module  OrderService
                                           priority: res.priority,
                                           art_regimen: res.art_regi,
                                           arv_number: arv_number,
+                                          site_code_number: site_code_number,
                                           sample_created_by: {
                                                       id: res.drawe_number,
                                                       name: res.drawer_name,
