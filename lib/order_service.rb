@@ -35,7 +35,9 @@ module  OrderService
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
-                  if params[:sample_type] == "Nasopharyngeal"
+		  params[:sample_type] = "Plasma" if params[:sample_type] == "Plasma (2)"
+                 params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70 micro ltr" 
+		 if params[:sample_type] == "Nasopharyngeal"
 		     spc = SpecimenType.find_by(:name => "Nasopharyngeal swab")
 		  else
 		      spc = SpecimenType.find_by(:name => params[:sample_type])
@@ -101,7 +103,8 @@ module  OrderService
                   end
 
                  #sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
-                  sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
+                params[:sample_type] = "specimen_accepted" if params[:sample_type] == "specimen-accepted"
+		sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
       		if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
 			order_ward = Ward.get_ward_id("Bwaila Hospital")
@@ -113,6 +116,10 @@ module  OrderService
 			order_ward = Ward.get_ward_id("Area 18 Urban Health Centre")
 		elsif "Chileka (Lilongwe) Health Center" ==  params[:order_location]
 			order_ward = Ward.get_ward_id("Chileka Health Centre (Lilongwe)")
+		elsif "Kamuzu (KCH) Central Hospital " == params[:order_location]
+			order_ward = Ward.get_ward_id("Kamuzu Central Hospital")
+		elsif "Gateway" == params[:order_location]
+			order_ward  = Ward.get_ward_id("Gateway Clinic (Blantyre)") 
 		else
 			order_ward = Ward.get_ward_id(params[:order_location])
 		end
