@@ -123,6 +123,12 @@ module  OrderService
 		else
 			order_ward = Ward.get_ward_id(params[:order_location])
 		end
+            art_regimen = "N/A"
+            arv_number = "N/A"
+            art_start_date = ""
+            art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
+            arv_number = params[:arv_number] if !params[:arv_number].blank?
+            art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
             sp_obj =  Speciman.create(
                         :tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
@@ -138,7 +144,9 @@ module  OrderService
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
-                        :date_created => params[:date_sample_drawn]
+                        :date_created => params[:date_sample_drawn],
+                        :arv_number => arv_number,
+                        :art_regimen => art_regimen
                   )
 
                   
@@ -152,9 +160,9 @@ module  OrderService
                   params[:tests].each do |tst|
                         tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
                         tst =  "CD4" if tst == "Cd4 Count"
-			tst = "CD4" if tst == "PIMA CD4"
+			      tst = "CD4" if tst == "PIMA CD4"
                         tst = "Viral Load" if tst == "Viral Load Gene X-per" 
-			     tst = "TB Tests" if tst == "Gene Xpert"
+			      tst = "TB Tests" if tst == "Gene Xpert"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
                         tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
@@ -172,11 +180,11 @@ module  OrderService
                         tst =  "India Ink" if tst == "I/Ink"
                         tst =  "Culture & Sensitivity" if tst == "C_S"
                         tst =  "Hepatitis B Test" if tst == "hep"
-			tst = "Viral Load" if tst == "Gene Xpert Viral"
+			      tst = "Viral Load" if tst == "Gene Xpert Viral"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
                         tst =  "Protein" if tst == "Protein and Sugar"
-			tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+			      tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
 			      tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
@@ -249,7 +257,7 @@ module  OrderService
                         tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
                         tst =  "CD4" if tst == "Cd4 Count"
 			      tst = "TB Tests" if tst == "Gene Xpert"
-			tst = "CD4" if tst == "PIMA CD4"
+			      tst = "CD4" if tst == "PIMA CD4"
                         tst = "Viral Load" if tst == "Viral Load Gene X-per"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
@@ -268,11 +276,11 @@ module  OrderService
                         tst =  "India Ink" if tst == "I/Ink"
                         tst =  "Culture & Sensitivity" if tst == "C_S"
                         tst =  "Hepatitis B Test" if tst == "hep"
-			tst = "Viral Load" if tst == "Gene Xpert Viral"
+			      tst = "Viral Load" if tst == "Gene Xpert Viral"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
                         tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
-			tst =  "Protein" if tst == "Protein and Sugar"
+			      tst =  "Protein" if tst == "Protein and Sugar"
 			      tst =  check_test_name(tst)            
                               couch_tests[tst] = {
                                     'results': {},
@@ -296,7 +304,10 @@ module  OrderService
                         who_order_test: who_order,
                         sample_statuses: sample_status,
                         test_statuses: test_status,
-                        sample_status: params[:sample_status] 
+                        sample_status: params[:sample_status],
+                        arv_number: arv_number,
+                        art_regimen: art_regimen,
+                        art_start_date: art_start_date
                   )
                   
                   sp = Speciman.find_by(:tracking_number => tracking_number)
@@ -616,7 +627,13 @@ module  OrderService
                                  
                         end
 
-                                    
+                        art_regimen = "N/A"
+                        arv_number = "N/A"
+                        art_start_date = ""
+                        art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
+                        arv_number = params[:arv_number] if !params[:arv_number].blank?
+                        art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
+
                   who_order = {
                         :first_name => params[:who_order_test_first_name],
                         :last_name => params[:who_order_test_last_name],
@@ -665,7 +682,9 @@ module  OrderService
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
-                        :date_created => time
+                        :date_created => time,
+                        :arv_number => arv_number,
+                        :art_regimen => art_regimen
                   )
 
                   
@@ -760,7 +779,10 @@ module  OrderService
                         who_order_test: who_order,
                         sample_statuses: sample_status,
                         test_statuses: test_status,
-                        sample_status: "specimen_not_collected" 
+                        sample_status: "specimen_not_collected",
+                        art_regimen: art_regimen,
+                        arv_number: arv_number,
+                        art_start_date: art_start_date 
                   )
 
                   sp = Speciman.find_by(:tracking_number => tracking_number)
@@ -998,7 +1020,8 @@ module  OrderService
                               specimen.sending_facility AS health_facility, specimen.requested_by AS requested_by,
                               specimen.date_created AS date_drawn,
                               patients.patient_number AS pat_id, patients.name AS pat_name,
-                              patients.dob AS dob, patients.gender AS sex 
+                              patients.dob AS dob, patients.gender AS sex,
+                              art_regimen AS art_regi, arv_number AS arv_number 
                               FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
                               LEFT JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                               INNER JOIN tests ON tests.specimen_id = specimen.id
@@ -1030,6 +1053,8 @@ module  OrderService
                                           order_location: res.order_location,
                                           date_created: res.date_created,
                                           priority: res.priority,
+                                          art_regimen: res.art_regi,
+                                          arv_number: arv_number,
                                           sample_created_by: {
                                                       id: res.drawe_number,
                                                       name: res.drawer_name,
