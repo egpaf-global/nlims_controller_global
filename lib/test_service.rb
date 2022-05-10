@@ -72,10 +72,7 @@ module TestService
 
 					)		
 				
-				tst_update = Test.find_by(:id => test_id)
-				tst_update.test_status_id = test_status.id
-				tst_update.save
-
+			
 
 				details = {}
 				couch_test = {}
@@ -104,22 +101,36 @@ module TestService
 						result_value = value
 						
 						measure = Measure.where(name: measure_name).first
-                        next if measure.blank?                        
-						TestResult.create(
-							measure_id: measure.id,
-							test_id: test_id,
-							result: result_value,	
-							device_name: '',						
-							time_entered: result_date
+                        next if measure.blank?      
+						if check_if_result_already_available(test_id,measure_id) == false                  
+							TestResult.create(
+								measure_id: measure.id,
+								test_id: test_id,
+								result: result_value,	
+								device_name: '',						
+								time_entered: result_date
 							)
-						test_results_measures[measure_name] = { 'result_value': result_value }
-						
+						end
+						test_results_measures[measure_name] = { 'result_value': result_value }						
 					end	
-					results_measure[test_name] = test_results_measures				
-
-				end
-			
-
+					results_measure[test_name] = test_results_measures	
+					if params[:test_status] != "completed" &&  params[:test_status] != "verified"
+						test_status = TestStatus.where(name: "completed").first
+					else
+						test_status = TestStatus.where(name: params[:test_status]).first
+					end				
+						tst_update = Test.find_by(:id => test_id)
+						tst_update.test_status_id = test_status.id
+						tst_update.save
+					end
+				else
+					if params[:test_status] != "completed" && params[:test_status] != "verified"
+						tst_update = Test.find_by(:id => test_id)
+						tst_update.test_status_id = test_status.id
+						tst_update.save
+					end
+				end		
+				
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false" 
@@ -136,8 +147,7 @@ module TestService
 							:phone_number => '',
 							:id => params[:who_updated]['id_number'] 
 						}                             
-				        }
-		
+				        }		
 					OrderService.update_couch_order(couch_id,retr_order)
 					end
 				else
@@ -149,19 +159,22 @@ module TestService
 					OrderService.update_couch_order(couch_id,retr_order)
 					end
 				end
-
-
 				return [true,""]
 			else
 				return [false,"order with such test not available"]
-
 			end
-
 		else
 			return [false, "order not available"]
 		end
+	end
 
-
+	def self.check_if_result_already_available(test_id, measure_id)
+		res = TestResult.find_by_sql("SELECT * FROM test_results where test_id=#{test_id} AND measure_id=#{measure_id}")
+		if !res.blank?
+			return true
+		else
+			return false
+		end
 	end
 
 	def self.test_no_results(npid)
