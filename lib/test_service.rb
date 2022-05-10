@@ -72,10 +72,7 @@ module TestService
 
 					)		
 				
-				tst_update = Test.find_by(:id => test_id)
-				tst_update.test_status_id = test_status.id
-				tst_update.save
-
+			
 
 				details = {}
 				couch_test = {}
@@ -116,9 +113,19 @@ module TestService
 						
 					end	
 					results_measure[test_name] = test_results_measures				
-
+					if params[:test_status] == "completed" ||  params[:test_status] == "verified"
+						tst_update = Test.find_by(:id => test_id)
+						tst_update.test_status_id = test_status.id
+						tst_update.save
+					end
 				end
-			
+				
+				if params[:test_status] != "completed" &&  params[:test_status] != "verified"
+					tst_update = Test.find_by(:id => test_id)
+					tst_update.test_status_id = test_status.id
+					tst_update.save
+				end
+
 
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)

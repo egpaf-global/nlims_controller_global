@@ -106,7 +106,7 @@ module  OrderService
                 params[:sample_type] = "specimen_accepted" if params[:sample_type] == "specimen-accepted"
 		sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
-      		if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
+      	if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
 			order_ward = Ward.get_ward_id("Bwaila Hospital")
 		elsif "Kawale Health Center" == params[:order_location]
 			order_ward = Ward.get_ward_id("Kawale Health Centre")
@@ -954,13 +954,11 @@ module  OrderService
             else
                   return false
             end
-
-      end
-
+      end      
+      
       def self.update_order(ord)
           return [false,"no tracking number"] if ord['tracking_number'].blank?
-	    status = ord['status']     
-          
+	    status = ord['status']              
           rejecter = {}  
 	    couch_id = ""
 	    #retr_order = OrderService.retrieve_order_from_couch(couch_id)
@@ -1053,7 +1051,7 @@ module  OrderService
                               tsts[t.test_name] = t.test_status
                         end
                   end
-                 
+                  
                   return { 
 
                         gen_details:   {  sample_type: res.sample_type,
