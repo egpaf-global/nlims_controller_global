@@ -329,8 +329,12 @@ module  OrderService
       end
 
       def self.get_site_code_number(site_code_alpha)
+            site_code_number = ""
             site_code_alpha = site_code_alpha[1..3]
-
+            res = Site.find_by_sql("SELECT site_code_number FRON sutes where site_code=#{site_code_alpha}").first
+            if !res.blank?
+                site_code_number = res['site_code_number']
+            end
 
             retun site_code_number
       end
@@ -1037,6 +1041,8 @@ module  OrderService
             tsts = {}
            
             if res.length > 0
+                  site_code_number = get_site_code_number(tracking_number)
+
                   res = res[0]
                   tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status
                                           FROM tests
