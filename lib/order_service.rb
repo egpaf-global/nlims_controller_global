@@ -331,13 +331,14 @@ module  OrderService
       def self.get_site_code_number(site_code_alpha)
             site_code_number = ""
             site_code_alpha = site_code_alpha[1..3]
-            res = Site.find_by_sql("SELECT site_code_number FRON sutes where site_code=#{site_code_alpha}").first
+            res = Site.find_by_sql("SELECT site_code_number FROM sites where site_code='#{site_code_alpha}'").first
             if !res.blank?
                 site_code_number = res['site_code_number']
             end
 
-            retun site_code_number
+            return site_code_number
       end
+
 
       def self.check_test_name(test)
 	  tst = TestType.find_by_sql("SELECT name AS tst_name FROM test_types WHERE name ='#{test}' LIMIT 1")
@@ -1042,7 +1043,6 @@ module  OrderService
            
             if res.length > 0
                   site_code_number = get_site_code_number(tracking_number)
-
                   res = res[0]
                   tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status
                                           FROM tests
@@ -1068,7 +1068,7 @@ module  OrderService
                                           art_regimen: res.art_regi,
                                           arv_number: res.arv_number,
                                           site_code_number: site_code_number,
-                                          art_start_date: res.art_start_date
+                                          art_start_date: res.art_start_date,
                                           sample_created_by: {
                                                       id: res.drawe_number,
                                                       name: res.drawer_name,
@@ -1082,6 +1082,7 @@ module  OrderService
                                                 },
                                           receiving_lab: res.target_lab,
                                           sending_lab: res.health_facility,
+                                          sending_lab_code: site_code_number,
                                           requested_by: res.requested_by                                         
                                           },
                                           tests: tsts
