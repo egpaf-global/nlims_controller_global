@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20210621081319) do
+ActiveRecord::Schema.define(version: 20220509071352) do
 
   create_table "data_anomalies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "data_type"
@@ -138,6 +138,38 @@ ActiveRecord::Schema.define(version: 20210621081319) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "remarks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+    t.string "remark"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "site_sync_frequencies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+    t.string "site_id"
+    t.datetime "last_sync"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "remark_id"
+  end
+
+  create_table "sites", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+    t.string "name"
+    t.string "district"
+    t.float "x", limit: 24
+    t.float "y", limit: 24
+    t.string "region"
+    t.string "description"
+    t.boolean "enabled"
+    t.boolean "sync_status"
+    t.string "site_code"
+    t.string "application_port"
+    t.string "host_address"
+    t.string "couch_username"
+    t.string "couch_password"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "specimen", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.integer "specimen_type_id", null: false
     t.integer "specimen_status_id", null: false
@@ -156,6 +188,8 @@ ActiveRecord::Schema.define(version: 20210621081319) do
     t.string "district"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "arv_number"
+    t.string "art_regimen"
     t.index ["specimen_status_id"], name: "index_specimen_on_specimen_status_id"
     t.index ["specimen_type_id"], name: "index_specimen_on_specimen_type_id"
     t.index ["tracking_number"], name: "index_specimen_on_tracking_number"
@@ -163,12 +197,21 @@ ActiveRecord::Schema.define(version: 20210621081319) do
     t.index ["ward_id"], name: "index_specimen_on_ward_id"
   end
 
+  create_table "specimen_dispatch_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+    t.string "name"
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "specimen_dispatches", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "tracking_number"
-    t.string "dispatcher_name"
+    t.string "dispatcher"
+    t.bigint "dispatcher_type_id"
     t.datetime "date_dispatched"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["dispatcher_type_id"], name: "index_specimen_dispatches_on_dispatcher_type_id"
   end
 
   create_table "specimen_status_trails", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
