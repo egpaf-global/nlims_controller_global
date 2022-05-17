@@ -330,15 +330,23 @@ module  OrderService
 
       def self.get_site_code_number(site_code_alpha)
             site_code_number = ""
-            site_code_alpha = site_code_alpha[1..3]
+            if site_code_alpha[3..3].match?(/[[:digit:]]/)
+                  site_code_alpha = site_code_alpha[1..2]
+            else
+                  if site_code_alpha[4..4].match?(/[[:digit:]]/)
+                        site_code_alpha = site_code_alpha[1..3]
+                  else
+                        if site_code_alpha[5..5].match?(/[[:digit:]]/)
+                              site_code_alpha = site_code_alpha[1..4]
+                        end
+                  end
+            end
             res = Site.find_by_sql("SELECT site_code_number FROM sites where site_code='#{site_code_alpha}'").first
             if !res.blank?
                 site_code_number = res['site_code_number']
             end
-
             return site_code_number
       end
-
 
       def self.check_test_name(test)
 	  tst = TestType.find_by_sql("SELECT name AS tst_name FROM test_types WHERE name ='#{test}' LIMIT 1")
