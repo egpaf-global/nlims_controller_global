@@ -37,6 +37,7 @@ module  OrderService
                   end
 		  params[:sample_type] = "Plasma" if params[:sample_type] == "Plasma (2)"
                  params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70 micro ltr" 
+		 params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70ml (2)"
 		 if params[:sample_type] == "Nasopharyngeal"
 		     spc = SpecimenType.find_by(:name => "Nasopharyngeal swab")
 		  else
@@ -103,7 +104,7 @@ module  OrderService
                   end
 
                  #sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
-                params[:sample_type] = "specimen_accepted" if params[:sample_type] == "specimen-accepted"
+                params[:sample_status] = "specimen_accepted" if params[:sample_status] == "specimen-accepted"
 		sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
       	if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
@@ -329,14 +330,24 @@ module  OrderService
       end
 
       def self.get_site_code_number(site_code_alpha)
-            site_code_number = ""
-            site_code_alpha = site_code_alpha[1..3]
-            res = Site.find_by_sql("SELECT site_code_number FRON sutes where site_code=#{site_code_alpha}").first
+	site_code_number = ""	
+	  if site_code_alpha[3..3].match?(/[[:digit:]]/)
+                  site_code_alpha = site_code_alpha[1..2]
+            else
+                  if site_code_alpha[4..4].match?(/[[:digit:]]/)
+                        site_code_alpha = site_code_alpha[1..3]
+                  else
+                        if site_code_alpha[5..5].match?(/[[:digit:]]/)
+                              site_code_alpha = site_code_alpha[1..4]
+                        end
+                  end
+            end 
+	   res = Site.find_by_sql("SELECT site_code_number FROM sites where site_code='#{site_code_alpha}'").first
             if !res.blank?
                 site_code_number = res['site_code_number']
             end
 
-            retun site_code_number
+            return site_code_number
       end
 
       def self.check_test_name(test)
@@ -1068,7 +1079,7 @@ module  OrderService
                                           art_regimen: res.art_regi,
                                           arv_number: res.arv_number,
                                           site_code_number: site_code_number,
-                                          art_start_date: res.art_start_date
+                                          art_start_date: res.art_start_date,
                                           sample_created_by: {
                                                       id: res.drawe_number,
                                                       name: res.drawer_name,
