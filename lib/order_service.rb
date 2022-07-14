@@ -6,7 +6,9 @@ module  OrderService
             ActiveRecord::Base.transaction do 
 		      params[:tests].each do |tst|
 			      tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
-                        tst =  "CD4" if tst == "Cd4 Count"
+			tst = "CD4" if tst == "PIMA CD4"
+                        tst = "Viral Load" if tst == "Viral Load Gene X-per"
+			tst =  "CD4" if tst == "Cd4 Count"
 			      tst = "TB Tests" if tst == "Gene Xpert"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
@@ -27,12 +29,21 @@ module  OrderService
                         tst =  "Hepatitis B Test" if tst == "hep"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
-                        tst =  "Protein" if tst == "Protein and Sugar"
+                        tst = "Viral Load" if tst == "Gene Xpert Viral"
+	                tst =  "Protein" if tst == "Protein and Sugar"
+			tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
-                  spc = SpecimenType.find_by(:name => params[:sample_type])
-                  return [false,"specimen type not available in nlims"] if spc.blank?
+		  params[:sample_type] = "Plasma" if params[:sample_type] == "Plasma (2)"
+                 params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70 micro ltr" 
+		 params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70ml (2)"
+		 if params[:sample_type] == "Nasopharyngeal"
+		     spc = SpecimenType.find_by(:name => "Nasopharyngeal swab")
+		  else
+		      spc = SpecimenType.find_by(:name => params[:sample_type])
+                  end
+		  return [false,"specimen type not available in nlims"] if spc.blank?
                   spc = SpecimenStatus.find_by(:name => params[:sample_status])
                   return [false,"specimen status not available in nlims"] if spc.blank?
 
@@ -86,16 +97,47 @@ module  OrderService
                                     }
                   }
 
-                  sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
-                  sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
+		 if params[:sample_type] == "Nasopharyngeal"
+                     sample_type_id = SpecimenType.get_specimen_type_id("Nasopharyngeal swab") 
+		 else
+		      sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
+                  end
+
+                 #sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
+                params[:sample_status] = "specimen_accepted" if params[:sample_status] == "specimen-accepted"
+		params[:sample_status] = "specimen_accepted" if params[:status] == "specimen-accepted"
+
+		sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
-      
+      	if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
+			order_ward = Ward.get_ward_id("Bwaila Hospital")
+		elsif "Kawale Health Center" == params[:order_location]
+			order_ward = Ward.get_ward_id("Kawale Health Centre")
+		elsif "Mitundu Hospital" == params[:order_location]
+			order_ward = Ward.get_ward_id("Mitundu Rural Hospital")	
+		elsif "Area 18 Health Center" ==  params[:order_location]
+			order_ward = Ward.get_ward_id("Area 18 Urban Health Centre")
+		elsif "Chileka (Lilongwe) Health Center" ==  params[:order_location]
+			order_ward = Ward.get_ward_id("Chileka Health Centre (Lilongwe)")
+		elsif "Kamuzu (KCH) Central Hospital " == params[:order_location]
+			order_ward = Ward.get_ward_id("Kamuzu Central Hospital")
+		elsif "Gateway" == params[:order_location]
+			order_ward  = Ward.get_ward_id("Gateway Clinic (Blantyre)") 
+		else
+			order_ward = Ward.get_ward_id(params[:order_location])
+		end
+            art_regimen = "N/A"
+            arv_number = "N/A"
+            art_start_date = ""
+            art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
+            arv_number = params[:arv_number] if !params[:arv_number].blank?
+            art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
             sp_obj =  Speciman.create(
                         :tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
                         :specimen_status_id =>  sample_status_id,
                         :couch_id => '',
-                        :ward_id => Ward.get_ward_id(params[:order_location]),
+                        :ward_id => order_ward,
                         :priority => params[:sample_priority],
                         :drawn_by_id => params[:who_order_test_id],
                         :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
@@ -105,7 +147,9 @@ module  OrderService
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
-                        :date_created => params[:date_sample_drawn]
+                        :date_created => params[:date_sample_drawn],
+                        :arv_number => arv_number,
+                        :art_regimen => art_regimen
                   )
 
                   
@@ -119,6 +163,8 @@ module  OrderService
                   params[:tests].each do |tst|
                         tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
                         tst =  "CD4" if tst == "Cd4 Count"
+			      tst = "CD4" if tst == "PIMA CD4"
+                        tst = "Viral Load" if tst == "Viral Load Gene X-per" 
 			      tst = "TB Tests" if tst == "Gene Xpert"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
@@ -137,9 +183,11 @@ module  OrderService
                         tst =  "India Ink" if tst == "I/Ink"
                         tst =  "Culture & Sensitivity" if tst == "C_S"
                         tst =  "Hepatitis B Test" if tst == "hep"
+			      tst = "Viral Load" if tst == "Gene Xpert Viral"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
                         tst =  "Protein" if tst == "Protein and Sugar"
+			      tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
 			      tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
@@ -212,6 +260,8 @@ module  OrderService
                         tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
                         tst =  "CD4" if tst == "Cd4 Count"
 			      tst = "TB Tests" if tst == "Gene Xpert"
+			      tst = "CD4" if tst == "PIMA CD4"
+                        tst = "Viral Load" if tst == "Viral Load Gene X-per"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
                         tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
@@ -229,9 +279,11 @@ module  OrderService
                         tst =  "India Ink" if tst == "I/Ink"
                         tst =  "Culture & Sensitivity" if tst == "C_S"
                         tst =  "Hepatitis B Test" if tst == "hep"
+			      tst = "Viral Load" if tst == "Gene Xpert Viral"
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
-                        tst =  "Protein" if tst == "Protein and Sugar"
+                        tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+			      tst =  "Protein" if tst == "Protein and Sugar"
 			      tst =  check_test_name(tst)            
                               couch_tests[tst] = {
                                     'results': {},
@@ -255,7 +307,10 @@ module  OrderService
                         who_order_test: who_order,
                         sample_statuses: sample_status,
                         test_statuses: test_status,
-                        sample_status: params[:sample_status] 
+                        sample_status: params[:sample_status],
+                        arv_number: arv_number,
+                        art_regimen: art_regimen,
+                        art_start_date: art_start_date
                   )
                   
                   sp = Speciman.find_by(:tracking_number => tracking_number)
@@ -274,6 +329,27 @@ module  OrderService
             else
                   return false
             end
+      end
+
+      def self.get_site_code_number(site_code_alpha)
+	site_code_number = ""	
+	  if site_code_alpha[3..3].match?(/[[:digit:]]/)
+                  site_code_alpha = site_code_alpha[1..2]
+            else
+                  if site_code_alpha[4..4].match?(/[[:digit:]]/)
+                        site_code_alpha = site_code_alpha[1..3]
+                  else
+                        if site_code_alpha[5..5].match?(/[[:digit:]]/)
+                              site_code_alpha = site_code_alpha[1..4]
+                        end
+                  end
+            end 
+	   res = Site.find_by_sql("SELECT site_code_number FROM sites where site_code='#{site_code_alpha}'").first
+            if !res.blank?
+                site_code_number = res['site_code_number']
+            end
+
+            return site_code_number
       end
 
       def self.check_test_name(test)
@@ -448,18 +524,102 @@ module  OrderService
             end
       end
 
-      def self.dispatch_sample(tracking_number,first,last)
+      def self.retrieve_undispatched_samples(facilities)
+            master_facility = {}
+            facility_samples = []
+            facilities.each do |facility|                  
+                  res = Site.find_by_sql("SELECT name AS site_name FROM sites WHERE id='#{facility}'")
+                  
+                  if !res.blank?
+                        res_ = Speciman.find_by_sql("SELECT specimen.tracking_number AS tracking_number, specimen_types.name AS sample_type, specimen_statuses.name AS specimen_status,
+                                                      wards.name AS order_location, specimen.date_created AS date_created, specimen.priority AS priority,
+                                                      specimen.drawn_by_id AS drawer_id, specimen.drawn_by_name AS drawer_name,
+                                                      specimen.drawn_by_phone_number AS drawe_number, specimen.target_lab AS target_lab, 
+                                                      specimen.sending_facility AS health_facility, specimen.requested_by AS requested_by,
+                                                      specimen.date_created AS date_drawn,
+                                                      patients.patient_number AS pat_id, patients.name AS pat_name,
+                                                      patients.dob AS dob, patients.gender AS sex 
+                                                      FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
+                                                      LEFT JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
+                                                      INNER JOIN tests ON tests.specimen_id = specimen.id
+                                                      INNER JOIN patients ON patients.id = tests.patient_id
+                                                      LEFT JOIN wards ON specimen.ward_id = wards.id
+                                                      WHERE specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)")
+                                                      tsts = {}
+                        
+                        if res_.length > 0
+                              res_.each do |ress|                                    
+                                    tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status
+                                                      FROM tests
+                                                      INNER JOIN specimen ON specimen.id = tests.specimen_id
+                                                      INNER JOIN test_types ON test_types.id = tests.test_type_id
+                                                      INNER JOIN test_statuses ON test_statuses.id = tests.test_status_id
+                                                      WHERE specimen.tracking_number ='#{ress.tracking_number}'"
+                                                )
+                                          
+                                          if tst.length > 0
+                                                tst.each do |t|
+                                                      tsts[t.test_name] = t.test_status
+                                                end
+                                          end
+                                               
+                                          facility_samples.push(
+                                                {     tracking_number: ress.tracking_number,
+                                                      sample_type: ress.sample_type,
+                                                                  specimen_status: ress.specimen_status,
+                                                                  order_location: ress.order_location,
+                                                                  date_created: ress.date_created,
+                                                                  priority: ress.priority,
+                                                                  receiving_lab: ress.target_lab,
+                                                                  sending_lab: ress.health_facility,
+                                                                  requested_by: ress.requested_by,
+                                                                  sample_created_by: {
+                                                                                    id: ress.drawe_number,
+                                                                                    name: ress.drawer_name,
+                                                                                    phone: ress.drawe_number
+                                                                                    },
+                                                                  patient: {
+                                                                              id: ress.pat_id,
+                                                                              name: ress.pat_name,
+                                                                              gender: ress.sex,
+                                                                              dob: ress.dob
+                                                                        },
+                                                                                                           
+                                                            
+                                                      tests: tsts
+                                                }
+                                          )
+                                          tsts = {}
+                                                
+                              end
+                                                            
+                        else
+                              facility_samples.push("N/A"
+                              )
+                        end
+                        
+                  else
+
+                  end
+                  master_facility["#{facility}"] = facility_samples     
+                  facility_samples = []             
+            end
+            return [true,master_facility]
+      end
+
+      def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)          
             SpecimenDispatch.create(
                   tracking_number: tracking_number,
-                  dispatcher_name: first + " "+ last,
-                  date_dispatched: Time.now.strftime("%Y%m%d%H%M%S") 
+                  dispatcher: dispatcher,
+                  date_dispatched: date_dispatched,
+                  dispatcher_type_id: dispatcher_type
             )
 
             return true
       end
 
-      def self.check_if_dispatched(tracking_number)
-            rs = SpecimenDispatch.find_by_sql("SELECT * FROM specimen_dispatches WHERE tracking_number='#{tracking_number}'")
+      def self.check_if_dispatched(tracking_number,dispatcher_type)
+            rs = SpecimenDispatch.find_by_sql("SELECT * FROM specimen_dispatches WHERE tracking_number='#{tracking_number}' AND dispatcher_type_id='#{dispatcher_type}'")
             if rs.length > 0
                   return true
             else  
@@ -491,7 +651,13 @@ module  OrderService
                                  
                         end
 
-                                    
+                        art_regimen = "N/A"
+                        arv_number = "N/A"
+                        art_start_date = ""
+                        art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
+                        arv_number = params[:arv_number] if !params[:arv_number].blank?
+                        art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
+
                   who_order = {
                         :first_name => params[:who_order_test_first_name],
                         :last_name => params[:who_order_test_last_name],
@@ -540,7 +706,9 @@ module  OrderService
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
-                        :date_created => time
+                        :date_created => time,
+                        :arv_number => arv_number,
+                        :art_regimen => art_regimen
                   )
 
                   
@@ -635,7 +803,10 @@ module  OrderService
                         who_order_test: who_order,
                         sample_statuses: sample_status,
                         test_statuses: test_status,
-                        sample_status: "specimen_not_collected" 
+                        sample_status: "specimen_not_collected",
+                        art_regimen: art_regimen,
+                        arv_number: arv_number,
+                        art_start_date: art_start_date 
                   )
 
                   sp = Speciman.find_by(:tracking_number => tracking_number)
@@ -800,13 +971,11 @@ module  OrderService
             else
                   return false
             end
-
-      end
-
+      end      
+      
       def self.update_order(ord)
           return [false,"no tracking number"] if ord['tracking_number'].blank?
-	    status = ord['status']     
-          
+	    status = ord['status']              
           rejecter = {}  
 	    couch_id = ""
 	    #retr_order = OrderService.retrieve_order_from_couch(couch_id)
@@ -873,7 +1042,9 @@ module  OrderService
                               specimen.sending_facility AS health_facility, specimen.requested_by AS requested_by,
                               specimen.date_created AS date_drawn,
                               patients.patient_number AS pat_id, patients.name AS pat_name,
-                              patients.dob AS dob, patients.gender AS sex 
+                              patients.dob AS dob, patients.gender AS sex,
+                              art_regimen AS art_regi, arv_number AS arv_number,
+                              art_start_date AS art_start_date 
                               FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
                               LEFT JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
                               INNER JOIN tests ON tests.specimen_id = specimen.id
@@ -883,6 +1054,8 @@ module  OrderService
             tsts = {}
            
             if res.length > 0
+                  site_code_number = get_site_code_number(tracking_number)
+
                   res = res[0]
                   tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status
                                           FROM tests
@@ -897,7 +1070,7 @@ module  OrderService
                               tsts[t.test_name] = t.test_status
                         end
                   end
-
+                  
                   return { 
 
                         gen_details:   {  sample_type: res.sample_type,
@@ -905,6 +1078,10 @@ module  OrderService
                                           order_location: res.order_location,
                                           date_created: res.date_created,
                                           priority: res.priority,
+                                          art_regimen: res.art_regi,
+                                          arv_number: res.arv_number,
+                                          site_code_number: site_code_number,
+                                          art_start_date: res.art_start_date,
                                           sample_created_by: {
                                                       id: res.drawe_number,
                                                       name: res.drawer_name,

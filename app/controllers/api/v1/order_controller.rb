@@ -43,7 +43,7 @@ class API::V1::OrderController < ApplicationController
 		                        msg = "last name for person ordering not provided"
 		                    else
 								order_availability = false
-									if (params['tracking_number'])
+									if (params['tracking_number'] && !params['tracking_number'].blank?)
                                         tracking_number = params['tracking_number']
 										order_availability = OrderService.check_order(tracking_number)
 										
@@ -76,6 +76,16 @@ class API::V1::OrderController < ApplicationController
 													}
 											}
 										TrackingNumberService.prepare_next_tracking_number
+									else
+									      response = {
+                                                       					status: 401,
+                                                        				error: true,
+                                                        				message: st[1],
+                                                        				data: {
+
+        			                                	                }
+	                        				                }
+
 									end										
 							end
 
@@ -88,8 +98,10 @@ class API::V1::OrderController < ApplicationController
 										
 									}
 								}
-							end							
-				
+							end
+				puts "-------------------"							
+				puts response.to_json
+				puts "-------------------"
 				render plain: response.to_json and return	
 	end
 	
@@ -128,41 +140,210 @@ class API::V1::OrderController < ApplicationController
 
 		render plain: response.to_json  and return
 	end
+	
+	def retrieve_undispatched_samples		
+		facilities = params[:facilities]
+		
+		if facilities.blank?
+			msg = "please provide facilities in order to have undispatched samples"
+		elsif !facilities.kind_of?(Array)
+			msg = "data parameter format is incorrect, Array format is accepted only"
+		elsif facilities.length > 5
+			msg = "can not request undispatcahed samples for more than FIVE facilities"
+		else
 
-	def dispatch_sample
-		if params[:tracking_number] && params[:dispatcher_first] && params[:dispatcher_last]
-				status = OrderService.dispatch_sample(params[:tracking_number],params[:dispatcher_first],params[:dispatcher_last])
-				if status == false
+			res =OrderService.retrieve_undispatched_samples(facilities)
+			
+			if res[0] == true
 					response = {
+								status: 200,
+								error: false,
+								message: 'undispatching samples successfuly retrieved',
+								data: res[1]
+							}
+			else
+				response = {
 							status: 401,
 							error: true,
-							message: 'patient has Zero orders',
+							message: "error",
 							data: {
 								
 							}
 					}
-				else
-			
-					response = {
-								status: 200,
-								error: false,
-								message: 'dispatching successfuly done',
+			end
+		end
+
+		if msg
+			response = {
+							status: 401,
+							error: true,
+							message: msg,
+							data: {
+								
+							}
+					}
+		end
+
+		render plain: response.to_json  and return
+	end
+
+	def dispatch_sample
+		#authentication should go here------------------------------------------------------------------------
+		if !request.headers['Authorization'].blank?
+			auth = request.headers['Authorization'].split(" ")[1]
+			auth = Base64.decode64(auth);
+			username = auth.split(":")[0]
+			password = auth.split(":")[1]
+			usr = UserService.authenticate(username,password)
+			if usr == true		
+				if !params[:properties].blank?
+					case_type = params[:properties]["case_type"]
+					if case_type == "r4h_sample"
+						tracking_number = params[:properties]["tracking_number"]
+						date_dispatched = params[:properties]["date_sample_picked_up_by_courier"]
+						delivery_type = "sample_dispatched_from_facility"
+						dispatcher = "rh4"
+						if tracking_number && date_dispatched
+							dispatcher_type_id = SpecimenDispatchType.find_by(name: delivery_type)
+							res = OrderService.check_if_dispatched(tracking_number,dispatcher_type_id.id)
+							if res == false
+								status = OrderService.dispatch_sample(tracking_number,dispatcher,date_dispatched,dispatcher_type_id.id)
+								if status == false
+									response = {
+											status: 401,
+											error: true,
+											message: 'patient has Zero orders',
+											data: {
+												
+											}
+									}
+								else
+							
+									response = {
+												status: 200,
+												error: false,
+												message: 'dispatching successfuly done',
+												data: {
+													orders: status
+												}
+											}
+
+								end
+							else
+								msg = "sample already dispatched from the given location (dispatch type)"
+							end
+						else
+							response = {
+								status: 401,
+								error: true,
+								message: 'tracking number or dispatch details not provided',
 								data: {
-									orders: status
+									
 								}
 							}
+						end
 
+
+
+
+
+
+
+
+
+
+
+					elsif case_type == "delivery"
+						tracking_numbers = params[:properties]["tracking_numbers"]
+						date_dispatched = params[:properties]["date_of_delivery"]
+						delivery_type = params[:properties]["delivery_type"]
+						dispatcher = "rh4"
+						if tracking_numbers && date_dispatched && delivery_type
+							dispatcher_type_id = SpecimenDispatchType.find_by(name: delivery_type)
+							msg = ""
+							tracking_numbers.split(" ").each do |tracking_number|
+								res = OrderService.check_if_dispatched(tracking_number,dispatcher_type_id.id)
+								if res == false
+									status = OrderService.dispatch_sample(tracking_number,dispatcher,date_dispatched,dispatcher_type_id.id)
+									if status == false
+										response = {
+												status: 401,
+												error: true,
+												message: 'patient has Zero orders',
+												data: {
+													
+												}
+										}
+									else
+								
+										response = {
+													status: 200,
+													error: false,
+													message: 'dispatching successfuly done',
+													data: {
+														orders: status
+													}
+												}
+
+									end
+								else
+									msg = + "sample already dispatched from the given location (dispatch type) samples # #{tracking_number}"
+								end
+							end
+						else
+							response = {
+								status: 401,
+								error: true,
+								message: 'tracking number or dispatch details not provided',
+								data: {
+									
+								}
+							}
+						end
+
+					end
+				else
+					response = {
+								status: 401,
+								error: true,
+								message: 'dispatching details not available',
+								data: {
+									
+							}
+					}
 				end
-
-		else
-			response = {
+			else
+				response = {
 					status: 401,
 					error: true,
-					message: 'tracking number or dispatcher details not provided',
+					message: 'username or password incorrect',
 					data: {
 						
 					}
-			}
+				}
+			end
+
+		else
+			response = {
+						status: 401,
+						error: true,
+						message: 'authentication parameters not provided',
+						data: {
+							
+						}
+					}
+			render plain: response.to_json and return
+		end
+
+		if msg
+			response = {
+				status: 401,
+				error: true,
+				message: msg,
+				data: {
+					
+				}
+		}
 		end
 
 		render plain: response.to_json and return

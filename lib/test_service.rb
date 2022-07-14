@@ -20,7 +20,9 @@ module TestService
 			couch_id = sql_order.couch_id
 			test_name = params[:test_name]
 			test_name = test_name.gsub("_"," ")
-
+			
+			test_name = "CD4" if test_name == "PIMA CD4"
+                        test_name = "Viral Load" if test_name == "Viral Load Gene X-per"
 			test_name = "Cryptococcus Antigen Test"  if test_name == "Cr Ag"
 			test_name =  "CD4" if test_name == "Cd4 Count"
 			test_name = "TB Tests" if test_name == "Gene Xpert"
@@ -38,6 +40,7 @@ module TestService
 			test_name =  "Anti Streptolysis O" if test_name == "ASOT"
 			test_name =  "Culture & Sensitivity" if test_name == "Blood C/S"
 			test_name =  "Cryptococcus Antigen Test" if test_name == "Cryptococcal Ag"
+			test_name = "Viral Load" if test_name == "Gene Xpert Viral"
 			test_name =  "India Ink" if test_name == "I/Ink"
 			test_name =  "Culture & Sensitivity" if test_name == "C_S"
 			test_name =  "Hepatitis B Test" if test_name == "hep"
@@ -58,7 +61,7 @@ module TestService
 				ts = test_id[0]
 				
 				test_id = ts['id']
-			
+				
 				TestStatusTrail.create(
 						test_id: test_id,
 						time_updated: params[:time_updated],
@@ -68,11 +71,8 @@ module TestService
 						who_updated_phone_number: ''				
 
 					)		
-
-				tst_update = Test.find_by(:id => test_id)
-				tst_update.test_status_id = test_status.id
-				tst_update.save
-
+				
+			
 
 				details = {}
 				couch_test = {}
@@ -101,27 +101,38 @@ module TestService
 						result_value = value
 						
 						measure = Measure.where(name: measure_name).first
-                        next if measure.blank?                        
-						TestResult.create(
-							measure_id: measure.id,
-							test_id: test_id,
-							result: result_value,	
-							device_name: '',						
-							time_entered: result_date
+                        next if measure.blank?      
+						if check_if_result_already_available(test_id,measure.id) == false                  
+							TestResult.create(
+								measure_id: measure.id,
+								test_id: test_id,
+								result: result_value,	
+								device_name: '',						
+								time_entered: result_date
 							)
-						test_results_measures[measure_name] = { 'result_value': result_value }
-						
+						end
+						test_results_measures[measure_name] = { 'result_value': result_value }						
 					end	
-					results_measure[test_name] = test_results_measures				
+					results_measure[test_name] = test_results_measures	
 
-				end
-			
+						test_status = TestStatus.where(name: params[:test_status]).first			
+						tst_update = Test.find_by(:id => test_id)
+						tst_update.test_status_id = test_status.id
+						tst_update.save
+					
+				else
+							test_status = TestStatus.where(name: params[:test_status]).first
+						tst_update = Test.find_by(:id => test_id)
+						tst_update.test_status_id = test_status.id
+						tst_update.save
 
+				end		
+				
 				if !results_measure.blank?
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false" 
 					couch_test_statuses = retr_order['test_statuses'][test_name]
-					couch_test_statuses[time] =  details 
+					couch_test_statuses[time] =  details if !couch_test_statuses.blank?
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
 					
 					retr_order['test_results'][test_name] = {
@@ -133,32 +144,34 @@ module TestService
 							:phone_number => '',
 							:id => params[:who_updated]['id_number'] 
 						}                             
-				    }
-		
+				        }		
 					OrderService.update_couch_order(couch_id,retr_order)
 					end
 				else
 					retr_order = OrderService.retrieve_order_from_couch(couch_id)
 					if retr_order != "false"
 					couch_test_statuses = retr_order['test_statuses'][test_name]
-					couch_test_statuses[time] =  details 
+					couch_test_statuses[time] =  details if !couch_test_statuses.blank?
 					retr_order['test_statuses'][test_name] =  couch_test_statuses
 					OrderService.update_couch_order(couch_id,retr_order)
 					end
 				end
-
-
 				return [true,""]
 			else
 				return [false,"order with such test not available"]
-
 			end
-
 		else
 			return [false, "order not available"]
 		end
+	end
 
-
+	def self.check_if_result_already_available(test_id, measure_id)
+		res = TestResult.find_by_sql("SELECT * FROM test_results where test_id=#{test_id} AND measure_id=#{measure_id}")
+		if !res.blank?
+			return true
+		else
+			return false
+		end
 	end
 
 	def self.test_no_results(npid)

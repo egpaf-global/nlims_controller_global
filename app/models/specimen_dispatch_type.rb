@@ -1,0 +1,2 @@
+class SpecimenDispatchType < ApplicationRecord
+end
