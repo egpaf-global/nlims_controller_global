@@ -105,6 +105,8 @@ module  OrderService
 
                  #sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
                 params[:sample_status] = "specimen_accepted" if params[:sample_status] == "specimen-accepted"
+		params[:sample_status] = "specimen_accepted" if params[:status] == "specimen-accepted"
+
 		sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
       	if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
