@@ -140,7 +140,7 @@ module  OrderService
                         :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
                         :drawn_by_phone_number => params[:who_order_test_phone_number],
                         :target_lab => params[:target_lab],
-                        :art_start_date => Time.now,
+                        :art_start_date => art_start_date,
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],

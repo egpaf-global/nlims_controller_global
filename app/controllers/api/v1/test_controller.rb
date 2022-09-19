@@ -333,4 +333,14 @@ class API::V1::TestController < ApplicationController
 		render plain: response.to_json and return
 	end
 
+
+	def acknowledge_test_results_receiptient
+		details = params
+		tracking_number = details['tracking_number']
+		test_name = details['test']
+		date_acknowledged = details['date_acknowledged']
+
+		res = TestService.acknowledge_test_results_receiptient(tracking_number,test_name,date_acknowledged)
+		
+	end
 end
