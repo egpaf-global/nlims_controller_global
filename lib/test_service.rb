@@ -102,7 +102,7 @@ module TestService
 						
 						measure = Measure.where(name: measure_name).first
                         next if measure.blank?      
-						if check_if_result_already_available(test_id,measure_id) == false                  
+						if check_if_result_already_available(test_id,measure.id) == false                  
 							TestResult.create(
 								measure_id: measure.id,
 								test_id: test_id,
@@ -122,7 +122,7 @@ module TestService
 						tst_update = Test.find_by(:id => test_id)
 						tst_update.test_status_id = test_status.id
 						tst_update.save
-					end
+				
 				else
 					if params[:test_status] != "completed" && params[:test_status] != "verified"
 						tst_update = Test.find_by(:id => test_id)
@@ -175,6 +175,12 @@ module TestService
 		else
 			return false
 		end
+	end
+
+	def self.acknowledge_test_results_receiptient(tracking_number,test_name,acknowlegded_date)
+    
+    
+    
 	end
 
 	def self.test_no_results(npid)
