@@ -5,26 +5,26 @@ Rails.application.routes.draw do
   namespace :api do
   	namespace :v1 do
   		#order routes
-  		post '/create_order'										 									=> 'order#create_order'
+  		post '/create_order'									  => 'order#create_order'
   		get  '/query_results_by_tracking_number/:tracking_number' => 'order#query_results_by_tracking_number'
-      get  '/query_order_by_tracking_number/:tracking_number'	  => 'order#query_order_by_tracking_number'
-      get  '/query_order_by_npid/:npid' 												=> 'order#query_order_by_npid'
-			get  '/query_results_by_npid/:npid' 											=> 'order#query_results_by_npid'
-			post '/update_order'																			=> 'order#update_order'
-			get  '/query_requested_order_by_npid/:npid'								=> 'order#query_requested_order_by_npid'
-			post '/dispatch_sample'																		=> 'order#dispatch_sample'
-			get	 '/check_if_dispatched/:tracking_number'							=> 'order#check_if_dispatched'
-			get  '/retrieve_undispatched_samples'						=> 'order#retrieve_undispatched_samples'
+      	get  '/query_order_by_tracking_number/:tracking_number'	  => 'order#query_order_by_tracking_number'
+     	get  '/query_order_by_npid/:npid' 												=> 'order#query_order_by_npid'
+		get  '/query_results_by_npid/:npid' 											=> 'order#query_results_by_npid'
+		post '/update_order'																			=> 'order#update_order'
+		get  '/query_requested_order_by_npid/:npid'								=> 'order#query_requested_order_by_npid'
+		post '/dispatch_sample'																		=> 'order#dispatch_sample'
+		get	 '/check_if_dispatched/:tracking_number'							=> 'order#check_if_dispatched'
+		get  '/retrieve_undispatched_samples'						=> 'order#retrieve_undispatched_samples'
 
   		#test routes
   		post '/update_test'  				   					 									=> 'test#update_test'
-      post '/add_test'                           								=> 'test#add_test'
-			put  '/edit_test_result'                  								=> 'test#edit_test_result'
-			get  '/retrieve_test_Catelog'															=> 'test#retrieve_test_catelog'
-			get	 '/query_test_measures/:test_name'										=> 'test#query_test_measures'
-			get  '/query_test_status/:tracking_number'								=> 'test#query_test_status'
-			get  '/query_tests_with_no_results_by_npid/:npid'								=> 'test#test_no_results'
-	
+     	post '/add_test'                           								=> 'test#add_test'
+		put  '/edit_test_result'                  								=> 'test#edit_test_result'
+		get  '/retrieve_test_Catelog'															=> 'test#retrieve_test_catelog'
+		get	 '/query_test_measures/:test_name'										=> 'test#query_test_measures'
+		get  '/query_test_status/:tracking_number'								=> 'test#query_test_status'
+		get  '/query_tests_with_no_results_by_npid/:npid'								=> 'test#test_no_results'
+		post '/acknowledge/test/results/receiptient'					=> 'test#acknowledge_test_results_receiptient'
 			    
   		#user routes	
   		post '/create_user'						         		 								=>	'user#create_user'
