@@ -2,6 +2,7 @@ require 'order_service.rb'
 require 'user_service.rb'
 require 'tracking_number_service.rb'
 require 'thread'
+require 'date'
 
 class API::V1::OrderController < ApplicationController
 
