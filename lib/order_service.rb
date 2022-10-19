@@ -603,13 +603,23 @@ module  OrderService
             return [true,master_facility]
       end
 
-      def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)          
-            SpecimenDispatch.create(
-                  tracking_number: tracking_number,
-                  dispatcher: dispatcher,
-                  date_dispatched: date_dispatched,
-                  dispatcher_type_id: dispatcher_type
-            )
+      def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type, delivery_location='pickup')          
+            if(delivery_location=='pickup')
+                  SpecimenDispatch.create(
+                        tracking_number: tracking_number,
+                        dispatcher: dispatcher,
+                        date_dispatched: date_dispatched,
+                        dispatcher_type_id: dispatcher_type
+                  )
+            else
+                  SpecimenDispatch.create(
+                        tracking_number: tracking_number,
+                        dispatcher: dispatcher,
+                        date_dispatched: date_dispatched,
+                        dispatcher_type_id: dispatcher_type,
+                        delivery_location: delivery_location
+                  ) 
+            end
 
             return true
       end
