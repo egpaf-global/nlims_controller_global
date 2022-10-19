@@ -208,6 +208,7 @@ class API::V1::OrderController < ApplicationController
 							time_of_delivery = DateTime.parse(time).strftime("%H:%M:%S")
 						else 
 							time_of_delivery = time_of_delivery[0..7]
+						end
 						date_dispatched += time_of_delivery
 						delivery_type = "sample_dispatched_from_facility"
 						dispatcher = "rh4"
@@ -250,17 +251,7 @@ class API::V1::OrderController < ApplicationController
 								}
 							}
 						end
-
-
-
-
-
-
-
-
-
-
-
+						
 					elsif case_type == "delivery"
 						tracking_numbers = params[:properties]["tracking_numbers"]
 						date_dispatched = params[:properties]["date_of_delivery"]
@@ -270,6 +261,7 @@ class API::V1::OrderController < ApplicationController
 							time_of_delivery = DateTime.parse(time).strftime("%H:%M:%S")
 						else 
 							time_of_delivery = time_of_delivery[0..7]
+						end
 						date_dispatched += time_of_delivery
 						delivery_type = params[:properties]["delivery_type"]
 						delivery_location = params[:properties]["delivery_location"]
