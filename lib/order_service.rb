@@ -540,7 +540,7 @@ module  OrderService
                                                       INNER JOIN tests ON tests.specimen_id = specimen.id
                                                       INNER JOIN patients ON patients.id = tests.patient_id
                                                       LEFT JOIN wards ON specimen.ward_id = wards.id
-                                                      WHERE specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)")
+                                                      WHERE specimen.sending_facility ='#{res[0]['site_name'].gsub("'", "\\\\'")}' AND specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)")
                                                       tsts = {}
                         
                         if res_.length > 0
