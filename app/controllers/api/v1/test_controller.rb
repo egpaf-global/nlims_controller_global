@@ -339,8 +339,31 @@ class API::V1::TestController < ApplicationController
 		tracking_number = details['tracking_number']
 		test_name = details['test']
 		date_acknowledged = details['date_acknowledged']
+		recipient_type = details['recipient_type']
 
-		res = TestService.acknowledge_test_results_receiptient(tracking_number,test_name,date_acknowledged)
-		
+		res = TestService.acknowledge_test_results_receiptient(tracking_number,test_name,date_acknowledged,recipient_type)
+
+		if res == true
+			response = {
+					status: 200,
+					error: false,
+					message: 'test results status successfuly updated',
+					data: {
+							
+						}
+				}
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'test result status update failed',
+					data: {
+							
+						}
+				}
+
+		end
+
+		render plain: response.to_json and return		
 	end
 end
