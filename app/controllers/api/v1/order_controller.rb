@@ -2,6 +2,7 @@ require 'order_service.rb'
 require 'user_service.rb'
 require 'tracking_number_service.rb'
 require 'thread'
+require 'date'
 
 class API::V1::OrderController < ApplicationController
 
@@ -201,6 +202,14 @@ class API::V1::OrderController < ApplicationController
 					if case_type == "r4h_sample"
 						tracking_number = params[:properties]["tracking_number"]
 						date_dispatched = params[:properties]["date_sample_picked_up_by_courier"]
+						time_of_delivery = params[:properties]["time_of_sample_collected"]
+						if time_of_delivery.nil?
+							time = Time.now.to_s
+							time_of_delivery = DateTime.parse(time).strftime("%H:%M:%S")
+						else 
+							time_of_delivery = time_of_delivery[0..7]
+						end
+						date_dispatched += time_of_delivery
 						delivery_type = "sample_dispatched_from_facility"
 						dispatcher = "rh4"
 						if tracking_number && date_dispatched
@@ -242,21 +251,20 @@ class API::V1::OrderController < ApplicationController
 								}
 							}
 						end
-
-
-
-
-
-
-
-
-
-
-
+						
 					elsif case_type == "delivery"
 						tracking_numbers = params[:properties]["tracking_numbers"]
 						date_dispatched = params[:properties]["date_of_delivery"]
+						time_of_delivery = params[:properties]["time_of_delivery"]
+						if time_of_delivery.nil?
+							time = Time.now.to_s
+							time_of_delivery = DateTime.parse(time).strftime("%H:%M:%S")
+						else 
+							time_of_delivery = time_of_delivery[0..7]
+						end
+						date_dispatched += time_of_delivery
 						delivery_type = params[:properties]["delivery_type"]
+						delivery_location = params[:properties]["delivery_location"]
 						dispatcher = "rh4"
 						if tracking_numbers && date_dispatched && delivery_type
 							dispatcher_type_id = SpecimenDispatchType.find_by(name: delivery_type)
@@ -264,7 +272,7 @@ class API::V1::OrderController < ApplicationController
 							tracking_numbers.split(" ").each do |tracking_number|
 								res = OrderService.check_if_dispatched(tracking_number,dispatcher_type_id.id)
 								if res == false
-									status = OrderService.dispatch_sample(tracking_number,dispatcher,date_dispatched,dispatcher_type_id.id)
+									status = OrderService.dispatch_sample(tracking_number,dispatcher,date_dispatched,dispatcher_type_id.id, delivery_location)
 									if status == false
 										response = {
 												status: 401,
