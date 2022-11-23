@@ -177,8 +177,21 @@ module TestService
 		end
 	end
 
-	def self.acknowledge_test_results_receiptient(tracking_number,test_name,date)
-		
+	def self.acknowledge_test_results_receiptient(tracking_number,test_name,date,recipient_type)
+		res = Test.find_by_sql("SELECT tests.id FROM tests INNER JOIN test_types ON test_types.id = tests.test_type_id
+							INNER JOIN specimen ON specimen.id = tests.specimen_id
+							where specimen.tracking_number ='#{tracking_number}' AND test_types.name='#{test_name}'")
+		if res		
+			type = TestResultRecepientType.find_by(:name => recipient_type)
+			tst = Test.find_by(:id => res[0]['id'])
+			tst.test_result_receipent_types = type.id
+			tst.result_given = true
+			tst.date_result_given = date
+			tst.save			
+			return true
+		else
+			return false
+		end
 	end
 
 	def self.test_no_results(npid)
