@@ -335,33 +335,56 @@ class API::V1::TestController < ApplicationController
 
 
 	def acknowledge_test_results_receiptient
+		msg = ""
 		details = params
 		tracking_number = details['tracking_number']
 		test_name = details['test']
 		date_acknowledged = details['date_acknowledged']
 		recipient_type = details['recipient_type']
 
-		res = TestService.acknowledge_test_results_receiptient(tracking_number,test_name,date_acknowledged,recipient_type)
-
-		if res == true
-			response = {
-					status: 200,
-					error: false,
-					message: 'test results status successfuly updated',
-					data: {
-							
-						}
-				}
+		if(!details['tracking_number'])                                      
+			msg = "no tracking number provided";                                      
+		elsif(!details['test'])
+			msg = "no test whose result being acknowledged is provided"
+		elsif (!details['recipient_type'])
+			msg = "no acknowledged type for the result provided"
+		elsif (!details['date_acknowledged'])
+			msg = "no date for acknowlegment is provided"
 		else
-			response = {
-					status: 401,
-					error: true,
-					message: 'test result status update failed',
-					data: {
-							
-						}
-				}
 
+			res = TestService.acknowledge_test_results_receiptient(tracking_number,test_name,date_acknowledged,recipient_type)
+
+			if res == true
+				response = {
+						status: 200,
+						error: false,
+						message: 'results delivered successfuly',
+						data: {
+								
+							}
+					}
+			else
+				response = {
+						status: 401,
+						error: true,
+						message: 'test result status update failed',
+						data: {
+								
+							}
+					}
+
+			end
+		end
+
+		if msg
+			response = {
+						status: 401,
+						error: true,
+						message: msg,
+						data: {
+								
+							}
+					}
 		end
 
 		render plain: response.to_json and return		
