@@ -78,6 +78,7 @@ module  OrderService
                         :first_name => params[:first_name],
                         :last_name => params[:last_name],
                         :phone_number => params[:phone_number],
+                        :dob => params[:date_of_birth],
                         :id => npid,
                         :email => params[:email],
                         :gender => params[:gender] 
