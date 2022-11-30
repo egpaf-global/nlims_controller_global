@@ -63,7 +63,9 @@ module  OrderService
                                                 external_patient_number:  "" 
 
                                                 )
-                                 
+                        else
+                              patient_obj.dob = params[:date_of_birth]
+                              patient_obj.save
                         end
 
                                     
