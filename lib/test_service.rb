@@ -119,7 +119,7 @@ module TestService
 						tst_update = Test.find_by(:id => test_id)
 						tst_update.test_status_id = test_status.id
 						tst_update.save
-					
+
 				else
 							test_status = TestStatus.where(name: params[:test_status]).first
 						tst_update = Test.find_by(:id => test_id)
@@ -168,6 +168,23 @@ module TestService
 	def self.check_if_result_already_available(test_id, measure_id)
 		res = TestResult.find_by_sql("SELECT * FROM test_results where test_id=#{test_id} AND measure_id=#{measure_id}")
 		if !res.blank?
+			return true
+		else
+			return false
+		end
+	end
+
+	def self.acknowledge_test_results_receiptient(tracking_number,test_name,date,recipient_type)
+		res = Test.find_by_sql("SELECT tests.id FROM tests INNER JOIN test_types ON test_types.id = tests.test_type_id
+							INNER JOIN specimen ON specimen.id = tests.specimen_id
+							where specimen.tracking_number ='#{tracking_number}' AND test_types.name='#{test_name}'")
+		if res		
+			type = TestResultRecepientType.find_by(:name => recipient_type)
+			tst = Test.find_by(:id => res[0]['id'])
+			tst.test_result_receipent_types = type.id
+			tst.result_given = true
+			tst.date_result_given = date
+			tst.save			
 			return true
 		else
 			return false

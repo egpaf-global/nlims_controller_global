@@ -66,7 +66,9 @@ module  OrderService
                                                 external_patient_number:  "" 
 
                                                 )
-                                 
+                        else
+                              patient_obj.dob = params[:date_of_birth]
+                              patient_obj.save
                         end
 
                                     
@@ -81,6 +83,7 @@ module  OrderService
                         :first_name => params[:first_name],
                         :last_name => params[:last_name],
                         :phone_number => params[:phone_number],
+                        :dob => params[:date_of_birth],
                         :id => npid,
                         :email => params[:email],
                         :gender => params[:gender] 
@@ -145,7 +148,7 @@ module  OrderService
                         :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
                         :drawn_by_phone_number => params[:who_order_test_phone_number],
                         :target_lab => params[:target_lab],
-                        :art_start_date => Time.now,
+                        :art_start_date => art_start_date,
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
@@ -336,8 +339,8 @@ module  OrderService
       end
 
       def self.get_site_code_number(site_code_alpha)
-	site_code_number = ""	
-	  if site_code_alpha[3..3].match?(/[[:digit:]]/)
+            site_code_number = ""
+            if site_code_alpha[3..3].match?(/[[:digit:]]/)
                   site_code_alpha = site_code_alpha[1..2]
             else
                   if site_code_alpha[4..4].match?(/[[:digit:]]/)
@@ -347,13 +350,15 @@ module  OrderService
                               site_code_alpha = site_code_alpha[1..4]
                         end
                   end
-            end 
-	   res = Site.find_by_sql("SELECT site_code_number FROM sites where site_code='#{site_code_alpha}'").first
+            end
+
+            res = Site.find_by_sql("SELECT site_code_number FROM sites where site_code='#{site_code_alpha}'").first
             if !res.blank?
                 site_code_number = res['site_code_number']
             end
 
             return site_code_number
+
       end
 
       def self.check_test_name(test)
@@ -611,13 +616,23 @@ module  OrderService
             return [true,master_facility]
       end
 
-      def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type)          
-            SpecimenDispatch.create(
-                  tracking_number: tracking_number,
-                  dispatcher: dispatcher,
-                  date_dispatched: date_dispatched,
-                  dispatcher_type_id: dispatcher_type
-            )
+      def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type, delivery_location='pickup')          
+            if(delivery_location=='pickup')
+                  SpecimenDispatch.create(
+                        tracking_number: tracking_number,
+                        dispatcher: dispatcher,
+                        date_dispatched: date_dispatched,
+                        dispatcher_type_id: dispatcher_type
+                  )
+            else
+                  SpecimenDispatch.create(
+                        tracking_number: tracking_number,
+                        dispatcher: dispatcher,
+                        date_dispatched: date_dispatched,
+                        dispatcher_type_id: dispatcher_type,
+                        delivery_location: delivery_location
+                  ) 
+            end
 
             return true
       end
@@ -1059,7 +1074,6 @@ module  OrderService
            
             if res.length > 0
                   site_code_number = get_site_code_number(tracking_number)
-
                   res = res[0]
                   tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status
                                           FROM tests
@@ -1099,6 +1113,7 @@ module  OrderService
                                                 },
                                           receiving_lab: res.target_lab,
                                           sending_lab: res.health_facility,
+                                          sending_lab_code: site_code_number,
                                           requested_by: res.requested_by                                         
                                           },
                                           tests: tsts
