@@ -198,7 +198,7 @@ class API::V1::OrderController < ApplicationController
 			if usr == true		
 				if !params[:properties].blank?
 					case_type = params[:properties]["case_type"]
-					if case_type == "r4h_sample"
+					if case_type == "Sample"
 						tracking_number = params[:properties]["tracking_number"]
 						date_dispatched = params[:properties]["date_sample_picked_up_by_courier"]
 						delivery_type = "sample_dispatched_from_facility"
