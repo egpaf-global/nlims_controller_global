@@ -21,6 +21,4 @@ class Order < CouchRest::Model::Base
    property   :art_start_date, String
    property   :art_regimen, String
 
-    
-
 end
