@@ -32,6 +32,8 @@ module  OrderService
                         tst = "Viral Load" if tst == "Gene Xpert Viral"
 	                tst =  "Protein" if tst == "Protein and Sugar"
 			tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+			tst =  "SARS Cov 2" if tst == "SARS-CoV-2"
+			tst =  "Creatine kinase" if tst == "CREATINE (J)"
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
@@ -188,6 +190,8 @@ module  OrderService
                         tst =  "Sickling Test" if tst == "Sickle"
                         tst =  "Protein" if tst == "Protein and Sugar"
 			      tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+				tst =  "SARS Cov 2" if tst == "SARS-CoV-2"
+			tst =  "Creatine kinase" if tst == "CREATINE (J)"
 			      tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
@@ -544,7 +548,7 @@ module  OrderService
                                                       INNER JOIN tests ON tests.specimen_id = specimen.id
                                                       INNER JOIN patients ON patients.id = tests.patient_id
                                                       LEFT JOIN wards ON specimen.ward_id = wards.id
-                                                      WHERE specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)")
+                                                      WHERE specimen.sending_facility ='#{res[0]['site_name'].gsub("'", "\\\\'")}' AND specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)")
                                                       tsts = {}
                         
                         if res_.length > 0
