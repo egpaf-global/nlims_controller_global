@@ -6,9 +6,9 @@ module  OrderService
             ActiveRecord::Base.transaction do 
 		      params[:tests].each do |tst|
 			      tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
-			tst = "CD4" if tst == "PIMA CD4"
+			      tst = "CD4" if tst == "PIMA CD4"
                         tst = "Viral Load" if tst == "Viral Load Gene X-per"
-			tst =  "CD4" if tst == "Cd4 Count"
+			      tst =  "CD4" if tst == "Cd4 Count"
 			      tst = "TB Tests" if tst == "Gene Xpert"
 			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
@@ -30,8 +30,8 @@ module  OrderService
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
                         tst = "Viral Load" if tst == "Gene Xpert Viral"
-	                tst =  "Protein" if tst == "Protein and Sugar"
-			tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+	                  tst =  "Protein" if tst == "Protein and Sugar"
+			      tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
@@ -543,7 +543,9 @@ module  OrderService
                                                       INNER JOIN tests ON tests.specimen_id = specimen.id
                                                       INNER JOIN patients ON patients.id = tests.patient_id
                                                       LEFT JOIN wards ON specimen.ward_id = wards.id
-                                                      WHERE specimen.sending_facility ='#{res[0]['site_name'].gsub("'", "\\\\'")}' AND specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)")
+                                                      WHERE specimen.sending_facility ='#{res[0]['site_name'].gsub("'", "\\\\'")}' AND specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)
+                                                      GROUP BY specimen.id DESC limit 100
+                                                      ")
                                                       tsts = {}
                         
                         if res_.length > 0
@@ -1034,8 +1036,7 @@ module  OrderService
                         'phone_number': '',
                         'id': ord['who_rejected']['id_number'],                        
                         'rejection_explained_to': ord['who_rejected']['person_talked_to'],
-                        'reason_for_rejection': ord['who_rejected']['reason_for_rejection']
-                        
+                        'reason_for_rejection': ord['who_rejected']['reason_for_rejection']                        
                   }
             end
             OrderService.update_couch_order(couch_id,retr_order)
