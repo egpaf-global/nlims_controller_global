@@ -667,7 +667,10 @@ module  OrderService
                                                 external_patient_number:  "" 
 
                                                 )
-                                 
+                        
+			else
+                              patient_obj.dob = params[:date_of_birth]
+                              patient_obj.save         
                         end
 
                         art_regimen = "N/A"
@@ -675,8 +678,8 @@ module  OrderService
                         art_start_date = ""
                         art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
                         arv_number = params[:arv_number] if !params[:arv_number].blank?
-                        art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
-
+			art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
+			 #art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
                   who_order = {
                         :first_name => params[:who_order_test_first_name],
                         :last_name => params[:who_order_test_last_name],
@@ -688,7 +691,8 @@ module  OrderService
                         :first_name => params[:first_name],
                         :last_name => params[:last_name],
                         :phone_number => params[:phone_number],
-                        :id => npid,
+                  	:dob => params[:date_of_birth],
+			:id => npid,
                         :email => params[:email],
                         :gender => params[:gender] 
                   }
@@ -721,7 +725,7 @@ module  OrderService
                         :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
                         :drawn_by_phone_number => params[:who_order_test_phone_number],
                         :target_lab => 'not_assigned',
-                        :art_start_date => Time.now,
+                        :art_start_date => art_start_date,
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
