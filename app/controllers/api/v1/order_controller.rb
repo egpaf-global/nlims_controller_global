@@ -283,7 +283,9 @@ class API::V1::OrderController < ApplicationController
 												}
 										}
 									else
-								
+										if dispatcher_type_id.id == 1
+											OrderService.record_r4h_pickup_from_hub(params[:properties]["pickup_info"], dispatcher)
+										end
 										response = {
 													status: 200,
 													error: false,

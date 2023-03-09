@@ -629,6 +629,20 @@ module  OrderService
             return true
       end
 
+      def self.record_r4h_pickup_from_hub(pickup_info, dispatcher)
+            pickup_info.each do |info|
+                  date_picked_up = info['date_picked_from_hub']
+                  time_picked_from_hub = info['time_picked_from_hub']
+                  datetime_picked_from_hub = date_picked_up + " "+ time_picked_from_hub
+                  SpecimenDispatch.create(
+                        tracking_number: info['tracking_number'],
+                        dispatcher: dispatcher,
+                        date_dispatched: datetime_picked_from_hub,
+                        dispatcher_type_id: 5
+                  )
+            end
+      end
+
       def self.check_if_dispatched(tracking_number,dispatcher_type)
             rs = SpecimenDispatch.find_by_sql("SELECT * FROM specimen_dispatches WHERE tracking_number='#{tracking_number}' AND dispatcher_type_id='#{dispatcher_type}'")
             if rs.length > 0
