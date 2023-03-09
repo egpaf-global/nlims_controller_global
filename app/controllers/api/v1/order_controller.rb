@@ -109,7 +109,7 @@ class API::V1::OrderController < ApplicationController
 	def check_if_dispatched
 	
 		if !params[:tracking_number].blank?
-			res = OrderService.check_if_dispatched(params[:tracking_number])
+			res = OrderService.check_if_dispatched(params[:tracking_number], params[:dispatcher_type_id])
 			if res == false
 				response = {
 								status: 200,
