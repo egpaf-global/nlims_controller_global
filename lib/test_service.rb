@@ -110,6 +110,9 @@ module TestService
 								device_name: '',						
 								time_entered: result_date
 							)
+						else
+							test_result_ = TestResult.where(test_id: test_id, measure_id: measure.id).first
+							test_result_.update(result: result_value, time_entered: result_date)
 						end
 						test_results_measures[measure_name] = { 'result_value': result_value }						
 					end	
