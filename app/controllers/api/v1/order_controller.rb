@@ -252,7 +252,7 @@ class API::V1::OrderController < ApplicationController
 							}
 						end
 						
-					elsif case_type == "delivery"
+					elsif case_type == "r4h_delivery"
 						tracking_numbers = params[:properties]["tracking_numbers"]
 						date_dispatched = params[:properties]["date_of_delivery"]
 						time_of_delivery = params[:properties]["time_of_delivery"]
