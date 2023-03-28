@@ -630,6 +630,7 @@ module  OrderService
       end
 
       def self.record_r4h_pickup_from_hub(pickup_info, dispatcher)
+            pickup_info = pickup_info.gsub('[\\{','[{').gsub('\\}]', '}]').gsub('tracking_number', '"tracking_number"').gsub('time_picked_from_hub', '"time_picked_from_hub"').gsub('date_picked_from_hub', '"date_picked_from_hub"').gsub(/\\/, '')
             JSON.parse(pickup_info).each do |info|
                   date_picked_up = info['date_picked_from_hub']
                   time_picked_from_hub = info['time_picked_from_hub']
