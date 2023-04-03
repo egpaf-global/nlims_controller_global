@@ -8,7 +8,7 @@ class API::V1::OrderController < ApplicationController
 
 	def create_order
 	   
-						    if(!params['district'])                                      
+						    if(!params['disptrict'])                                      
 		                        msg = "district not provided";                                      
 		                    elsif(!params['health_facility_name'])
 		                        msg = "health facility name not provided"
@@ -188,6 +188,43 @@ class API::V1::OrderController < ApplicationController
 		render plain: response.to_json  and return
 	end
 
+	def retrieve_samples
+		if params['order_date'].blank?
+			msg = "date not provided"	
+		else
+			res = OrderService.retrieve_samples(params['order_date'])
+			if res != false
+				response = {
+										status: 200,
+										error: false,
+										message: 'undispatching samples successfuly retrieved',
+										data: res
+									}	
+			else
+				response = {
+						status: 401,
+						error: true,
+						message: "no samples available yet",
+						data: {
+							
+						}
+				}
+			end
+		end
+
+		if msg
+			response = {
+							status: 401,
+							error: true,
+							message: msg,
+							data: {
+								
+							}
+					}
+		end
+		render plain: response.to_json  and return
+	end
+
 	def dispatch_sample
 		#authentication should go here------------------------------------------------------------------------
 		if !request.headers['Authorization'].blank?
@@ -199,7 +236,7 @@ class API::V1::OrderController < ApplicationController
 			if usr == true		
 				if !params[:properties].blank?
 					case_type = params[:properties]["case_type"]
-					if case_type == "Sample"
+					if case_type == "r4h_sample"
 						tracking_number = params[:properties]["tracking_number"]
 						date_dispatched = params[:properties]["date_sample_picked_up_by_courier"]
 						time_of_delivery = params[:properties]["time_of_sample_collected"]
@@ -209,7 +246,7 @@ class API::V1::OrderController < ApplicationController
 						else 
 							time_of_delivery = time_of_delivery[0..7]
 						end
-						date_dispatched = date_dispatched +" "+ time_of_delivery
+						date_dispatched += time_of_delivery
 						delivery_type = "sample_dispatched_from_facility"
 						dispatcher = "rh4"
 						if tracking_number && date_dispatched
@@ -262,7 +299,7 @@ class API::V1::OrderController < ApplicationController
 						else 
 							time_of_delivery = time_of_delivery[0..7]
 						end
-						date_dispatched = date_dispatched + " " + time_of_delivery
+						date_dispatched += time_of_delivery
 						delivery_type = params[:properties]["delivery_type"]
 						delivery_location = params[:properties]["delivery_location"]
 						dispatcher = "rh4"
@@ -298,6 +335,7 @@ class API::V1::OrderController < ApplicationController
 									msg = + "sample already dispatched from the given location (dispatch type) samples # #{tracking_number}"
 								end
 							end
+
 						else
 							response = {
 								status: 401,
@@ -649,6 +687,48 @@ class API::V1::OrderController < ApplicationController
 		render plain: response.to_json and return
 	end
 
+
+
+	def query_results_by_tracking_number_site_code
+		
+		if params[:tracking_number]
+				tracking_number = params[:site_code]+"/" + params[:tracking_number]
+				res = OrderService.query_results_by_tracking_number(tracking_number)
+
+				if res == false
+					response = {
+						status: 401,
+						error: true,
+						message: 'results not available',
+						data: {
+						}
+					}
+				else
+					response = {
+						status: 200,
+						error: false,
+						message: 'results retrieved successfuly',
+						data: {
+							tracking_number: tracking_number,
+							results: res
+						}
+					}
+				end			
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'tracking_number not provided',
+					data: {
+						
+					}
+			}
+		end
+	
+		render plain: response.to_json and return
+	end
+
+
 	def query_order_by_tracking_number
 		if  params[:tracking_number]
 
@@ -687,5 +767,48 @@ class API::V1::OrderController < ApplicationController
 	
 		render plain: response.to_json and return
 	end
+
+
+
+	def query_order_by_tracking_number_site_code
+		if  params[:tracking_number]
+			tracking_number = params[:site_code]+"/" + params[:tracking_number]
+				res = OrderService.query_order_by_tracking_number(tracking_number)
+				
+				if res == false
+					response = {
+						status: 401,
+						error: true,
+						message: 'order not available',
+						data: {
+							
+						}
+					}
+				else
+					response = {
+						status: 200,
+						error: false,
+						message: 'order retrieved',
+						data: {
+							tests: res[:tests],
+							other: res[:gen_details]
+						}
+					}
+				end
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'tracking number not provided',
+					data: {
+						
+					}
+			}
+		end
+	
+		render plain: response.to_json and return
+	end
+
+
 
 end
