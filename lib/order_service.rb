@@ -553,7 +553,7 @@ module  OrderService
                                                       INNER JOIN tests ON tests.specimen_id = specimen.id
                                                       INNER JOIN patients ON patients.id = tests.patient_id
                                                       LEFT JOIN wards ON specimen.ward_id = wards.id
-                                                      WHERE specimen.sending_facility ='#{res[0]['site_name'].gsub("'", "\\\\'")}' AND specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)")
+                                                      WHERE specimen.sending_facility ='#{res[0]['site_name'].gsub("'", "\\\\'")}' AND specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches) GROUP BY specimen.id DESC limit 250")
                                                       tsts = {}
                         
                         if res_.length > 0
@@ -1093,6 +1093,8 @@ module  OrderService
                         end
                   end
                   
+			arv_number = res.arv_number.split("-")
+			arv_number = arv_number[arv_number.length - 1]
                   return { 
 
                         gen_details:   {  sample_type: res.sample_type,
@@ -1101,7 +1103,7 @@ module  OrderService
                                           date_created: res.date_created,
                                           priority: res.priority,
                                           art_regimen: res.art_regi,
-                                          arv_number: res.arv_number,
+                                          arv_number: arv_number,
                                           site_code_number: site_code_number,
                                           art_start_date: res.art_start_date,
                                           sample_created_by: {
