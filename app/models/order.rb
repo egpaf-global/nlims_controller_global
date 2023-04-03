@@ -17,9 +17,8 @@ class Order < CouchRest::Model::Base
     property :sample_type, String
     property :sample_statuses, {}
     property :test_statuses, {}
-    property :art_regimen, String
-    property :arv_number, String
-    property :art_start_date, String 
-
+   property :arv_number, String
+   property   :art_start_date, String
+   property   :art_regimen, String
 
 end

@@ -30,13 +30,16 @@ module  OrderService
                         tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
                         tst =  "Sickling Test" if tst == "Sickle"
                         tst = "Viral Load" if tst == "Gene Xpert Viral"
-	                  tst =  "Protein" if tst == "Protein and Sugar"
-			      tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+	                tst =  "Protein" if tst == "Protein and Sugar"
+			tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+			tst =  "SARS Cov 2" if tst == "SARS-CoV-2"
+			tst =  "Creatine kinase" if tst == "CREATINE (J)"
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
 		  params[:sample_type] = "Plasma" if params[:sample_type] == "Plasma (2)"
                  params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70 micro ltr" 
+		 params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70ml (2)"
 		 if params[:sample_type] == "Nasopharyngeal"
 		     spc = SpecimenType.find_by(:name => "Nasopharyngeal swab")
 		  else
@@ -106,7 +109,9 @@ module  OrderService
                   end
 
                  #sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
-                params[:sample_type] = "specimen_accepted" if params[:sample_type] == "specimen-accepted"
+                params[:sample_status] = "specimen_accepted" if params[:sample_status] == "specimen-accepted"
+		params[:sample_status] = "specimen_accepted" if params[:status] == "specimen-accepted"
+
 		sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
       	if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
@@ -188,6 +193,8 @@ module  OrderService
                         tst =  "Sickling Test" if tst == "Sickle"
                         tst =  "Protein" if tst == "Protein and Sugar"
 			      tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+				tst =  "SARS Cov 2" if tst == "SARS-CoV-2"
+			tst =  "Creatine kinase" if tst == "CREATINE (J)"
 			      tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
@@ -344,11 +351,14 @@ module  OrderService
                         end
                   end
             end
+
             res = Site.find_by_sql("SELECT site_code_number FROM sites where site_code='#{site_code_alpha}'").first
             if !res.blank?
                 site_code_number = res['site_code_number']
             end
+
             return site_code_number
+
       end
 
       def self.check_test_name(test)
@@ -543,9 +553,8 @@ module  OrderService
                                                       INNER JOIN tests ON tests.specimen_id = specimen.id
                                                       INNER JOIN patients ON patients.id = tests.patient_id
                                                       LEFT JOIN wards ON specimen.ward_id = wards.id
-                                                      WHERE specimen.sending_facility ='#{res[0]['site_name'].gsub("'", "\\\\'")}' AND specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches)
-                                                      GROUP BY specimen.id DESC limit 100
-                                                      ")
+						      WHERE specimen.sending_facility ='#{res[0]['site_name'].gsub("'", "\\\\'")}' AND specimen.tracking_number NOT IN (SELECT tracking_number FROM specimen_dispatches) GROUP BY specimen.id DESC limit 250")
+
                                                       tsts = {}
                         
                         if res_.length > 0
@@ -659,7 +668,10 @@ module  OrderService
                                                 external_patient_number:  "" 
 
                                                 )
-                                 
+                        
+			else
+                              patient_obj.dob = params[:date_of_birth]
+                              patient_obj.save         
                         end
 
                         art_regimen = "N/A"
@@ -667,8 +679,8 @@ module  OrderService
                         art_start_date = ""
                         art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
                         arv_number = params[:arv_number] if !params[:arv_number].blank?
-                        art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
-
+			art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
+			 #art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
                   who_order = {
                         :first_name => params[:who_order_test_first_name],
                         :last_name => params[:who_order_test_last_name],
@@ -680,7 +692,8 @@ module  OrderService
                         :first_name => params[:first_name],
                         :last_name => params[:last_name],
                         :phone_number => params[:phone_number],
-                        :id => npid,
+                  	:dob => params[:date_of_birth],
+			:id => npid,
                         :email => params[:email],
                         :gender => params[:gender] 
                   }
@@ -713,7 +726,7 @@ module  OrderService
                         :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
                         :drawn_by_phone_number => params[:who_order_test_phone_number],
                         :target_lab => 'not_assigned',
-                        :art_start_date => Time.now,
+                        :art_start_date => art_start_date,
                         :sending_facility => params[:health_facility_name],
                         :requested_by =>  params[:requesting_clinician],
                         :district => params[:district],
@@ -1080,6 +1093,8 @@ module  OrderService
                         end
                   end
                   
+			arv_number = res.arv_number.split("-")
+			arv_number = arv_number[arv_number.length - 1]
                   return { 
 
                         gen_details:   {  sample_type: res.sample_type,
@@ -1088,7 +1103,7 @@ module  OrderService
                                           date_created: res.date_created,
                                           priority: res.priority,
                                           art_regimen: res.art_regi,
-                                          arv_number: res.arv_number,
+                                          arv_number: arv_number,
                                           site_code_number: site_code_number,
                                           art_start_date: res.art_start_date,
                                           sample_created_by: {
