@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
 ActiveRecord::Schema.define(version: 20221123065729) do
+
   create_table "data_anomalies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "data_type"
     t.string "data"
@@ -172,12 +172,11 @@ ActiveRecord::Schema.define(version: 20221123065729) do
   end
 
   create_table "specimen", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-
     t.bigint "specimen_type_id", null: false
     t.bigint "specimen_status_id"
     t.bigint "ward_id"
     t.string "tracking_number", null: false
-   t.string "couch_id"
+    t.string "couch_id"
     t.datetime "date_created"
     t.string "priority", null: false
     t.string "drawn_by_id"
@@ -268,15 +267,22 @@ ActiveRecord::Schema.define(version: 20221123065729) do
   end
 
   create_table "test_phases", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    	t.string "name"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
- 
-create_table "test_result_recepient_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  end
+
+  create_table "test_result_recepient_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name"
     t.string "description"
     t.datetime "created_at", null: false
-    0
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "test_results", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.bigint "test_id"
+    t.bigint "measure_id"
+    t.string "result", limit: 5000
     t.datetime "time_entered"
     t.string "device_name"
     t.datetime "created_at", null: false
