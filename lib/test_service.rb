@@ -114,21 +114,18 @@ module TestService
 						test_results_measures[measure_name] = { 'result_value': result_value }						
 					end	
 					results_measure[test_name] = test_results_measures	
-					if params[:test_status] != "completed" &&  params[:test_status] != "verified"
-						test_status = TestStatus.where(name: "completed").first
-					else
-						test_status = TestStatus.where(name: params[:test_status]).first
-					end				
+
+						test_status = TestStatus.where(name: params[:test_status]).first			
 						tst_update = Test.find_by(:id => test_id)
 						tst_update.test_status_id = test_status.id
 						tst_update.save
-				
+
 				else
-					if params[:test_status] != "completed" && params[:test_status] != "verified"
+							test_status = TestStatus.where(name: params[:test_status]).first
 						tst_update = Test.find_by(:id => test_id)
 						tst_update.test_status_id = test_status.id
 						tst_update.save
-					end
+
 				end		
 				
 				if !results_measure.blank?

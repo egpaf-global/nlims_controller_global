@@ -5,9 +5,8 @@ class API::V1::UserController < ApplicationController
 
 
 	def create_user
-		
 		token = request.headers['token']
-		if params[:location] && params[:app_name] && params[:password] && params[:username] && token && params[:partner]
+		if params[:location] && params[:app_name] && params[:password] && params[:username]  && token && params[:partner]
 			status = UserService.check_user(params[:username])
 			if status == false
 				st = UserService.check_account_creation_request(token)
