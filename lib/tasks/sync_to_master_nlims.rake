@@ -2,7 +2,8 @@ namespace :master_nlims do
     desc "TODO"
     task sync_data: :environment do
       
-      
+      push_acknwoledgement_to_master_nlims
+
       config = YAML.load_file("#{Rails.root}/config/master_nlims.yml")
       username = config['username']
       password = config['password']
@@ -125,8 +126,46 @@ def already_updated_with_such?(test_id, test_status)
 end
 
 
+def push_acknwoledgement_to_master_nlims()
+  res = ResultsAcknwoledge.find_by_sql("SELECT * FROM results_acknwoledges WHERE acknwoledged_to_nlims ='false'")
+  if !res.blank?
+    res.each do |order|      
+        dt = Test.find_by_sql("SELECT test_types.name AS test_name
+                        FROM tests 
+                        INNER JOIN test_types ON test_types.id = tests.test_type_id 
+                        WHERE tests.id='#{order['test_id']}'
+                      ")
+          level =  TestResultRecepientType.find_by(:id => order['acknwoledment_level'])
+               
+          if !level.blank?
+            level = level['name']
+          end
+        data = {  
+          tracking_number: order['tracking_number'],
+          test_name: dt[0]['test_name'],
+          time_acknwoledged: order['acknwoledged_at'],
+          acknwoledment_mode: level,
+          acknwoledment_by: order['acknwoledged_by']
+        }
+       
+
+        auth = JSON.parse(RestClient.get("#{protocol}:#{port}/api/v1/re_authenticate/#{username}/#{password}"))       
+        if auth['error'] == false
+          token = auth['data']['token']
+            headers = {
+            content_type: 'application/json',
+            token: token
+          }
+          url = "#{protocol}:#{port}/api/v2/acknwoledge_results_recepient"
+          order = JSON.parse(RestClient.post(url,data,headers))
+        end
+    end
+  end
+   
+end
+
 def acknwoledge_result_at_facility_level(tracking_number, test_id, result_date)
-  check ResultsAcknwoledge.find_by(:tracking_number => tracking_number, acknwoledged_to_nlims => "local_nlims_at_facility")
+  check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_to_nlims => "local_nlims_at_facility")
   if check.blank?
     tr = ResultsAcknwoledge.create(
         tracking_number: tracking_number,
@@ -134,13 +173,14 @@ def acknwoledge_result_at_facility_level(tracking_number, test_id, result_date)
         acknwoledged_at:  Time.new.strftime("%Y%m%d%H%M%S"),
         result_date: result_date,
         acknwoledged_by: "local_nlims_at_facility",
-        acknwoledged_to_nlims: false
+        acknwoledged_to_nlims: false,
+        acknwoledment_level: 3
       )
     tr.save
       test = Test.find_by(:id => test_id)
       test.result_given = 0,
       test.date_result_given = Time.new.strftime("%Y%m%d%H%M%S"),
-      test.test_result_receipent_types = 2
+      test.test_result_receipent_types = 3
       test.save
   end
 end
