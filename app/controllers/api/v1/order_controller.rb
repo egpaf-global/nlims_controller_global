@@ -8,7 +8,7 @@ class API::V1::OrderController < ApplicationController
 
 	def create_order
 	   
-						    if(!params['disptrict'])                                      
+						    if(!params['district'])                                      
 		                        msg = "district not provided";                                      
 		                    elsif(!params['health_facility_name'])
 		                        msg = "health facility name not provided"
@@ -192,7 +192,7 @@ class API::V1::OrderController < ApplicationController
 		if params['order_date'].blank?
 			msg = "date not provided"	
 		else
-			res = OrderService.retrieve_samples(params['order_date'])
+			res = OrderService.retrieve_samples(params['order_date'],params['region'])
 			if res != false
 				response = {
 										status: 200,
@@ -736,7 +736,7 @@ class API::V1::OrderController < ApplicationController
 				
 				if res == false
 					response = {
-						status: 401,
+						status: 200,
 						error: true,
 						message: 'order not available',
 						data: {
