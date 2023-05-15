@@ -33,11 +33,21 @@ namespace :master_nlims do
   
             url = "#{protocol}:#{port}/api/v2/query_order_by_tracking_number/#{tracking_number}?test_name=#{test_name}"
             order = JSON.parse(RestClient.get(url,headers)) 
-         
+            
             if order['error'] == false              
               specimen_status = order['data']['other']['specimen_status']
               tests = order['data']['tests']
               
+              tests.each do |test,details|
+                status = details['status']
+                updater_name = details['update_details']['updater_name']
+                updater_id = details['update_details']['updater_id']
+                time_updated = details['update_details']['time_updated']
+                trail_staus =  details['update_details']['status']
+                
+              end
+
+
               if !order['data']['other']['results'].blank?
                 results = order['data']['other']['results']
                 
@@ -54,22 +64,48 @@ namespace :master_nlims do
                                   time_entered: re_value['result_date']
                                 )
                       tst_save.save
+                      acknwoledge_result_at_facility_level(tracking_number,test_id,re_value['result_date'])
                       puts "result updated = " + tracking_number
                     end
                   end
                 end
               end
              
-              tests.each do |test, status|
+              tests.each do |test, details|
                 test_name = test
+
+                status = details['status']
+                if !details['update_details'].blank?
+                  updater_name = details['update_details']['updater_name']
+                  updater_id = details['update_details']['updater_id']
+                  time_updated = details['update_details']['time_updated']
+                  trail_staus =  details['update_details']['status']
+                end
+
                 test_status = status
                 tst_id = TestType.find_by(:name => test_name)['id']
                 tst_status_id = TestStatus.find_by(:name => test_status)['id']
-
-                tst_update = Test.find_by(:id => test_id,:test_type_id => tst_id)
-                tst_update.test_status_id = tst_status_id
-                tst_update.save()
-                puts "status updated = " + tracking_number
+                
+                if already_updated_with_such?(test_id,tst_status_id) == false
+                  tst_update = Test.find_by(:id => test_id,:test_type_id => tst_id)
+                  tst_update.test_status_id = tst_status_id
+                  tst_update.save()
+                  
+                  if status == trail_staus
+                    TestStatusTrail.create(
+                      test_id: test_id,
+                      time_updated: time_updated, # updated at Test.where()
+                      test_status_id: tst_status_id,
+                      who_updated_id:  updater_id.to_s,
+                      who_updated_name: updater_name.to_s,
+                      who_updated_phone_number: ""		       
+                    )
+                  end
+                  puts "status updated = " + tracking_number
+                else
+                  puts "status already updated with such = " + tracking_number
+                end
+                
               end
             end            
           end
@@ -79,6 +115,32 @@ namespace :master_nlims do
 end
 
 
-def create_order()
-  
+def already_updated_with_such?(test_id, test_status)
+    res = Test.find_by(:id => test_id, :test_status_id => test_status)   
+    if res == nil
+      return false
+    else
+      return true
+    end    
+end
+
+
+def acknwoledge_result_at_facility_level(tracking_number, test_id, result_date)
+  check ResultsAcknwoledge.find_by(:tracking_number => tracking_number, acknwoledged_to_nlims => "local_nlims_at_facility")
+  if check.blank?
+    tr = ResultsAcknwoledge.create(
+        tracking_number: tracking_number,
+        test_id: test_id,
+        acknwoledged_at:  Time.new.strftime("%Y%m%d%H%M%S"),
+        result_date: result_date,
+        acknwoledged_by: "local_nlims_at_facility",
+        acknwoledged_to_nlims: false
+      )
+    tr.save
+      test = Test.find_by(:id => test_id)
+      test.result_given = 0,
+      test.date_result_given = Time.new.strftime("%Y%m%d%H%M%S"),
+      test.test_result_receipent_types = 2
+      test.save
+  end
 end
