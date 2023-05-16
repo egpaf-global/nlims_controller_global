@@ -2,7 +2,7 @@ namespace :master_nlims do
     desc "TODO"
     task sync_data: :environment do
       
-      push_acknwoledgement_to_master_nlims
+      
 
       config = YAML.load_file("#{Rails.root}/config/master_nlims.yml")
       username = config['username']
@@ -40,6 +40,7 @@ namespace :master_nlims do
               tests = order['data']['tests']
               
               tests.each do |test,details|
+              
                 status = details['status']
                 updater_name = details['update_details']['updater_name']
                 updater_id = details['update_details']['updater_id']
@@ -112,6 +113,9 @@ namespace :master_nlims do
           end
         end
       end
+
+      #pushing result acknowledgment at facility level
+      push_acknwoledgement_to_master_nlims()
     end
 end
 
@@ -127,7 +131,14 @@ end
 
 
 def push_acknwoledgement_to_master_nlims()
+  config = YAML.load_file("#{Rails.root}/config/master_nlims.yml")
+  username = config['username']
+  password = config['password']
+  protocol = config['protocol']
+  port = config['port']
+  
   res = ResultsAcknwoledge.find_by_sql("SELECT * FROM results_acknwoledges WHERE acknwoledged_to_nlims ='false'")
+  
   if !res.blank?
     res.each do |order|      
         dt = Test.find_by_sql("SELECT test_types.name AS test_name
@@ -135,29 +146,34 @@ def push_acknwoledgement_to_master_nlims()
                         INNER JOIN test_types ON test_types.id = tests.test_type_id 
                         WHERE tests.id='#{order['test_id']}'
                       ")
-          level =  TestResultRecepientType.find_by(:id => order['acknwoledment_level'])
+        level =  TestResultRecepientType.find_by(:id => order['acknwoledment_level'])
                
-          if !level.blank?
-            level = level['name']
-          end
+        if !level.blank?
+          level = level['name']
+        end
         data = {  
-          tracking_number: order['tracking_number'],
-          test_name: dt[0]['test_name'],
-          time_acknwoledged: order['acknwoledged_at'],
-          acknwoledment_mode: level,
-          acknwoledment_by: order['acknwoledged_by']
-        }
-       
+          'tracking_number': order['tracking_number'],
+          'test': dt[0]['test_name'],
+          'date_acknowledged': order['acknwoledged_at'],
+          'recipient_type': level,
+          'acknwoledment_by': order['acknwoledged_by']
+        }       
 
         auth = JSON.parse(RestClient.get("#{protocol}:#{port}/api/v1/re_authenticate/#{username}/#{password}"))       
         if auth['error'] == false
           token = auth['data']['token']
-            headers = {
+          headers = {
             content_type: 'application/json',
             token: token
           }
-          url = "#{protocol}:#{port}/api/v2/acknwoledge_results_recepient"
-          order = JSON.parse(RestClient.post(url,data,headers))
+          url = "#{protocol}:#{port}/api/v1/acknowledge/test/results/recipient"
+          order_res = JSON.parse(RestClient.post(url,data.to_json,headers))         
+          if order_res['error'] == false  
+            ackn = ResultsAcknwoledge.find_by(:id => order['id'])
+            ackn.acknwoledged_to_nlims = true
+            ackn.save()
+
+          end
         end
     end
   end
