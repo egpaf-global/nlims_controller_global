@@ -135,7 +135,14 @@ module  OrderService
             art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
             arv_number = params[:arv_number] if !params[:arv_number].blank?
             art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
-            sp_obj =  Speciman.create(
+             if !params[:date_sample_drawn].blank?
+                        time_got = Time.new
+                        time_got = time_got.strftime("%H:%M:%S")
+                        params[:date_sample_drawn] = params[:date_sample_drawn] if params[:date_sample_drawn].split(" ").length > 1
+                        params[:date_sample_drawn] = params[:date_sample_drawn] +" "+ time_got if params[:date_sample_drawn].split(" ").length == 1
+            end
+
+        	sp_obj =  Speciman.create(
                         :tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
                         :specimen_status_id =>  sample_status_id,
@@ -333,6 +340,149 @@ module  OrderService
                   return false
             end
       end
+
+
+ def self.query_order_by_tracking_number_v2(tracking_number,test_name)
+
+            res = Speciman.find_by_sql("SELECT specimen_types.name AS sample_type, specimen_statuses.name AS specimen_status,
+                                    wards.name AS order_location, specimen.date_created AS date_created, specimen.priority AS priority,
+                                    specimen.drawn_by_id AS drawer_id, specimen.drawn_by_name AS drawer_name,
+                                    specimen.drawn_by_phone_number AS drawe_number, specimen.target_lab AS target_lab, 
+                                    specimen.sending_facility AS health_facility, specimen.requested_by AS requested_by,
+                                    specimen.date_created AS date_drawn,
+                                    patients.patient_number AS pat_id, patients.name AS pat_name,
+                                    patients.dob AS dob, patients.gender AS sex,
+                                    art_regimen AS art_regi, arv_number AS arv_number,
+                                    art_start_date AS art_start_date 
+                                    FROM specimen INNER JOIN specimen_statuses ON specimen_statuses.id = specimen.specimen_status_id
+                                    LEFT JOIN specimen_types ON specimen_types.id = specimen.specimen_type_id
+                                    INNER JOIN tests ON tests.specimen_id = specimen.id
+                                    INNER JOIN patients ON patients.id = tests.patient_id
+                                    LEFT JOIN wards ON specimen.ward_id = wards.id
+                                    WHERE specimen.tracking_number ='#{tracking_number}' ")
+            
+            tsts = {}
+            result_status = false
+            results = {}
+            result_measures = {}
+            result_val = {}
+            if res.length > 0
+                  site_code_number = get_site_code_number(tracking_number)
+                  res = res[0]
+                  tst = Test.find_by_sql("SELECT test_types.name AS test_name, test_statuses.name AS test_status,
+                                          tests.id  AS test_id
+                                          FROM tests
+                                          INNER JOIN specimen ON specimen.id = tests.specimen_id
+                                          INNER JOIN test_types ON test_types.id = tests.test_type_id
+                                          INNER JOIN test_statuses ON test_statuses.id = tests.test_status_id
+                                          WHERE specimen.tracking_number ='#{tracking_number}' AND test_types.name='#{test_name}'"
+                              )
+
+                  if tst.length > 0
+                        tst.each do |t|
+                              tsts[t.test_name] = t.test_status                              
+                              result_got =TestResult.find_by_sql("SELECT * FROM test_results WHERE test_id='#{t.test_id}'")
+                              if !result_got.blank?                                    
+                                    puts "=============================="
+                                    puts t.test_name
+                                    puts result_got
+                                    puts "=============================="
+                                    result_got.each do |reslt|
+                                          puts reslt['measure_id']
+                                          result_value = reslt['result']
+                                          result_measure = Measure.find_by(:id => reslt['measure_id'])['name']
+                                          result_measures[result_measure] = {'result': result_value, 'result_date': reslt['time_entered']}   
+                                                                               
+                                    end
+                                    result_val[t.test_name] = result_measures
+                                    result_measures = {}                                    
+                                    result_status = true
+                              end
+                              
+                        end
+                  end
+                  arv_number = res.arv_number.split("-")
+                  arv_number = arv_number[arv_number.length - 1]
+
+                  if result_status == true
+
+                        return { 
+
+                              gen_details:   {  sample_type: res.sample_type,
+                                                specimen_status: res.specimen_status,
+                                                order_location: res.order_location,
+                                                date_created: res.date_created,
+                                                priority: res.priority,
+                                                art_regimen: res.art_regi,
+                                                arv_number: arv_number,
+                                                site_code_number: site_code_number,
+                                                art_start_date: res.art_start_date,
+                                                sample_created_by: {
+                                                            id: res.drawe_number,
+                                                            name: res.drawer_name,
+                                                            phone: res.drawe_number
+                                                      },
+                                                patient: {
+                                                            id: res.pat_id,
+                                                            name: res.pat_name,
+                                                            gender: res.sex,
+                                                            dob: res.dob
+                                                      },
+                                                receiving_lab: res.target_lab,
+                                                sending_lab: res.health_facility,
+                                                sending_lab_code: site_code_number,
+                                                requested_by: res.requested_by,
+                                                tracking_number: tracking_number,
+                                                results: result_val
+                                                },
+                                                tests: tsts,
+                                                
+                                               
+                        }
+                  else
+
+                        return { 
+
+                              gen_details:   {  sample_type: res.sample_type,
+                                                specimen_status: res.specimen_status,
+                                                order_location: res.order_location,
+                                                date_created: res.date_created,
+                                                priority: res.priority,
+                                                art_regimen: res.art_regi,
+                                                arv_number: arv_number,
+                                                site_code_number: site_code_number,
+                                                art_start_date: res.art_start_date,
+                                                sample_created_by: {
+                                                            id: res.drawe_number,
+                                                            name: res.drawer_name,
+                                                            phone: res.drawe_number
+                                                      },
+                                                patient: {
+                                                            id: res.pat_id,
+                                                            name: res.pat_name,
+                                                            gender: res.sex,
+                                                            dob: res.dob
+                                                      },
+                                                receiving_lab: res.target_lab,
+                                                sending_lab: res.health_facility,
+                                                sending_lab_code: site_code_number,
+                                                requested_by: res.requested_by,
+                                                tracking_number: tracking_number                                         
+                                                },
+                                                tests: tsts
+                                                
+                        }
+
+
+                  end
+
+            else
+                  return false
+            end
+
+      end
+
+
 
       def self.get_site_code_number(site_code_alpha)
 

@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
 ActiveRecord::Schema.define(version: 20221123065729) do
+
   create_table "data_anomalies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "data_type"
     t.string "data"
@@ -138,15 +138,9 @@ ActiveRecord::Schema.define(version: 20221123065729) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "remarks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "remark"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
   create_table "site_sync_frequencies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "site_id"
-    t.datetime "last_sync"
+    t.string "site"
+    t.boolean "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -176,11 +170,6 @@ ActiveRecord::Schema.define(version: 20221123065729) do
     t.bigint "ward_id"
     t.string "tracking_number"
     t.string "couch_id"
-    t.bigint "specimen_type_id", null: false
-    t.bigint "specimen_status_id"
-    t.bigint "ward_id"
-    t.string "tracking_number", null: false
-    t.string "couch_id"
     t.datetime "date_created"
     t.string "priority", null: false
     t.string "drawn_by_id"
@@ -197,7 +186,6 @@ ActiveRecord::Schema.define(version: 20221123065729) do
     t.string "art_regimen"
     t.index ["specimen_status_id"], name: "index_specimen_on_specimen_status_id"
     t.index ["specimen_type_id"], name: "index_specimen_on_specimen_type_id"
-    t.index ["tracking_number"], name: "index_specimen_on_tracking_number"
     t.index ["ward_id"], name: "index_specimen_on_ward_id"
   end
 
@@ -276,24 +264,21 @@ ActiveRecord::Schema.define(version: 20221123065729) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "test_result_recepient_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name"
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "test_results", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "test_id"
     t.bigint "measure_id"
     t.string "result"
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
- 
-create_table "test_result_recepient_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "name"
-    t.string "description"
-    t.datetime "created_at", null: false
     t.datetime "time_entered"
     t.string "device_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "test_result_receipent_types"
-    t.boolean "result_given"
     t.index ["measure_id"], name: "index_test_results_on_measure_id"
     t.index ["test_id"], name: "index_test_results_on_test_id"
   end

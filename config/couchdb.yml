@@ -4,7 +4,7 @@ development: &development
   port: 5984
   prefix: nlims
   suffix: repo_
-  username: root
+  username: admin
   password: root
 
 test:
