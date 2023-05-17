@@ -87,6 +87,44 @@ class API::V2::OrderController < ApplicationController
 
 	end
 
+	def query_order_by_tracking_number		
+		if  params[:tracking_number]
+				res = OrderService.query_order_by_tracking_number_v2(params[:tracking_number])				
+				if res == false
+					response = {
+						status: 200,
+						error: true,
+						message: 'order not available',
+						data: {
+							
+						}
+					}
+				else
+					response = {
+						status: 200,
+						error: false,
+						message: 'order retrieved',
+						data: {
+							tests: res[:tests],
+							other: res[:gen_details]
+						}
+					}
+				end
+		else
+			response = {
+					status: 401,
+					error: true,
+					message: 'tracking number not provided',
+					data: {
+						
+					}
+			}
+		end
+
+		render plain: response.to_json and return
+
+	end
+
     def  confirm_order_request
         if params['tracking_number']  && params['specimen_type']	&& params['target_lab']
 			OrderService.confirm_order_request(params)

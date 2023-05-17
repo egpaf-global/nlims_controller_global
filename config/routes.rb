@@ -13,6 +13,8 @@ Rails.application.routes.draw do
 		post '/dispatch_sample'									  	=> 'order#dispatch_sample'
 		get	 '/check_if_dispatched/:tracking_number'				=> 'order#check_if_dispatched'
 		get  '/retrieve_undispatched_samples'						=> 'order#retrieve_undispatched_samples'
+		get  '/retrieve_samples/:order_date/:region'				=> 'order#retrieve_samples'
+		
 
   		#test routes
   		post '/update_test'  				   					 	=> 'test#update_test'
@@ -41,6 +43,7 @@ Rails.application.routes.draw do
 			post '/request_order'									=> 'order#request_order'
 			post '/confirm_order_request'							=> 'order#confirm_order_request'
 			get  '/query_requested_order_by_npid/:npid'				=> 'order#query_requested_order_by_npid2'
+			get  '/query_order_by_tracking_number/:tracking_number'	=> 'order#query_order_by_tracking_number'
 	end
   end
 end

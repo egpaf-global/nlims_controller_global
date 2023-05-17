@@ -1,0 +1,2 @@
+class ResultsAcknwoledge < ApplicationRecord
+end
