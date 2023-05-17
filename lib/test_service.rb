@@ -317,7 +317,18 @@ module TestService
                         tst.result_given = true
                         tst.date_result_given = date
                         tst.save
-
+			check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_by => "emr_at_facility")
+  			if check.blank?
+			   tr = ResultsAcknwoledge.create(
+        			tracking_number: tracking_number,
+        			test_id: res[0]['id'],
+        			acknwoledged_at:  date,
+        			result_date: date,
+        			acknwoledged_by: "emr_at_facility",
+        			acknwoledged_to_nlims: false,
+       				 acknwoledment_level: 2
+			      )
+			end
                         obj = Speciman.find_by(:tracking_number => tracking_number)
                         couch_id = obj['couch_id'] if !obj['couch_id'].blank?
 

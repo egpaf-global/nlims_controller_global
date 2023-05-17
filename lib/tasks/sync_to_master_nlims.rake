@@ -15,7 +15,7 @@ namespace :master_nlims do
                       tests.id as test_id,test_type_id as test_type_id, test_types.name as test_name
                       FROM tests INNER JOIN specimen ON specimen.id = tests.specimen_id 
                       INNER JOIN test_types ON test_types.id = tests.test_type_id
-                      WHERE tests.id NOT IN (SELECT test_id FROM test_results) AND substr(specimen.date_created,1,10) > '2023-04-19'")
+                      WHERE tests.id NOT IN (SELECT test_id FROM test_results) AND substr(specimen.date_created,1,10) > '2023-05-08'")
 
       if !res.blank?        
         auth = JSON.parse(RestClient.get("#{protocol}:#{port}/api/v1/re_authenticate/#{username}/#{password}"))       
@@ -85,7 +85,8 @@ namespace :master_nlims do
                 end
 
                 test_status = status
-                tst_id = TestType.find_by(:name => test_name)['id']
+                test_status = "test-rejected"  if test_status == "rejected"
+		tst_id = TestType.find_by(:name => test_name)['id']
                 tst_status_id = TestStatus.find_by(:name => test_status)['id']
                 
                 if already_updated_with_such?(test_id,tst_status_id) == false
