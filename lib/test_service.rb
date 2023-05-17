@@ -178,20 +178,44 @@ module TestService
 	end
 
 	def self.acknowledge_test_results_receiptient(tracking_number,test_name,date,recipient_type)
+		test_name = "Viral Load" if test_name == "HIV viral load"
 		res = Test.find_by_sql("SELECT tests.id FROM tests INNER JOIN test_types ON test_types.id = tests.test_type_id
 							INNER JOIN specimen ON specimen.id = tests.specimen_id
 							where specimen.tracking_number ='#{tracking_number}' AND test_types.name='#{test_name}'")
-		if res		
-			type = TestResultRecepientType.find_by(:name => recipient_type)
-			tst = Test.find_by(:id => res[0]['id'])
-			tst.test_result_receipent_types = type.id
-			tst.result_given = true
-			tst.date_result_given = date
-			tst.save			
-			return true
-		else
-			return false
-		end
+		if !res.blank?
+                        type = TestResultRecepientType.find_by(:name => recipient_type)
+                        tst = Test.find_by(:id => res[0]['id'])
+                        tst.test_result_receipent_types = type.id
+                        tst.result_given = true
+                        tst.date_result_given = date
+                        tst.save
+
+                        obj = Speciman.find_by(:tracking_number => tracking_number)
+                        couch_id = obj['couch_id'] if !obj['couch_id'].blank?
+
+                        retr_order = OrderService.retrieve_order_from_couch(couch_id)
+                #puts "hello"
+                                #puts retr_order
+                                #raise retr_order.inspect
+                        if !retr_order['tracking_number'].blank?
+                        test_ackn = {}
+                        test_ackn[test_name] = {
+                                'result_recepient_type': recipient_type ,
+                                'result_given': "true",
+                                'date_result_give;': date
+                        }
+
+                        new_acknow = retr_order['results_acknowledgement']
+                        new_acknow = test_ackn
+                        retr_order['results_acknowledgement'] = new_acknow
+                        OrderService.update_couch_order(couch_id,retr_order)
+                        end
+
+                        return true
+                else
+                        return false
+                end
+
 	end
 
 	def self.test_no_results(npid)

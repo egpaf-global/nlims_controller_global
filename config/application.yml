@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+page_size: 40
+district: 'Blantyre'
+facility_name: 'Ndirande Health Centre'
+receiving_facility: 'Queen Elizabeth Central Hospital'
+bart2_address: 'http://192.168.5.89:5000'
+facility_code: 'ND'
+
+=======
 district: 'Lilongwe'
 facility_name: 'Community Health Sciences Unit'
 facility_code: 'CHSU'
+>>>>>>> f68df7d870ba1888adb497b0996f2a1120ae0890
