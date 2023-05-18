@@ -1,0 +1,6 @@
+protocol: 'http://10.44.0.46'
+port: 3010
+username: mzuzumacro_locallims
+password: mzuzumacro_locallims
+default_username: admin
+default_password: knock_knock
