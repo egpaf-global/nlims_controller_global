@@ -672,6 +672,28 @@ class API::V1::OrderController < ApplicationController
 							results: res
 						}
 					}
+
+					res.each do |test,result|
+						if test == "Viral Load"
+							test_id_ = Test.find_by_sql("SELECT tests.id as test_id FROM tests INNER JOIN specimen ON specimen.id = tests.specimen_id 
+											INNER JOIN test_types ON test_types.id = tests.test_type_id 
+											WHERE specimen.tracking_number ='#{params[:tracking_number]}' AND test_types.name LIKE '%Viral Load%'")
+							if !test_id_.blank?	
+								check = ResultsAcknwoledge.find_by(:tracking_number => params[:tracking_number], :acknwoledged_by => "emr_at_facility")
+								if check.blank?
+									tr = ResultsAcknwoledge.create(
+										tracking_number: params[:tracking_number],
+										test_id: test_id_[0]['test_id'],
+										acknwoledged_at:  Time.new.strftime("%Y%m%d%H%M%S"),
+										result_date: result['result_date'],
+										acknwoledged_by: "emr_at_facility",
+										acknwoledged_to_nlims: false,
+										acknwoledment_level: 2
+									)
+								end
+							end
+						end
+					end
 				end			
 		else
 			response = {
