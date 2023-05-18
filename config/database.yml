@@ -48,6 +48,6 @@ test:
 #
 production:
   <<: *default
-  database: nlims_production
-  username: nlims
+  database: lims_db
+  username: lab_test
   password: <%= ENV['NLIMS_DATABASE_PASSWORD'] %>

@@ -137,15 +137,16 @@ module  OrderService
             art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
             arv_number = params[:arv_number] if !params[:arv_number].blank?
             art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
-             if !params[:date_sample_drawn].blank?
+
+ 		if !params[:date_sample_drawn].blank?
                         time_got = Time.new
                         time_got = time_got.strftime("%H:%M:%S")
                         params[:date_sample_drawn] = params[:date_sample_drawn] if params[:date_sample_drawn].split(" ").length > 1
                         params[:date_sample_drawn] = params[:date_sample_drawn] +" "+ time_got if params[:date_sample_drawn].split(" ").length == 1
-            end
+	        end
 
-        	sp_obj =  Speciman.create(
-                        :tracking_number => tracking_number,
+            sp_obj =  Speciman.create(
+			:tracking_number => tracking_number,
                         :specimen_type_id =>  sample_type_id,
                         :specimen_status_id =>  sample_status_id,
                         :couch_id => '',

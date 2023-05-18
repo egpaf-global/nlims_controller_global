@@ -306,12 +306,15 @@ module TestService
 	end
 
 	def self.acknowledge_test_results_receiptient(tracking_number,test_name,date,recipient_type)
+
 		 test_name = "Viral Load" if test_name == "HIV viral load"
 		 test_name = "CD4" if test_name == "CD4 count"
 			res = Test.find_by_sql("SELECT tests.id FROM tests INNER JOIN test_types ON test_types.id = tests.test_type_id
                                                         INNER JOIN specimen ON specimen.id = tests.specimen_id
                                                         where specimen.tracking_number ='#{tracking_number}' AND test_types.name='#{test_name}'")
-                if !res.blank?
+
+		if !res.blank?
+
                         type = TestResultRecepientType.find_by(:name => recipient_type)
                         tst = Test.find_by(:id => res[0]['id'])
                         tst.test_result_receipent_types = type.id
@@ -319,6 +322,18 @@ module TestService
                         tst.date_result_given = date
                         tst.save
 
+			check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_by => "emr_at_facility")
+  			if check.blank?
+			   tr = ResultsAcknwoledge.create(
+        			tracking_number: tracking_number,
+        			test_id: res[0]['id'],
+        			acknwoledged_at:  date,
+        			result_date: date,
+        			acknwoledged_by: "emr_at_facility",
+        			acknwoledged_to_nlims: false,
+       				 acknwoledment_level: 2
+			      )
+			end
                         obj = Speciman.find_by(:tracking_number => tracking_number)
                         couch_id = obj['couch_id'] if !obj['couch_id'].blank?
 
