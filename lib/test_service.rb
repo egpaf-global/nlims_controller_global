@@ -21,8 +21,7 @@ module TestService
 			test_name = params[:test_name]
 			test_name = test_name.gsub("_"," ")
 			
-			retr_order = OrderService.retrieve_order_from_couch(couch_id)
-			
+			retr_order = OrderService.retrieve_order_from_couch(couch_id)			
 
 			test_name = "CD4" if test_name == "PIMA CD4"
                         test_name = "Viral Load" if test_name == "Viral Load Gene X-per"
@@ -106,8 +105,15 @@ module TestService
 										time_entered: result_date
 									)
 								else
-									test_result_ = TestResult.where(test_id: test_id, measure_id: measure.id).first
-									test_result_.update(result: result_value, time_entered: result_date)
+									if test_name == "Viral Load"
+										test_result_ = TestResult.where(test_id: test_id, measure_id: measure.id).first
+										test_result_.update(result: result_value, time_entered: result_date)	
+										
+										t = TestStatusTrail.where(test_id: test_id,test_status_id:5).first
+										if !t.blank?
+											t.update(time_updated = time_entered)
+										end
+									end
 								end
 								test_results_measures[measure_name] = { 'result_value': result_value }						
 							end	

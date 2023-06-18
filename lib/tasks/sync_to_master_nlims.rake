@@ -181,7 +181,7 @@ def push_acknwoledgement_to_master_nlims()
 end
 
 def acknwoledge_result_at_facility_level(tracking_number, test_id, result_date)
-  check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_to_nlims => "local_nlims_at_facility")
+  check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_by => "local_nlims_at_facility")
   if check.blank?
     tr = ResultsAcknwoledge.create(
         tracking_number: tracking_number,
