@@ -1,6 +1,6 @@
 namespace :emr do
     desc "TODO"
-    create_user: :environment do
+    task create_user: :environment do
       
       
       config = YAML.load_file("#{Rails.root}/config/emr_connection.yml")
@@ -11,11 +11,7 @@ namespace :emr do
 
 
       url = "#{protocol}:#{port}/api/v1/lab/users"
-      user = JSON.parse(RestClient.post(url,{'username': username,'password': password,headers)) 
-      if user['errors'][0] != "Username already exists" 
-        puts "emr user created succussfuly"
-      else
-        puts  user['errors'][0]
-      end
+      user = JSON.parse(RestClient.post(url,{'username': username,'password': password}.to_json, content_type: 'application/json')) 
+  
     end
 end

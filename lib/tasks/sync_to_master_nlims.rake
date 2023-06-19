@@ -1,8 +1,7 @@
 namespace :master_nlims do
     desc "TODO"
     task sync_data: :environment do
-      
-      
+   
 
       config = YAML.load_file("#{Rails.root}/config/master_nlims.yml")
       username = config['username']
@@ -15,11 +14,15 @@ namespace :master_nlims do
                       tests.id as test_id,test_type_id as test_type_id, test_types.name as test_name
                       FROM tests INNER JOIN specimen ON specimen.id = tests.specimen_id 
                       INNER JOIN test_types ON test_types.id = tests.test_type_id
-                      WHERE tests.id NOT IN (SELECT test_id FROM test_results) AND substr(specimen.date_created,1,10) > '2023-04-19'")
-
+                      WHERE tests.id NOT IN (SELECT test_id FROM test_results) AND substr(specimen.date_created,1,10) > '2023-06-17'")
+                     
       if !res.blank?        
-        auth = JSON.parse(RestClient.get("#{protocol}:#{port}/api/v1/re_authenticate/#{username}/#{password}"))       
+        auth = JSON.parse(RestClient.get("#{protocol}:#{port}/api/v1/re_authenticate/#{username}/#{password}"))    
+
         if auth['error'] == false
+         
+          emr_auth_status = authenticate_with_emr
+            
           token = auth['data']['token']
           headers = {
             content_type: 'application/json',
@@ -30,7 +33,6 @@ namespace :master_nlims do
             tracking_number = sample['tracking_number']
             test_name = sample['test_name']
             test_id = sample['test_id']
-
   
             url = "#{protocol}:#{port}/api/v2/query_order_by_tracking_number/#{tracking_number}?test_name=#{test_name}"
             order = JSON.parse(RestClient.get(url,headers)) 
@@ -45,10 +47,8 @@ namespace :master_nlims do
                 updater_name = details['update_details']['updater_name']
                 updater_id = details['update_details']['updater_id']
                 time_updated = details['update_details']['time_updated']
-                trail_staus =  details['update_details']['status']
-                
+                trail_staus =  details['update_details']['status']                
               end
-
 
               if !order['data']['other']['results'].blank?
                 results = order['data']['other']['results']
@@ -68,12 +68,16 @@ namespace :master_nlims do
                       tst_save.save
                       acknwoledge_result_at_facility_level(tracking_number,test_id,re_value['result_date'])
                       #push to emr tracking number, test name, result, result date
+                      if emr_auth_status[0] = true  
+                        token = emr_auth_status[1]
+                        push_result_to_emr(token,tracking_number, re_value['result'], re_value['result_date'], test_name)
+                      end
                       puts "result updated = " + tracking_number
                     end
                   end
                 end
               end
-             
+
               tests.each do |test, details|
                 test_name = test
 
@@ -103,7 +107,11 @@ namespace :master_nlims do
                       who_updated_name: updater_name.to_s,
                       who_updated_phone_number: ""		       
                     )
-                  end
+                  end 
+                  if emr_auth_status[0] = true   
+                    token = emr_auth_status[1]
+                    res_up = push_status_to_emr(token,tracking_number, status, time_updated, test_name)                   
+                  end                     
                   puts "status updated = " + tracking_number
                   #push to emr the status, tracking_number, test status, test name, status time
                 else
@@ -213,9 +221,9 @@ def authenticate_with_emr
 
 
   url = "#{protocol}:#{port}/api/v1/lab/users/login"
-  user = JSON.parse(RestClient.post(url,{'username': username,'password': password,headers}, content_type: 'application/json')) 
+  user = JSON.parse(RestClient.post(url,{'username': username,'password': password}, content_type: 'application/json')) 
   if user['errors'].blank? 
-   return [true, user['token']]
+   return [true, user['auth_token']]
   else
     return [false,""]
   end
@@ -226,12 +234,42 @@ def push_status_to_emr(token,tracking_number, status, status_time, test_name)
   protocol = config['protocol']
   port = config['port']
 
-  header = {"token": token, content_type: 'application/json'}
   data = {
-    "tracking_number" : tracking_number,
+    "tracking_number": tracking_number,
     "status": status,
-    "status_time"
+    "status_time": status_time
   }
+  token = " Bearer "+ token
   url = "#{protocol}:#{port}/api/v1/lab/orders/order_status"
-  user = JSON.parse(RestClient.post(url,data,headers)) 
+  user = JSON.parse(RestClient.post(url,data.to_json, {"content_type": "application/json", "Authorization": token}))
+
+  if !user['message'].blank?   
+      return true  
+  else
+      return false
+  end 
+end
+
+def push_result_to_emr(token,tracking_number, result, result_date, test_name)
+  config = YAML.load_file("#{Rails.root}/config/emr_connection.yml")
+  protocol = config['protocol']
+  port = config['port']
+
+  data = {
+        "tracking_number": tracking_number,
+        "results": {
+          "Viral Load": result,
+          "result_date": result_date
+        }
+  }
+
+  token = " Bearer "+ token
+  url = "#{protocol}:#{port}/api/v1/lab/orders/order_result"
+  user = JSON.parse(RestClient.post(url,data.to_json, {"content_type": "application/json", "Authorization": token}))
+
+  if !user['message'].blank?   
+      return true  
+  else
+      return false
+  end
 end
