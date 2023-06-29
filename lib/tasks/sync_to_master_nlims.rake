@@ -15,12 +15,14 @@ namespace :master_nlims do
                       tests.id as test_id,test_type_id as test_type_id, test_types.name as test_name
                       FROM tests INNER JOIN specimen ON specimen.id = tests.specimen_id 
                       INNER JOIN test_types ON test_types.id = tests.test_type_id
-                      WHERE tests.id NOT IN (SELECT test_id FROM test_results) AND substr(specimen.date_created,1,10) > '2023-05-08'")
+                      WHERE tests.id NOT IN (SELECT test_id FROM test_results) AND substr(specimen.date_created,1,10) > '2023-05-05'")
 
       if !res.blank?        
         auth = JSON.parse(RestClient.get("#{protocol}:#{port}/api/v1/re_authenticate/#{username}/#{password}"))       
         if auth['error'] == false
-          token = auth['data']['token']
+         emr_auth_status = authenticate_with_emr
+
+	  token = auth['data']['token']
           headers = {
             content_type: 'application/json',
             token: token
@@ -68,7 +70,13 @@ namespace :master_nlims do
                       tst_save.save
                       acknwoledge_result_at_facility_level(tracking_number,test_id,re_value['result_date'])
                       puts "result updated = " + tracking_number
-                    end
+                       if emr_auth_status[0] = true  
+                       token = emr_auth_status[1]
+                        push_result_to_emr(token,tracking_number, re_value['result'], re_value['result_date'], test_name)
+                      	acknwoledge_result_at_emr_level(tracking_number,test_id,re_value['result_date'])
+			puts "pushed result to emr = " + tracking_number
+			end
+		    end
                   end
                 end
               end
@@ -105,7 +113,12 @@ namespace :master_nlims do
                     )
                   end
                   puts "status updated = " + tracking_number
-                else
+                  if emr_auth_status[0] = true   
+                    token = emr_auth_status[1]
+                    res_up = push_status_to_emr(token,tracking_number, status, time_updated, test_name)                   
+                    puts "pushed status to emr = " + tracking_number
+	          end
+		else
                   puts "status already updated with such = " + tracking_number
                 end
                 
@@ -182,8 +195,8 @@ def push_acknwoledgement_to_master_nlims()
 end
 
 def acknwoledge_result_at_facility_level(tracking_number, test_id, result_date)
-  check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_to_nlims => "local_nlims_at_facility")
-  if check.blank?
+  check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_by => "local_nlims_at_facility")
+  if check.nil?
     tr = ResultsAcknwoledge.create(
         tracking_number: tracking_number,
         test_id: test_id,
@@ -201,3 +214,89 @@ def acknwoledge_result_at_facility_level(tracking_number, test_id, result_date)
       test.save
   end
 end
+
+
+
+def acknwoledge_result_at_emr_level(tracking_number, test_id, result_date)
+  check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_by => "emr_at_facility")
+  if check.nil?
+    tr = ResultsAcknwoledge.create(
+        tracking_number: tracking_number,
+        test_id: test_id,
+        acknwoledged_at:  Time.new.strftime("%Y%m%d%H%M%S"),
+        result_date: result_date,
+        acknwoledged_by: "emr_at_facility",
+        acknwoledged_to_nlims: false,
+        acknwoledment_level: 2
+      )
+    tr.save
+  end
+end
+
+
+
+def authenticate_with_emr
+  config = YAML.load_file("#{Rails.root}/config/emr_connection.yml")
+  username = config['username']
+  password = config['password']
+  protocol = config['protocol']
+  port = config['port']
+
+
+  url = "#{protocol}:#{port}/api/v1/lab/users/login"
+  user = JSON.parse(RestClient.post(url,{'username': username,'password': password}, content_type: 'application/json')) 
+  if user['errors'].blank? 
+   return [true, user['auth_token']]
+  else
+    return [false,""]
+  end
+end
+
+def push_status_to_emr(token,tracking_number, status, status_time, test_name)
+  config = YAML.load_file("#{Rails.root}/config/emr_connection.yml")
+  protocol = config['protocol']
+  port = config['port']
+
+  data = {
+    "tracking_number": tracking_number,
+    "status": status,
+    "status_time": status_time
+  }
+  token = " Bearer "+ token
+  url = "#{protocol}:#{port}/api/v1/lab/orders/order_status"
+  user = JSON.parse(RestClient.post(url,data.to_json, {"content_type": "application/json", "Authorization": token}))
+
+  if !user['message'].blank?   
+      return true  
+  else
+      return false
+  end 
+end
+
+def push_result_to_emr(token,tracking_number, result, result_date, test_name)
+  config = YAML.load_file("#{Rails.root}/config/emr_connection.yml")
+  protocol = config['protocol']
+  port = config['port']
+
+  data = {"data":{
+        "tracking_number": tracking_number,
+        "results": {
+            "Viral Load":{
+	    "Viral Load": result,
+            "result_date": result_date
+            }
+	  }
+	}
+  }
+
+  token = " Bearer "+ token
+  url = "#{protocol}:#{port}/api/v1/lab/orders/order_result"
+  user = JSON.parse(RestClient.post(url,data.to_json, {"content_type": "application/json", "Authorization": token}))
+
+  if !user['message'].blank?   
+      return true  
+  else
+      return false
+  end
+end
+

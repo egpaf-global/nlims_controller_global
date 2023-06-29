@@ -755,10 +755,10 @@ class API::V1::OrderController < ApplicationController
 		if  params[:tracking_number]
 
 				res = OrderService.query_order_by_tracking_number(params[:tracking_number])
-				
+		
 				if res == false
 					response = {
-						status: 200,
+						status: 401,
 						error: true,
 						message: 'order not available',
 						data: {
@@ -786,7 +786,6 @@ class API::V1::OrderController < ApplicationController
 					}
 			}
 		end
-	
 		render plain: response.to_json and return
 	end
 
