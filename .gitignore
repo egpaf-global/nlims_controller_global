@@ -19,4 +19,12 @@
 .byebug_history
 
 #Ignore yml files in config
-config/*.yml
+Gemfile.lock
+config/database.yml
+config/secrets.yml
+config/application.yml
+config/couchdb.yml
+config/emr_connection.yml
+config/result_channel_soucket.yml
+config/master_nlims.yml
+

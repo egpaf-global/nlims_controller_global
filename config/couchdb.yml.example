@@ -3,8 +3,8 @@ development: &development
   host: localhost
   port: 5984
   prefix: nlims
-  suffix: repo
-  username: root
+  suffix: repo_
+  username: admin
   password: root
 test:
   <<: *development
