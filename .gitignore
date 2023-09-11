@@ -25,6 +25,6 @@ config/secrets.yml
 config/application.yml
 config/couchdb.yml
 config/emr_connection.yml
-config/result_channel_soucket.yml
+config/results_channel_socket.yml
 config/master_nlims.yml
 
