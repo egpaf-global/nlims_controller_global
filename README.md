@@ -1,24 +1,73 @@
-# README
+# Local NLIMS at Sites
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Overview
 
-Things you may want to cover:
+Local NLIMS (National Laboratory Information Management System) is an integral part of the healthcare infrastructure in ART sites. It plays a crucial role in facilitating communication between the ART application and the central CHSU (Central Health Service Unit) NLIMS. This document provides an overview of how Local NLIMS operates and communicates with various components.
 
-* Ruby version
+## Functionality
 
-* System dependencies
+- **Running in ART Sites**: Local NLIMS is deployed and operates within ART sites, specifically on the ART server.
 
-* Configuration
+- **Communication with ART**: Every ART application at the site has an associated account with the Local NLIMS. This allows ART to push orders and pull statuses and results from the Local NLIMS.
 
-* Database creation
+- **Integration with CHSU NLIMS**: Local NLIMS further communicates with the central CHSU NLIMS. It pushes orders to the CHSU NLIMS and pulls statuses and results from it.
 
-* Database initialization
+- **Data Relay to ART**: Once the Local NLIMS retrieves statuses and results from the CHSU NLIMS, it pushes this data to the ART application, ensuring seamless data transfer.
 
-* How to run the test suite
+- **Access Control**: Local NLIMS enforces access control by requiring accounts to permit transactions between it and other systems. This access is configured via usernames and passwords.
 
-* Services (job queues, cache servers, search engines, etc.)
+## How ART Communicates with Local NLIMS
 
-* Deployment instructions
+ART communicates with the Local NLIMS through its backend, which is the API module. To configure this communication, follow these steps:
 
-* ...
+1. **Check `application.yml`**: Within the API, locate the `application.yml` file.
+
+2. **Configuration Settings**:
+   - Ensure that `lims_api` is not commented out, as this allows the API to interact with the Local NLIMS.
+   - Verify that `lims_port` specifies the correct port number on which the Local NLIMS is running.
+   - Set `lims_default_username` to "admini" for access during account creation.
+   - Set `lims_default_password` to "knock_knock" for access during account creation.
+   - Customize `lims_username` and `lims_password` with your desired credentials for accounts created on the Local NLIMS.
+
+3. **Create an Account**: To create an account with the Local NLIMS at the facility, run the following command within the BHT-EMR-API application:
+   ```bash
+   rake nlims:create_user
+   ```
+
+4. With these configurations in place, BHT-EMR-API can now interact with the Local NLIMS. Additionally, a job within the EMR-API allows transactions to and from the Local NLIMS. This job should be scheduled in the crontab to execute at specified intervals. The job is found under `bin/lab/sync_worker.rb`.  
+```bash
+* * * * * /bin/bash -l -c 'cd /var/www/BHT-EMR-API && bin/rails runner -e development '\''bin/lab/sync_worker.rb'\'''
+```
+
+## How Local NLIMS Communicates with CHSU NLIMS
+
+Local NLIMS communicates with the CHSU NLIMS and requires an account for proper setup. Follow these steps:
+
+1. **Edit `master_nlims.yml`**:
+   - Set the `protocol` to the IP address of the CHSU NLIMS (e.g., 10.44.0.46).
+   - Set `port` to the port number on which the CHSU NLIMS is running (e.g., 3010).
+   - Ensure that `default_username` and `default_password` are set to "admin" and "knock_knock," respectively, to permit account creation at CHSU NLIMS.
+   - Customize `password` and `username` with your desired credentials for the account created at CHSU NLIMS.
+
+2. **Create an Account with CHSU NLIMS**:
+   Run the following command to create an account with the CHSU NLIMS:
+   ```bash
+   rake master_nlims:create_account
+   ```
+
+3. **Data Synchronization to CHSU NLIMS**:
+   To push orders from the Local NLIMS to the CHSU NLIMS, a job named `master_nlims:sync_data_to` must be scheduled in the crontab. This job ensures that pending data is sent to the CHSU NLIMS.
+   ```bash
+   0 */2 * * *  /bin/bash -l -c 'cd /var/www/nlims_controller && rvm use 2.5.3 && RAILS_ENV=development bundle exec rake master_nlims:sync_data --silent >> log/pull_from_master_nlims.log 2>&1'
+   ```
+
+4. **Data Retrieval from CHSU NLIMS and Sharing**:
+   Local NLIMS pulls statuses and results from the CHSU NLIMS and shares this data with the ART application. This is accomplished through the `master_nlims:sync_data` job. It can also send these statuses and results to the ART application proactively without waiting for a request.
+
+5. **Account Configuration with ART**:
+   - Edit the `emr_connection.yml` file to specify the IP address and port number where the ART application is running.
+   - Customize `username` and `password` with your desired credentials, which will be used for the account created within the ART application.
+
+6. Run the necessary command to complete the setup, as per your specific requirements.
+
+By following these steps, Local NLIMS establishes effective communication with both the ART application and the CHSU NLIMS, facilitating efficient data exchange within the healthcare system.
