@@ -20,8 +20,8 @@ cp database.yml.example database.yml
    - `couchdb.yml`: Configure your CouchDB settings.
    - `results_channel_socket.yml`: Configure your results channel socket settings.
    - `application.yml`: Edit application-specific configurations as required.
-   - `emr_connection` : Configure connection to emr for updating results and statuses.
-   - `master_nlims.yml`: Configure your CouchDB settings.
+   - `emr_connection` : Configure connection to emr for updating results and statuses, [See this section](#master_nlims)
+   - `master_nlims.yml`: Configure your CouchDB settings, [See this section](#master_nlims)
 
 2. Update the configuration settings in these files to match your environment.
 
@@ -96,7 +96,7 @@ If you already had NLIMS running before and want to update it, follow these step
 
 
 
-# Local NLIMS at Sites
+# Local NLIMS at Sites 
 
 ## Overview
 
@@ -114,7 +114,7 @@ Local NLIMS (National Laboratory Information Management System) is an integral p
 
 - **Access Control**: Local NLIMS enforces access control by requiring accounts to permit transactions between it and other systems. This access is configured via usernames and passwords.
 
-## How ART Communicates with Local NLIMS
+## How ART Communicates with Local NLIMS 
 
 ART communicates with the Local NLIMS through its backend, which is the API module. To configure this communication, follow these steps:
 
@@ -137,7 +137,7 @@ ART communicates with the Local NLIMS through its backend, which is the API modu
 * * * * * /bin/bash -l -c 'cd /var/www/BHT-EMR-API && bin/rails runner -e development '\''bin/lab/sync_worker.rb'\'''
 ```
 
-## How Local NLIMS Communicates with CHSU NLIMS
+## How Local NLIMS Communicates with CHSU NLIMS {#master_nlims}
 
 Local NLIMS communicates with the CHSU NLIMS and requires an account for proper setup. Follow these steps:
 
@@ -162,7 +162,7 @@ Local NLIMS communicates with the CHSU NLIMS and requires an account for proper 
 4. **Data Retrieval from CHSU NLIMS and Sharing**:
    Local NLIMS pulls statuses and results from the CHSU NLIMS and shares this data with the ART application. This is accomplished through the `master_nlims:sync_data` job. It can also send these statuses and results to the ART application proactively without waiting for a request.
 
-5. **Account Configuration with ART**:
+5. **Account Configuration with ART**
    - Edit the `emr_connection.yml` file to specify the IP address and port number where the ART application is running.
    - Customize `username` and `password` with your desired credentials, which will be used for the account created within the ART application.
    - Run the following command to create account with emr
