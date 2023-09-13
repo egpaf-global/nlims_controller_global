@@ -1,3 +1,101 @@
+# NLIMS SETUP
+
+## Prerequisites
+
+Before installing `NLIMS`, ensure that the following requirements are met:
+
+- Ruby 2.5.3
+- MySQL 5.6
+- Rails 5
+- Couchdb 3.2.1
+
+## Configuration
+
+1. Open the respective configuration files in the `config` folder: Copy the .example file to respective .yml file e.g  
+```bash
+cp database.yml.example database.yml
+```
+
+   - `database.yml`: Configure your database settings.
+   - `couchdb.yml`: Configure your CouchDB settings.
+   - `results_channel_socket.yml`: Configure your results channel socket settings.
+   - `application.yml`: Edit application-specific configurations as required.
+   - `emr_connection` : Configure connection to emr for updating results and statuses.
+   - `master_nlims.yml`: Configure your CouchDB settings.
+
+2. Update the configuration settings in these files to match your environment.
+
+## Installation
+
+1. Install project dependencies using Bundler. Run the following command in your project directory:
+
+   ```bash
+   bundle install
+   ```
+
+## First-Time Setup
+
+If you are installing the app for the first time, follow these steps:
+
+1. Create the database:
+
+   ```bash
+   rails db:create
+   ```
+
+2. Run database migrations:
+
+   ```bash
+   rails db:migrate
+   ```
+
+3. Seed the database with initial data:
+
+   ```bash
+   rails db:seed
+   ```
+
+## Updating NLIMS
+
+If you already had NLIMS running before and want to update it, follow these steps:
+
+1. Load the database dump if applicable.
+
+2. Run database migrations:
+
+   ```bash
+   rails db:migrate
+   ```
+
+3. Seed the database with specific data as needed:
+
+   - Seed Dispatcher Types:
+
+     ```bash
+     rake db:seed:specific\[seed_dispatcher_types.rb\]
+     ```
+
+   - Seed Test Results Recipient Types:
+
+     ```bash
+     rake db:seed:specific\[seed_test_results_recepient_types.rb\]
+     ```
+
+   - Seed Update Site Name:
+
+     ```bash
+     rake db:seed:specific\[seed_update_site_name.rb\]
+     ```
+
+   - Seed Update Sites:
+
+     ```bash
+     rake db:seed:specific\[seed_update_sites.rb\]
+     ```
+
+
+
+
 # Local NLIMS at Sites
 
 ## Overview
@@ -56,7 +154,7 @@ Local NLIMS communicates with the CHSU NLIMS and requires an account for proper 
    ```
 
 3. **Data Synchronization to CHSU NLIMS**:
-   To push orders from the Local NLIMS to the CHSU NLIMS, a job named `master_nlims:sync_data_to` must be scheduled in the crontab. This job ensures that pending data is sent to the CHSU NLIMS.
+   To push orders from the Local NLIMS to the CHSU NLIMS, a job named `master_nlims:sync_data` must be scheduled in the crontab. This job ensures that pending data is sent to the CHSU NLIMS.
    ```bash
    0 */2 * * *  /bin/bash -l -c 'cd /var/www/nlims_controller && rvm use 2.5.3 && RAILS_ENV=development bundle exec rake master_nlims:sync_data --silent >> log/pull_from_master_nlims.log 2>&1'
    ```
@@ -67,6 +165,10 @@ Local NLIMS communicates with the CHSU NLIMS and requires an account for proper 
 5. **Account Configuration with ART**:
    - Edit the `emr_connection.yml` file to specify the IP address and port number where the ART application is running.
    - Customize `username` and `password` with your desired credentials, which will be used for the account created within the ART application.
+   - Run the following command to create account with emr
+   ```bash
+      rake emr:create_user
+   ```
 
 6. Run the necessary command to complete the setup, as per your specific requirements.
 
