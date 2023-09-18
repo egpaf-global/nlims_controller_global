@@ -307,34 +307,34 @@ module  OrderService
                               }
                   end
 
-                  c_order  =  Order.create(
-                        tracking_number: tracking_number,
-                        sample_type: params[:sample_type],
-                        date_created: params[:date_sample_drawn],
-                        sending_facility: params[:health_facility_name],
-                        receiving_facility: params[:target_lab],
-                        tests: couchdb_tests,
-                        test_results: couch_tests,
-                        patient: patient,
-                        order_location: params[:order_location] ,
-                        districy: params[:district],
-                        priority: params[:sample_priority],
-                        who_order_test: who_order,
-                        sample_statuses: sample_status,
-                        test_statuses: test_status,
-                        sample_status: params[:sample_status],
-                        arv_number: arv_number,
-                        art_regimen: art_regimen,
-                        art_start_date: art_start_date
-                  )
+                  # c_order  =  Order.create(
+                  #       tracking_number: tracking_number,
+                  #       sample_type: params[:sample_type],
+                  #       date_created: params[:date_sample_drawn],
+                  #       sending_facility: params[:health_facility_name],
+                  #       receiving_facility: params[:target_lab],
+                  #       tests: couchdb_tests,
+                  #       test_results: couch_tests,
+                  #       patient: patient,
+                  #       order_location: params[:order_location] ,
+                  #       districy: params[:district],
+                  #       priority: params[:sample_priority],
+                  #       who_order_test: who_order,
+                  #       sample_statuses: sample_status,
+                  #       test_statuses: test_status,
+                  #       sample_status: params[:sample_status],
+                  #       arv_number: arv_number,
+                  #       art_regimen: art_regimen,
+                  #       art_start_date: art_start_date
+                  # )
                   
-                  sp = Speciman.find_by(:tracking_number => tracking_number)
-                  sp.couch_id = c_order['_id']
-                  sp.save()
-                  couch_order = c_order['_id']
+                  # sp = Speciman.find_by(:tracking_number => tracking_number)
+                  # sp.couch_id = c_order['_id']
+                  # sp.save()
+                  # couch_order = c_order['_id']
             end              
 
-            return [true,tracking_number,couch_order]
+            return [true,tracking_number]
       end
 
       def self.check_order(tracking_number)
