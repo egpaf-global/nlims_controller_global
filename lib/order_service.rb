@@ -1309,6 +1309,23 @@ module  OrderService
       end
 
       def self.query_order_by_npid(npid)
+        
+       test_data = []
+                  # Get Patient tests
+        patient = Patient.find_by_patient_number(npid)
+
+        tests = Test.where(patient_id: patient.id)
+        (tests || []).each do | test |
+         test_type = TestType.find(test.test_type_id)
+         test_status = TestStatus.find(test.test_status_id)
+         tracking_number = Speciman.find(test.specimen_id).tracking_number
+         test_data.push(query_order_by_tracking_number(tracking_number)[:gen_details].merge!({tracking_number: tracking_number, 
+         test_type: test_type.name,
+         test_status: test_status.name }))
+        end
+        return test_data
+
+
 
     
                   res = Speciman.find_by_sql("SELECT specimen_types.name AS spc_type, specimen.tracking_number AS track_number, specimen.id AS _id, 
