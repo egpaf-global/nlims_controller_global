@@ -10,6 +10,7 @@ DEPARTMENT_TRANSLATION = {
   'Sérologie' => 'Serology'
 }.freeze
 
+
 print 'Please enter the url mlab is running on including port (eg: localost:3002): '
 url = gets.chomp 
 URL = "http://#{url}/api/v1/".freeze
@@ -66,11 +67,27 @@ end
 MLAB_DEPARTMENTS = mlab_request(http_method, url, payload)
 url = 'specimen'
 MLAB_SPECIMEN_TYPES = mlab_request(http_method, url, payload)
+url = 'test_types/test_indicator_types/'
+MLAB_TEST_INDICATOR_TYPES = mlab_request(http_method,url, payload)
 
 def department_english_name(department)
   DEPARTMENT_TRANSLATION[department]
 end
 
+def test_indicator_type_id(type)
+  case type
+  when type.blank?
+    'Free Text'
+  when type.instance_of?(Float)
+    'numeric'
+  when type.instance_of?(Integer)
+    'numeric'
+  when type.instance_of?(String)
+    'Alpha Numeric'
+  end
+
+  (MLAB_TEST_INDICATOR_TYPES.find { |indicator| indicator['name'] == type })['id']
+end
 # Specify the path to your Excel file
 excel_file_path = "#{Rails.root}/storage/EXAMENS.xlsx"
 
@@ -138,7 +155,7 @@ excel.sheets.each do |department|
     # Create testtype in MLAB
     http_method = :post
     url = 'test_types'
-    mlab_specimen_type_ids = specimen_type.map do |specimen_name| 
+    mlab_specimen_type_ids = specimen_type.map do |specimen_name|
       (MLAB_SPECIMEN_TYPES.find { |specimen| specimen['name'] == specimen_name.name })['id']
     end
 
@@ -181,5 +198,3 @@ excel.sheets.each do |department|
 
   puts "\n"  # Add a separator between worksheets
 end
-
-
