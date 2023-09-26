@@ -1313,6 +1313,7 @@ module  OrderService
        test_data = []
                   # Get Patient tests
         patient = Patient.find_by_patient_number(npid)
+        return nil if patient.blank?
 
         tests = Test.where(patient_id: patient.id)
         (tests || []).each do | test |
