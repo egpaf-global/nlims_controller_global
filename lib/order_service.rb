@@ -2,62 +2,63 @@
 module  OrderService
 
       def self.create_order(params,tracking_number)
-            couch_order = 0
+            # couch_order = 0
             ActiveRecord::Base.transaction do 
 		      params[:tests].each do |tst|
-			      tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
-			      tst = "CD4" if tst == "PIMA CD4"
-                        tst = "Viral Load" if tst == "Viral Load Gene X-per"
-			      tst =  "CD4" if tst == "Cd4 Count"
-			      tst = "TB Tests" if tst == "Gene Xpert"
-			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
-                        tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
-                        tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
-                        tst =  "calcium" if tst == "Serum calcium"
-                        tst =  "TB Tests" if tst == "GeneXpert"
-                        tst =  "FBC" if tst == "FBS"
-                        tst =  "Direct Coombs Test" if tst == "D/Coombs"
-                        tst =  "Creatinine" if tst == "creat"
-                        tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
-                        tst =  "Urine Microscopy" if tst == "Urine micro"
-                        tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
-                        tst =  "Anti Streptolysis O" if tst == "ASOT"
-                        tst =  "Culture & Sensitivity" if tst == "Blood C/S"
-                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
-                        tst =  "India Ink" if tst == "I/Ink"
-                        tst =  "Culture & Sensitivity" if tst == "C_S"
-                        tst =  "Hepatitis B Test" if tst == "hep"
-                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
-                        tst =  "Sickling Test" if tst == "Sickle"
-                        tst = "Viral Load" if tst == "Gene Xpert Viral"
-	                tst =  "Protein" if tst == "Protein and Sugar"
-			tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
-			tst =  "SARS Cov 2" if tst == "SARS-CoV-2"
-			tst =  "Creatine kinase" if tst == "CREATINE (J)"
+			#       tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+			#       tst = "CD4" if tst == "PIMA CD4"
+                  #       tst = "Viral Load" if tst == "Viral Load Gene X-per"
+			#       tst =  "CD4" if tst == "Cd4 Count"
+			#       tst = "TB Tests" if tst == "Gene Xpert"
+			#       tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                  #       tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
+                  #       tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
+                  #       tst =  "calcium" if tst == "Serum calcium"
+                  #       tst =  "TB Tests" if tst == "GeneXpert"
+                  #       tst =  "FBC" if tst == "FBS"
+                  #       tst =  "Direct Coombs Test" if tst == "D/Coombs"
+                  #       tst =  "Creatinine" if tst == "creat"
+                  #       tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
+                  #       tst =  "Urine Microscopy" if tst == "Urine micro"
+                  #       tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
+                  #       tst =  "Anti Streptolysis O" if tst == "ASOT"
+                  #       tst =  "Culture & Sensitivity" if tst == "Blood C/S"
+                  #       tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
+                  #       tst =  "India Ink" if tst == "I/Ink"
+                  #       tst =  "Culture & Sensitivity" if tst == "C_S"
+                  #       tst =  "Hepatitis B Test" if tst == "hep"
+                  #       tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                  #       tst =  "Sickling Test" if tst == "Sickle"
+                  #       tst = "Viral Load" if tst == "Gene Xpert Viral"
+	            #     tst =  "Protein" if tst == "Protein and Sugar"
+			# tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+			# tst =  "SARS Cov 2" if tst == "SARS-CoV-2"
+			# tst =  "Creatine kinase" if tst == "CREATINE (J)"
                         tst =  check_test_name(tst)
                         return [false,"test name not available in nlims"] if tst == false
                   end
-		  params[:sample_type] = "Plasma" if params[:sample_type] == "Plasma (2)"
-                 params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70 micro ltr" 
-		 params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70ml (2)"
-		 if params[:sample_type] == "Nasopharyngeal"
-		     spc = SpecimenType.find_by(:name => "Nasopharyngeal swab")
-		  else
-		      spc = SpecimenType.find_by(:name => params[:sample_type])
-                  end
+		#  params[:sample_type] = "Plasma" if params[:sample_type] == "Plasma (2)"
+            #  params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70 micro ltr" 
+		#  params[:sample_type] = "DBS 70ml" if params[:sample_type] == "DBS 70ml (2)"
+		#  if params[:sample_type] == "Nasopharyngeal"
+		#      spc = SpecimenType.find_by(:name => "Nasopharyngeal swab")
+		#   else
+		      spc = SpecimenType.find_by_name(params[:sample_type])
+            # end
 		  return [false,"specimen type not available in nlims"] if spc.blank?
-                  spc = SpecimenStatus.find_by(:name => params[:sample_status])
-                  return [false,"specimen status not available in nlims"] if spc.blank?
+              
+              spc = SpecimenStatus.find_by(name: params[:sample_status])
+              return [false,"specimen status not available in nlims"] if spc.blank?
 
                   npid = params[:national_patient_id]
-                  patient_obj = Patient.where(:patient_number => npid)
+                  patient_obj = Patient.where(patient_number: npid)
                 
                   patient_obj = patient_obj.first unless patient_obj.blank?
 
                         if patient_obj.blank?
                               patient_obj = patient_obj.create(
                                                 patient_number: npid,
-                                                name: params[:first_name] +" "+ params[:last_name],
+                                                name: "#{params[:first_name]} #{params[:last_name]}",
                                                 email: '' ,
                                                 dob: params[:date_of_birth],
                                                 gender: params[:gender],
@@ -71,8 +72,7 @@ module  OrderService
                               patient_obj.save
                         end
 
-                                    
-                  who_order = {
+                 who_order = {
                         :first_name => params[:who_order_test_first_name],
                         :last_name => params[:who_order_test_last_name],
                         :phone_number => params[:who_order_test_phone_number],
@@ -90,8 +90,8 @@ module  OrderService
                   }
                   sample_status =  {}
                   test_status = {}
-                  time = Time.now.strftime("%Y%m%d%H%M%S") if params[:date_sample_drawn].blank? 
-                  time = params[:date_sample_drawn] if !params[:date_sample_drawn].blank?
+                  time = params[:date_sample_drawn] || Time.now.strftime("%Y%m%d%H%M%S") 
+                  # time = params[:date_sample_drawn] if !params[:date_sample_drawn].blank?
                   sample_status[time] = {
                         "status" => "Drawn",
                               "updated_by":  {
@@ -102,107 +102,107 @@ module  OrderService
                                     }
                   }
 
-		 if params[:sample_type] == "Nasopharyngeal"
-                     sample_type_id = SpecimenType.get_specimen_type_id("Nasopharyngeal swab") 
-		 else
+		#  if params[:sample_type] == "Nasopharyngeal"
+            #          sample_type_id = SpecimenType.get_specimen_type_id("Nasopharyngeal swab") 
+		#  else
 		      sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
-                  end
+            #  end
 
-                 #sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
-                params[:sample_status] = "specimen_accepted" if params[:sample_status] == "specimen-accepted"
-		params[:sample_status] = "specimen_accepted" if params[:status] == "specimen-accepted"
+            # sample_type_id = SpecimenType.get_specimen_type_id(params[:sample_type])
+            # params[:sample_status] = "specimen_accepted" if params[:sample_status] == "specimen-accepted"
+		# params[:sample_status] = "specimen_accepted" if params[:status] == "specimen-accepted"
 
 		sample_status_id = SpecimenStatus.get_specimen_status_id(params[:sample_status])
                  
-      	if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
-			order_ward = Ward.get_ward_id("Bwaila Hospital")
-		elsif "Kawale Health Center" == params[:order_location]
-			order_ward = Ward.get_ward_id("Kawale Health Centre")
-		elsif "Mitundu Hospital" == params[:order_location]
-			order_ward = Ward.get_ward_id("Mitundu Rural Hospital")	
-		elsif "Area 18 Health Center" ==  params[:order_location]
-			order_ward = Ward.get_ward_id("Area 18 Urban Health Centre")
-		elsif "Chileka (Lilongwe) Health Center" ==  params[:order_location]
-			order_ward = Ward.get_ward_id("Chileka Health Centre (Lilongwe)")
-		elsif "Kamuzu (KCH) Central Hospital " == params[:order_location]
-			order_ward = Ward.get_ward_id("Kamuzu Central Hospital")
-		elsif "Gateway" == params[:order_location]
-			order_ward  = Ward.get_ward_id("Gateway Clinic (Blantyre)") 
-		else
-			order_ward = Ward.get_ward_id(params[:order_location])
-		end
-            art_regimen = "N/A"
-            arv_number = "N/A"
-            art_start_date = ""
-            art_regimen = params[:art_regimen] if !params[:art_regimen].blank?
-            arv_number = params[:arv_number] if !params[:arv_number].blank?
-            art_start_date = params[:art_start_date] if !params[:art_start_date].blank?
+      	# if "Bwaila Hospital Martin Preuss Centre" == params[:order_location]
+		# 	order_ward = Ward.get_ward_id("Bwaila Hospital")
+		# elsif "Kawale Health Center" == params[:order_location]
+		# 	order_ward = Ward.get_ward_id("Kawale Health Centre")
+		# elsif "Mitundu Hospital" == params[:order_location]
+		# 	order_ward = Ward.get_ward_id("Mitundu Rural Hospital")	
+		# elsif "Area 18 Health Center" ==  params[:order_location]
+		# 	order_ward = Ward.get_ward_id("Area 18 Urban Health Centre")
+		# elsif "Chileka (Lilongwe) Health Center" ==  params[:order_location]
+		# 	order_ward = Ward.get_ward_id("Chileka Health Centre (Lilongwe)")
+		# elsif "Kamuzu (KCH) Central Hospital " == params[:order_location]
+		# 	order_ward = Ward.get_ward_id("Kamuzu Central Hospital")
+		# elsif "Gateway" == params[:order_location]
+		order_ward  = Ward.get_ward_id(params[:order_location]) 
+		# else
+		# 	order_ward = Ward.get_ward_id(params[:order_location])
+		# end
+            # art_regimen = "N/A"
+            # arv_number = "N/A"
+            # art_start_date = ""
+            art_regimen = params[:art_regimen] || 'N/A'
+            arv_number = params[:arv_number] || 'N/A'
+            art_start_date = params[:art_start_date] || 'N/A'
 
- 		if !params[:date_sample_drawn].blank?
-                        time_got = Time.new
-                        time_got = time_got.strftime("%H:%M:%S")
-                        params[:date_sample_drawn] = params[:date_sample_drawn] if params[:date_sample_drawn].split(" ").length > 1
-                        params[:date_sample_drawn] = params[:date_sample_drawn] +" "+ time_got if params[:date_sample_drawn].split(" ").length == 1
-	        end
+ 		# if !params[:date_sample_drawn].blank?
+            #             time_got = Time.new
+            #             time_got = time_got.strftime("%H:%M:%S")
+            #             params[:date_sample_drawn] = params[:date_sample_drawn] if params[:date_sample_drawn].split(" ").length > 1
+            #             params[:date_sample_drawn] = params[:date_sample_drawn] +" "+ time_got if params[:date_sample_drawn].split(" ").length == 1
+	      #  end
 
             sp_obj =  Speciman.create(
-			:tracking_number => tracking_number,
-                        :specimen_type_id =>  sample_type_id,
-                        :specimen_status_id =>  sample_status_id,
-                        :couch_id => '',
-                        :ward_id => order_ward,
-                        :priority => params[:sample_priority],
-                        :drawn_by_id => params[:who_order_test_id],
-                        :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
-                        :drawn_by_phone_number => params[:who_order_test_phone_number],
-                        :target_lab => params[:target_lab],
-                        :art_start_date => art_start_date,
-                        :sending_facility => params[:health_facility_name],
-                        :requested_by =>  params[:requesting_clinician],
-                        :district => params[:district],
-                        :date_created => params[:date_sample_drawn],
-                        :arv_number => arv_number,
-                        :art_regimen => art_regimen
-                  )
+                  :tracking_number => tracking_number,
+                  :specimen_type_id =>  sample_type_id,
+                  :specimen_status_id =>  sample_status_id,
+                  :couch_id => '',
+                  :ward_id => order_ward,
+                  :priority => params[:sample_priority],
+                  :drawn_by_id => params[:who_order_test_id],
+                  :drawn_by_name =>  "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
+                  :drawn_by_phone_number => params[:who_order_test_phone_number],
+                  :target_lab => params[:target_lab],
+                  :art_start_date => art_start_date,
+                  :sending_facility => params[:health_facility_name],
+                  :requested_by =>  params[:requesting_clinician],
+                  :district => params[:district],
+                  :date_created => params[:date_sample_drawn],
+                  :arv_number => arv_number,
+                  :art_regimen => art_regimen
+            )
 
-                  
-                        res = Visit.create(
-                                 :patient_id => npid,
-                                 :visit_type_id => '',
-                                 :ward_id => Ward.get_ward_id(params[:order_location])
-                              )
-                        visit_id = res.id
-		      couchdb_tests = []
+            res = Visit.create(
+                        :patient_id => npid,
+                        :visit_type_id => '',
+                        :ward_id => order_ward
+                  )
+            visit_id = res.id
+		      # couchdb_tests = []
                   params[:tests].each do |tst|
-                        tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
-                        tst =  "CD4" if tst == "Cd4 Count"
-			      tst = "CD4" if tst == "PIMA CD4"
-                        tst = "Viral Load" if tst == "Viral Load Gene X-per" 
-			      tst = "TB Tests" if tst == "Gene Xpert"
-			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
-                        tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
-                        tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
-                        tst =  "calcium" if tst == "Serum calcium"
-                        tst =  "TB Tests" if tst == "GeneXpert"
-                        tst =  "FBC" if tst == "FBS"
-                        tst =  "Direct Coombs Test" if tst == "D/Coombs"
-                        tst =  "Creatinine" if tst == "creat"
-                        tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
-                        tst =  "Urine Microscopy" if tst == "Urine micro"
-                        tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
-                        tst =  "Anti Streptolysis O" if tst == "ASOT"
-                        tst =  "Culture & Sensitivity" if tst == "Blood C/S"
-                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
-                        tst =  "India Ink" if tst == "I/Ink"
-                        tst =  "Culture & Sensitivity" if tst == "C_S"
-                        tst =  "Hepatitis B Test" if tst == "hep"
-			      tst = "Viral Load" if tst == "Gene Xpert Viral"
-                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
-                        tst =  "Sickling Test" if tst == "Sickle"
-                        tst =  "Protein" if tst == "Protein and Sugar"
-			      tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
-				tst =  "SARS Cov 2" if tst == "SARS-CoV-2"
-			tst =  "Creatine kinase" if tst == "CREATINE (J)"
+                  #       tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+                  #       tst =  "CD4" if tst == "Cd4 Count"
+			#       tst = "CD4" if tst == "PIMA CD4"
+                  #       tst = "Viral Load" if tst == "Viral Load Gene X-per" 
+			#       tst = "TB Tests" if tst == "Gene Xpert"
+			#       tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                  #       tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
+                  #       tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
+                  #       tst =  "calcium" if tst == "Serum calcium"
+                  #       tst =  "TB Tests" if tst == "GeneXpert"
+                  #       tst =  "FBC" if tst == "FBS"
+                  #       tst =  "Direct Coombs Test" if tst == "D/Coombs"
+                  #       tst =  "Creatinine" if tst == "creat"
+                  #       tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
+                  #       tst =  "Urine Microscopy" if tst == "Urine micro"
+                  #       tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
+                  #       tst =  "Anti Streptolysis O" if tst == "ASOT"
+                  #       tst =  "Culture & Sensitivity" if tst == "Blood C/S"
+                  #       tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
+                  #       tst =  "India Ink" if tst == "I/Ink"
+                  #       tst =  "Culture & Sensitivity" if tst == "C_S"
+                  #       tst =  "Hepatitis B Test" if tst == "hep"
+			#       tst = "Viral Load" if tst == "Gene Xpert Viral"
+                  #       tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                  #       tst =  "Sickling Test" if tst == "Sickle"
+                  #       tst =  "Protein" if tst == "Protein and Sugar"
+			#       tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+			# 	  tst =  "SARS Cov 2" if tst == "SARS-CoV-2"
+			#       tst =  "Creatine kinase" if tst == "CREATINE (J)"
+
 			      tst =  check_test_name(tst)
                         tst = tst.gsub("&amp;",'&')
                         status = check_test(tst)
@@ -217,7 +217,6 @@ module  OrderService
                                           :id => params[:who_order_test_id] 
                                           }
                               }
-
                            
 			            test_status[tst] = details 
                               rst = TestType.get_test_type_id(tst)
@@ -227,7 +226,7 @@ module  OrderService
                                     :specimen_id => sp_obj.id,
                                     :test_type_id => rst,
                                     :patient_id => patient_obj.id,
-                                    :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                                    :created_by => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
                                     :panel_id => '',
                                     :time_created => time,
                                     :test_status_id => rst2
@@ -258,7 +257,7 @@ module  OrderService
                                           :specimen_id => sp_obj.id,
                                           :test_type_id => tt.id,
                                           :patient_id => patient_obj.id,
-                                          :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                                          :created_by => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
                                           :panel_id => '',
                                           :time_created => time,
                                           :test_status_id => rst2
@@ -266,44 +265,44 @@ module  OrderService
                               end
                         end
 
-			couchdb_tests.push(tst)
+			# couchdb_tests.push(tst)
                   end
                   
                  
                   couch_tests = {}
                   params[:tests].each do |tst|
-                        tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
-                        tst =  "CD4" if tst == "Cd4 Count"
-			      tst = "TB Tests" if tst == "Gene Xpert"
-			      tst = "CD4" if tst == "PIMA CD4"
-                        tst = "Viral Load" if tst == "Viral Load Gene X-per"
-			      tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
-                        tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
-                        tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
-                        tst =  "calcium" if tst == "Serum calcium"
-                        tst =  "TB Tests" if tst == "GeneXpert"
-                        tst =  "FBC" if tst == "FBS"
-                        tst =  "Direct Coombs Test" if tst == "D/Coombs"
-                        tst =  "Creatinine" if tst == "creat"
-                        tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
-                        tst =  "Urine Microscopy" if tst == "Urine micro"
-                        tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
-                        tst =  "Anti Streptolysis O" if tst == "ASOT"
-                        tst =  "Culture & Sensitivity" if tst == "Blood C/S"
-                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
-                        tst =  "India Ink" if tst == "I/Ink"
-                        tst =  "Culture & Sensitivity" if tst == "C_S"
-                        tst =  "Hepatitis B Test" if tst == "hep"
-			      tst = "Viral Load" if tst == "Gene Xpert Viral"
-                        tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
-                        tst =  "Sickling Test" if tst == "Sickle"
-                        tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
-			      tst =  "Protein" if tst == "Protein and Sugar"
-			      tst =  check_test_name(tst)            
+                        # tst = "Cryptococcus Antigen Test"  if tst == "Cr Ag"
+                        # tst =  "CD4" if tst == "Cd4 Count"
+			      # tst = "TB Tests" if tst == "Gene Xpert"
+			      # tst = "CD4" if tst == "PIMA CD4"
+                        # tst = "Viral Load" if tst == "Viral Load Gene X-per"
+			      # tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                        # tst =  "TB Microscopic Exam" if tst == "AFB sputum smear"
+                        # tst =  "Beta Human Chorionic Gonatropin" if tst == "B-HCG"
+                        # tst =  "calcium" if tst == "Serum calcium"
+                        # tst =  "TB Tests" if tst == "GeneXpert"
+                        # tst =  "FBC" if tst == "FBS"
+                        # tst =  "Direct Coombs Test" if tst == "D/Coombs"
+                        # tst =  "Creatinine" if tst == "creat"
+                        # tst =  "TB Microscopic Exam" if tst == "AAFB (3rd)"
+                        # tst =  "Urine Microscopy" if tst == "Urine micro"
+                        # tst =  "TB Microscopic Exam" if tst == "AAFB (1st)"
+                        # tst =  "Anti Streptolysis O" if tst == "ASOT"
+                        # tst =  "Culture & Sensitivity" if tst == "Blood C/S"
+                        # tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Ag"
+                        # tst =  "India Ink" if tst == "I/Ink"
+                        # tst =  "Culture & Sensitivity" if tst == "C_S"
+                        # tst =  "Hepatitis B Test" if tst == "hep"
+			      # tst = "Viral Load" if tst == "Gene Xpert Viral"
+                        # tst =  "Cryptococcus Antigen Test" if tst == "Cryptococcal Antigen"
+                        # tst =  "Sickling Test" if tst == "Sickle"
+                        # tst =  "Nasopharyngeal swab"  if tst == "Nasopharyngeal"
+			      # tst =  "Protein" if tst == "Protein and Sugar"
+			      tst =  check_test_name(tst)
                               couch_tests[tst] = {
                                     'results': {},
                                     'date_result_entered': '',
-                                    'result_entered_by': {}                             
+                                    'result_entered_by': {}
                               }
                   end
 
@@ -332,17 +331,16 @@ module  OrderService
                   # sp.couch_id = c_order['_id']
                   # sp.save()
                   # couch_order = c_order['_id']
-            end              
-
-            return [true,tracking_number]
+            end
+            [true, tracking_number]
       end
 
       def self.check_order(tracking_number)
-            order = Speciman.where(tracking_number: tracking_number).first
+        order = Speciman.where(tracking_number: tracking_number).first
             if order
-                  return true
+                  true
             else
-                  return false
+                  false
             end
       end
 
@@ -411,7 +409,7 @@ module  OrderService
 
                   if result_status == true
 
-                        return { 
+                        { 
 
                               gen_details:   {  sample_type: res.sample_type,
                                                 specimen_status: res.specimen_status,
@@ -446,7 +444,7 @@ module  OrderService
                         }
                   else
 
-                        return { 
+                        { 
 
                               gen_details:   {  sample_type: res.sample_type,
                                                 specimen_status: res.specimen_status,
@@ -482,7 +480,7 @@ module  OrderService
                   end
 
             else
-                  return false
+                  false
             end
 
       end
@@ -519,26 +517,21 @@ module  OrderService
                   site_code_number = res['site_code_number']
                   end
             end
-                  return site_code_number
+                  site_code_number
       end
 
       def self.check_test_name(test)
 	  tst = TestType.find_by_sql("SELECT name AS tst_name FROM test_types WHERE name ='#{test}' LIMIT 1")
           if tst.length > 0
-                return tst[0].tst_name
+                tst[0].tst_name
           else
-                return false
+                false
           end
-
       end
 
       def self.get_order_by_tracking_number_sql(track_number)
-            details =   Speciman.where(tracking_number: track_number).first
-            if details
-                  return details
-            else
-                  return false
-            end
+        details = Speciman.where(tracking_number: track_number).first
+        details.blank? ? false : details
       end
 
       def self.query_order_by_tracking_number_v2(tracking_number)
@@ -598,7 +591,7 @@ module  OrderService
 
                   if result_status == true
 
-                        return { 
+                        { 
 
                               gen_details:   {  sample_type: res.sample_type,
                                                 specimen_status: res.specimen_status,
@@ -630,7 +623,7 @@ module  OrderService
                         }
                   else
 
-                        return { 
+                        { 
 
                               gen_details:   {  sample_type: res.sample_type,
                                                 specimen_status: res.specimen_status,
@@ -664,7 +657,7 @@ module  OrderService
                   end
 
             else
-                  return false
+                  false
             end
 
       end
@@ -676,14 +669,14 @@ module  OrderService
             port = settings['port']
             username = settings['username']
             password = settings['password']
-            db_name =  settings['prefix'].to_s + "_order_" + settings['suffix'].to_s
+            db_name =  "#{settings['prefix'].to_s}_order_#{settings['suffix'].to_s}"
             retr_order = "false"
 	    begin
               retr_order = JSON.parse(RestClient.get("#{protocol}://#{username}:#{password}@#{ip}:#{port}/#{db_name}/#{couch_id}"))
             rescue 
 
 	    end
-		return retr_order
+		retr_order
       end
 
       def self.update_couch_order(track_number,order)
@@ -693,7 +686,7 @@ module  OrderService
             port = settings['port']
             username = settings['username']
             password = settings['password']
-            db_name =  settings['prefix'].to_s + "_order_" + settings['suffix'].to_s
+            db_name =  "#{settings['prefix'].to_s}_order_#{settings['suffix'].to_s}"
 
             url = "#{protocol}://#{username}:#{password}@#{ip}:#{port}/#{db_name}"
             RestClient.post(url,order.to_json, :content_type => 'application/json')
@@ -763,13 +756,13 @@ module  OrderService
                   end
 
                   if checker == true
-                        return info
+                        info
                   else
-                        return checker
+                        checker
                   end
 
             else
-                  return false
+                  false
             end
 
       end
@@ -813,12 +806,12 @@ module  OrderService
                   end
                   if checker == true
                         
-                        return test_re
+                        test_re
                   else
-                        return checker
+                        checker
                   end
             else
-                  return false
+                  false
             end
       end
 
@@ -903,7 +896,7 @@ module  OrderService
                   master_facility["#{facility}"] = facility_samples     
                   facility_samples = []             
             end
-            return [true,master_facility]
+            [true,master_facility]
       end
 
 
@@ -981,9 +974,9 @@ module  OrderService
                         counter = counter + 1
                   end
                   counter = 0
-                  return data
+                  data
             else
-                  return false
+                  false
             end
       end
 
@@ -1009,15 +1002,15 @@ module  OrderService
                   ) 
             end
 
-            return true
+            true
       end
 
       def self.check_if_dispatched(tracking_number,dispatcher_type)
             rs = SpecimenDispatch.find_by_sql("SELECT * FROM specimen_dispatches WHERE tracking_number='#{tracking_number}' AND dispatcher_type_id='#{dispatcher_type}'")
             if rs.length > 0
-                  return true
+                  true
             else  
-                  return false
+                  false
             end
       end
 
@@ -1033,7 +1026,7 @@ module  OrderService
                         if patient_obj.blank?
                               patient_obj = patient_obj.create(
                                                 patient_number: npid,
-                                                name: params[:first_name] +" "+ params[:last_name],
+                                                name: "#{params[:first_name]} #{params[:last_name]}",
                                                 email: '' ,
                                                 dob: params[:date_of_birth],
                                                 gender: params[:gender],
@@ -1097,7 +1090,7 @@ module  OrderService
                         :ward_id => Ward.get_ward_id(params[:order_location]),
                         :priority => params[:sample_priority],
                         :drawn_by_id => params[:who_order_test_id],
-                        :drawn_by_name =>  params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                        :drawn_by_name =>  "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
                         :drawn_by_phone_number => params[:who_order_test_phone_number],
                         :target_lab => 'not_assigned',
                         :art_start_date => art_start_date,
@@ -1139,7 +1132,7 @@ module  OrderService
                                     :specimen_id => sp_obj.id,
                                     :test_type_id => rst,
                                     :patient_id => patient_obj.id,
-                                    :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                                    :created_by => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
                                     :panel_id => '',
                                     :time_created => time,
                                     :test_status_id => rst2
@@ -1168,7 +1161,7 @@ module  OrderService
                                           :specimen_id => sp_obj.id,
                                           :test_type_id => tt.id,
                                           :patient_id => patient_obj.id,
-                                          :created_by => params[:who_order_test_first_name] + " " + params[:who_order_test_last_name],
+                                          :created_by => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
                                           :panel_id => '',
                                           :time_created => time,
                                           :test_status_id => rst2
@@ -1213,7 +1206,7 @@ module  OrderService
                   couch_order = c_order['_id']
             end              
 
-            return [true,tracking_number,couch_order]
+            [true,tracking_number,couch_order]
       end
 
 
@@ -1300,10 +1293,10 @@ module  OrderService
                               end
                         end   
                         
-                        return details  
+                        details  
                         
                   else
-                        return false
+                        false
                   end  
 
       end
@@ -1371,9 +1364,9 @@ module  OrderService
                               end
                         end   
                         counter = 0
-                        return details
+                        details
                   else
-                        return false
+                        false
                   end
    
       end
@@ -1383,18 +1376,18 @@ module  OrderService
             res = PanelType.find_by_sql("SELECT * FROM panel_types WHERE name ='#{tst}'")
 
             if res.length > 0
-                  return true
+                  true
             else
-                  return false
+                  false
             end
       end      
 
       def self.check_if_order_updated?(tracking_number,status_id)
             obj = Speciman.find_by(:tracking_number => tracking_number ,:specimen_status_id => status_id)
             if !obj.blank?
-                return true
+                true
             else
-                  return false
+                  false
             end 
       end
       
@@ -1425,7 +1418,7 @@ module  OrderService
                   :specimen_status_id => status_id,
                   :time_updated => Time.new.strftime("%Y%m%d%H%M%S"),
                   :who_updated_id => ord['who_updated']['id'],
-                  :who_updated_name => ord['who_updated']['first_name'] + " " +  ord['who_updated']['last_name'],
+                  :who_updated_name => "#{ord['who_updated']['first_name']} #{ord['who_updated']['last_name']}",
                   :who_updated_phone_number => ord['who_updated']['phone_number'],
             )
             retr_order = OrderService.retrieve_order_from_couch(couch_id)          
@@ -1454,7 +1447,7 @@ module  OrderService
                   }
             end
             OrderService.update_couch_order(couch_id,retr_order)
-	   return [true,""]
+	   [true,""]
       end
 
       def self.query_order_by_tracking_number(tracking_number)
@@ -1496,7 +1489,7 @@ module  OrderService
                   
 			arv_number = res.arv_number.split("-")
 			arv_number = arv_number[arv_number.length - 1]
-                  return { 
+                  { 
 
                         gen_details:   {  sample_type: res.sample_type,
                                           specimen_status: res.specimen_status,
@@ -1527,7 +1520,7 @@ module  OrderService
                   }
                   
             else
-                  return false
+                  false
             end
 
       end

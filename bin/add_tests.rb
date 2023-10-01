@@ -11,7 +11,7 @@ DEPARTMENT_TRANSLATION = {
 }.freeze
 
 
-print 'Please enter the url mlab is running on including port (eg: localost:3002): '
+print 'Please enter the url mlab is running on including port (eg: localhost:3002): '
 url = gets.chomp 
 URL = "http://#{url}/api/v1/".freeze
 http_method = :get
@@ -68,24 +68,26 @@ MLAB_DEPARTMENTS = mlab_request(http_method, url, payload)
 url = 'specimen'
 MLAB_SPECIMEN_TYPES = mlab_request(http_method, url, payload)
 url = 'test_types/test_indicator_types/'
-MLAB_TEST_INDICATOR_TYPES = mlab_request(http_method,url, payload)
+MLAB_TEST_INDICATOR_TYPES = mlab_request(http_method, url, payload)
+
 
 def department_english_name(department)
   DEPARTMENT_TRANSLATION[department]
 end
 
 def test_indicator_type_id(type)
-  case type
-  when type.blank?
-    'Free Text'
-  when type.instance_of?(Float)
-    'numeric'
-  when type.instance_of?(Integer)
-    'numeric'
-  when type.instance_of?(String)
-    'Alpha Numeric'
+  if type.blank?
+    type = 'Free Text'
+  else
+    case type
+    when Float
+      type = 'numeric'
+    when Integer
+      type = 'numeric'
+    when String
+      type = 'Auto complete'
+    end
   end
-
   (MLAB_TEST_INDICATOR_TYPES.find { |indicator| indicator['name'] == type })['id']
 end
 # Specify the path to your Excel file
@@ -123,7 +125,8 @@ excel.sheets.each do |department|
   (2..excel.last_row).each do |row|
     row_data = Hash[header.zip(excel.row(row).map(&:to_s))]
 
-    puts 'Creating Test type: ' + row_data['Examens']
+    puts "Creating Test type: #{row_data['Examens']}"
+    next if row_data['Examens'] == 'GB'
 
     test_type = TestType.find_by_name(row_data['Examens'])
     if test_type.blank?
@@ -158,6 +161,17 @@ excel.sheets.each do |department|
     mlab_specimen_type_ids = specimen_type.map do |specimen_name|
       (MLAB_SPECIMEN_TYPES.find { |specimen| specimen['name'] == specimen_name.name })['id']
     end
+    
+    mlab_indicator_type_id = test_indicator_type_id(row_data['Résultats'])
+    unit = row_data['Unités']
+    lower_range = row_data['Low band']
+    upper_range = row_data['Upper band']
+    gender = (case row_data['gender']
+              when 'H'
+                'Male'
+              when 'F'
+                'Female'
+              end)
 
     payload = {
       "name": test_type.name,
@@ -171,11 +185,17 @@ excel.sheets.each do |department|
       "specimens": mlab_specimen_type_ids,
       "indicators": [
         {
-          "name": 'auto populated',
-          "test_indicator_type": 0,
-          "unit": '',
+          "name": test_type.name,
+          "test_indicator_type": mlab_indicator_type_id,
+          "unit": unit,
           "description": '',
-          "indicator_ranges": []
+          "indicator_ranges": [{
+            "min_age": 0,
+            "max_age": 120,
+            "sex": gender,
+            "lower_range": lower_range,
+            "upper_range": upper_range
+          }]
         }
       ],
       "organisms": [],
@@ -191,8 +211,45 @@ excel.sheets.each do |department|
     # Create test in MLAB
     response = mlab_request(http_method, url, payload)
     if response == 'test exists'
-      puts response
-      next
+      puts "#{response} update test "
+      fetch_url = "test_types?search=#{test_type.name}"
+      http_method = 'GET'
+      mlab_test_type = mlab_request(http_method, fetch_url, payload)['test_types'].find do |test|
+        test['name'] == test_type.name
+      end
+      fetch_url = "test_types/#{mlab_test_type['id']}"
+      payload = {}
+      begin
+        mlab_editable_test_type = mlab_request(http_method, fetch_url, payload)
+      rescue
+        
+      end
+      
+      update_payload = { specimens: [{}],
+                  organisms: [{}],
+                  "test_type": mlab_test_type,
+                  expected_turn_around_time: mlab_test_type['expected_turn_around_time'],
+                  "indicators": [
+                    {
+                      "name": test_type.name,
+                      "test_indicator_type": mlab_indicator_type_id,
+                      "unit": unit,
+                      "description": '',
+                      "indicator_ranges": [{
+                        "min_age": 0,
+                        "max_age": 120,
+                        "sex": gender,
+                        "lower_range": lower_range,
+                        "upper_range": upper_range
+                      }]
+                    }
+                  ] }
+      
+      payload.to_json
+      http_method = 'PUT'
+      update_url = "#{url}/#{mlab_test_type['test_types'].first['id'].to_s}"
+      
+      response = mlab_request(http_method, update_url, payload)
     end
   end
 
