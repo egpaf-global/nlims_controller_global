@@ -17,7 +17,7 @@ URL = "http://#{url}/api/v1/".freeze
 http_method = :get
 url = 'departments'
 payload = {}
-print 'Please enter MLAB Adminstrator password: '
+print 'Please enter MLAB Administrator password: '
 @mlab_password = gets.chomp
 
 def authenticate
@@ -69,7 +69,6 @@ url = 'specimen'
 MLAB_SPECIMEN_TYPES = mlab_request(http_method, url, payload)
 url = 'test_types/test_indicator_types/'
 MLAB_TEST_INDICATOR_TYPES = mlab_request(http_method, url, payload)
-
 
 def department_english_name(department)
   DEPARTMENT_TRANSLATION[department]
@@ -142,7 +141,7 @@ excel.sheets.each do |department|
     specimen_type.each do |specimen|
       next if specimen_names.include?(specimen.name)
 
-      # Create of find test type specimen type
+      # Create or find test type specimen type
       specimen_type << SpecimenType.create!(
         name: row_data['Types d\'échantillons'],
         description: 'French Version'
@@ -153,6 +152,12 @@ excel.sheets.each do |department|
         specimen_type_id: specimen_type.id
       )
     end
+
+    # Create measure 
+    Measure.find_or_create_by(
+      name: row_data['Examens'],
+      measure_type_id: MeasureType.find_by_name(row_data['measure type']).id
+    )
 
     
     # Create testtype in MLAB
@@ -188,14 +193,7 @@ excel.sheets.each do |department|
           "name": test_type.name,
           "test_indicator_type": mlab_indicator_type_id,
           "unit": unit,
-          "description": '',
-          "indicator_ranges": [{
-            "min_age": 0,
-            "max_age": 120,
-            "sex": gender,
-            "lower_range": lower_range,
-            "upper_range": upper_range
-          }]
+          "description": ''
         }
       ],
       "organisms": [],
@@ -206,6 +204,17 @@ excel.sheets.each do |department|
         "print_device": false
       }
     }
+    
+    if row_data['measure type'] == 'Numeric Range'
+      payload[:indicators][0][:indicator_ranges] = [{
+            "min_age": 0,
+            "max_age": 120,
+            "sex": gender,
+            "lower_range": lower_range,
+            "upper_range": upper_range
+          }]
+    end
+      
 
     payload = payload.to_json
     # Create test in MLAB
@@ -234,20 +243,22 @@ excel.sheets.each do |department|
                       "name": test_type.name,
                       "test_indicator_type": mlab_indicator_type_id,
                       "unit": unit,
-                      "description": '',
-                      "indicator_ranges": [{
-                        "min_age": 0,
-                        "max_age": 120,
-                        "sex": gender,
-                        "lower_range": lower_range,
-                        "upper_range": upper_range
-                      }]
+                      "description": ''
                     }
                   ] }
-      
+      if row_data['measure type'] == 'Numeric Range'
+        update_payload[:indicators][0][:indicator_ranges] = [{
+              "min_age": 0,
+              "max_age": 120,
+              "sex": gender,
+              "lower_range": lower_range,
+              "upper_range": upper_range
+            }]
+      end
+
       payload.to_json
       http_method = 'PUT'
-      update_url = "#{url}/#{mlab_test_type['test_types'].first['id'].to_s}"
+      update_url = "#{url}/#{mlab_test_type['id'].to_s}"
       
       response = mlab_request(http_method, update_url, payload)
     end
