@@ -40,7 +40,8 @@ module TestService
             results = params[:results]
             results.each do |measure_name, result_value|
               measure = Measure.where(name: measure_name).first
-              measure = Measure.create!(name: measure_name, measure_type_id: 5) if measure.blank?
+              return [false, "measure #{measure_name} does not exist"] if measure.blank?
+              
               if check_if_result_already_available(test_id, measure.id) == false
                 TestResult.create!(
                   measure_id: measure.id,
