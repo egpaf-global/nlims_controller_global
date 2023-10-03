@@ -76,7 +76,7 @@ def department_english_name(department)
 end
 
 def test_indicator_type_id(type)
-  if type.blank?
+  if type.blank? || type == 'Libre'
     type = 'Free Text'
   else
     case type
@@ -85,10 +85,10 @@ def test_indicator_type_id(type)
     when Integer
       type = 'numeric'
     when String
-      type = 'Auto complete'
+      type = 'Auto Complete'
     end
   end
-  (MLAB_TEST_INDICATOR_TYPES.find { |indicator| indicator['name'] == type })['id'] rescue 1
+  (MLAB_TEST_INDICATOR_TYPES.find { |indicator| indicator['name'] == type })['id']
 end
 # Specify the path to your Excel file
 excel_file_path = "#{Rails.root}/storage/EXAMENS.xlsx"
@@ -223,18 +223,15 @@ excel.sheets.each do |department|
 
       puts "#{response} update test "
       escaped_test_type = URI.escape(test_type.name)
+      escaped_test_type = escaped_test_type.gsub('+', '%2B') # Encode any positive sign (+) to %2B the make it searchable
       fetch_url = "test_types?search=#{escaped_test_type}"
       http_method = 'GET'
       mlab_test_type = mlab_request(http_method, fetch_url, payload)['test_types'].find do |test|
         test['name'] == test_type.name
       end
-      fetch_url = "test_types/#{mlab_test_type['id']}" rescue next
+      fetch_url = "test_types/#{mlab_test_type['id']}"
       payload = {}
-      begin
-        mlab_editable_test_type = mlab_request(http_method, fetch_url, payload)
-      rescue
-        
-      end
+      mlab_editable_test_type = mlab_request(http_method, fetch_url, payload)
       
       if row_data['measure type'] == 'Numeric Range'
          mlab_indicator_type_id = {id: 2, name: 'Numeric'}
@@ -243,34 +240,16 @@ excel.sheets.each do |department|
       end
       
       mlab_editable_test_type['indicators'][0]['test_indicator_type'] = mlab_indicator_type_id
-      # update_payload = { specimens: mlab_specimen_type_ids,
-      #             organisms: [],
-      #             "test_type": mlab_test_type,
-      #             expected_turn_around_time: mlab_test_type['expected_turn_around_time'],
-      #             "indicators": [
-      #               {
-      #                 "name": test_type.name,
-      #                 "test_indicator_type": mlab_indicator_type_id,
-      #                 "unit": unit,
-      #                 "description": ''
-      #               }
-      #             ] }
-    
+      mlab_editable_test_type["indicators"][0]['name'] = row_data['Examens']
+
       if row_data['measure type'] == 'Numeric Range'
-        begin
+          # Initilize the keys if they do not exist
+          mlab_editable_test_type["indicators"] ||= []
+          mlab_editable_test_type["indicators"][0]["indicator_ranges"] ||= {}
+          mlab_editable_test_type["indicators"][0]["indicator_ranges"][0] ||= {}
           mlab_editable_test_type['indicators'][0]['indicator_ranges'][0]['sex'] = gender
           mlab_editable_test_type['indicators'][0]['indicator_ranges'][0]['lower_range'] = lower_range
           mlab_editable_test_type['indicators'][0]['indicator_ranges'][0]['upper_range'] = upper_range
-        rescue
-          next 
-        end
-        # update_payload[:indicators][0][:indicator_ranges] = [{
-        #       "min_age": 0,
-        #       "max_age": 120,
-        #       "sex": gender,
-        #       "lower_range": lower_range,
-        #       "upper_range": upper_range
-        #     }]
       end
 
       update_payload = mlab_editable_test_type.to_json
