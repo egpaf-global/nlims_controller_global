@@ -1,6 +1,7 @@
 require 'roo'
 require 'rest-client'
 require 'json'
+require 'uri'
 
 DEPARTMENT_TRANSLATION = {
   'Hématologie' => 'Haematology',
@@ -87,7 +88,7 @@ def test_indicator_type_id(type)
       type = 'Auto complete'
     end
   end
-  (MLAB_TEST_INDICATOR_TYPES.find { |indicator| indicator['name'] == type })['id']
+  (MLAB_TEST_INDICATOR_TYPES.find { |indicator| indicator['name'] == type })['id'] rescue 1
 end
 # Specify the path to your Excel file
 excel_file_path = "#{Rails.root}/storage/EXAMENS.xlsx"
@@ -125,7 +126,6 @@ excel.sheets.each do |department|
     row_data = Hash[header.zip(excel.row(row).map(&:to_s))]
 
     puts "Creating Test type: #{row_data['Examens']}"
-    next if row_data['Examens'] == 'GB'
 
     test_type = TestType.find_by_name(row_data['Examens'])
     if test_type.blank?
@@ -220,13 +220,15 @@ excel.sheets.each do |department|
     # Create test in MLAB
     response = mlab_request(http_method, url, payload)
     if response == 'test exists'
+
       puts "#{response} update test "
-      fetch_url = "test_types?search=#{test_type.name}"
+      escaped_test_type = URI.escape(test_type.name)
+      fetch_url = "test_types?search=#{escaped_test_type}"
       http_method = 'GET'
       mlab_test_type = mlab_request(http_method, fetch_url, payload)['test_types'].find do |test|
         test['name'] == test_type.name
       end
-      fetch_url = "test_types/#{mlab_test_type['id']}"
+      fetch_url = "test_types/#{mlab_test_type['id']}" rescue next
       payload = {}
       begin
         mlab_editable_test_type = mlab_request(http_method, fetch_url, payload)
@@ -234,33 +236,48 @@ excel.sheets.each do |department|
         
       end
       
-      update_payload = { specimens: [{}],
-                  organisms: [{}],
-                  "test_type": mlab_test_type,
-                  expected_turn_around_time: mlab_test_type['expected_turn_around_time'],
-                  "indicators": [
-                    {
-                      "name": test_type.name,
-                      "test_indicator_type": mlab_indicator_type_id,
-                      "unit": unit,
-                      "description": ''
-                    }
-                  ] }
       if row_data['measure type'] == 'Numeric Range'
-        update_payload[:indicators][0][:indicator_ranges] = [{
-              "min_age": 0,
-              "max_age": 120,
-              "sex": gender,
-              "lower_range": lower_range,
-              "upper_range": upper_range
-            }]
+         mlab_indicator_type_id = {id: 2, name: 'Numeric'}
+      else
+         mlab_indicator_type_id = {id: 1, name: 'Free Text'}
+      end
+      
+      mlab_editable_test_type['indicators'][0]['test_indicator_type'] = mlab_indicator_type_id
+      # update_payload = { specimens: mlab_specimen_type_ids,
+      #             organisms: [],
+      #             "test_type": mlab_test_type,
+      #             expected_turn_around_time: mlab_test_type['expected_turn_around_time'],
+      #             "indicators": [
+      #               {
+      #                 "name": test_type.name,
+      #                 "test_indicator_type": mlab_indicator_type_id,
+      #                 "unit": unit,
+      #                 "description": ''
+      #               }
+      #             ] }
+    
+      if row_data['measure type'] == 'Numeric Range'
+        begin
+          mlab_editable_test_type['indicators'][0]['indicator_ranges'][0]['sex'] = gender
+          mlab_editable_test_type['indicators'][0]['indicator_ranges'][0]['lower_range'] = lower_range
+          mlab_editable_test_type['indicators'][0]['indicator_ranges'][0]['upper_range'] = upper_range
+        rescue
+          next 
+        end
+        # update_payload[:indicators][0][:indicator_ranges] = [{
+        #       "min_age": 0,
+        #       "max_age": 120,
+        #       "sex": gender,
+        #       "lower_range": lower_range,
+        #       "upper_range": upper_range
+        #     }]
       end
 
-      payload.to_json
+      update_payload = mlab_editable_test_type.to_json
       http_method = 'PUT'
       update_url = "#{url}/#{mlab_test_type['id'].to_s}"
       
-      response = mlab_request(http_method, update_url, payload)
+      response = mlab_request(http_method, update_url, update_payload)
     end
   end
 
