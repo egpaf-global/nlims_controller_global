@@ -1,6 +1,5 @@
 class SpecimenDispatch < ActiveRecord::Migration[5.1]
   def change
-    drop_table :specimen_dispatches
     create_table :specimen_dispatches do |t|
       t.string :tracking_number
       t.string :dispatcher
