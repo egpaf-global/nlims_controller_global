@@ -1421,33 +1421,33 @@ module  OrderService
                   :who_updated_name => "#{ord['who_updated']['first_name']} #{ord['who_updated']['last_name']}",
                   :who_updated_phone_number => ord['who_updated']['phone_number'],
             )
-            retr_order = OrderService.retrieve_order_from_couch(couch_id)          
-            return [false,"order not available -c"] if retr_order == "false"
-	      curent_status_trail = retr_order['sample_statuses']
-            curent_status_trail[Time.now.strftime("%Y%m%d%H%M%S")] = {
-                  "status": status,
-                  "updated_by":  {
-                        :first_name => ord[:who_updated]['first_name'],
-                        :last_name => ord[:who_updated]['last_name'],
-                        :phone_number => '',
-                        :id => ord[:who_updated]['id_number'] 
-                        }
-            }
-            retr_order['sample_statuses'] = curent_status_trail
-            retr_order['sample_status'] = status         
+      #       retr_order = OrderService.retrieve_order_from_couch(couch_id)          
+      #       return [false,"order not available -c"] if retr_order == "false"
+	#       curent_status_trail = retr_order['sample_statuses']
+      #       curent_status_trail[Time.now.strftime("%Y%m%d%H%M%S")] = {
+      #             "status": status,
+      #             "updated_by":  {
+      #                   :first_name => ord[:who_updated]['first_name'],
+      #                   :last_name => ord[:who_updated]['last_name'],
+      #                   :phone_number => '',
+      #                   :id => ord[:who_updated]['id_number'] 
+      #                   }
+      #       }
+      #       retr_order['sample_statuses'] = curent_status_trail
+      #       retr_order['sample_status'] = status         
             
-            if !ord['who_rejected'].blank?
-                  retr_order['who_rejected'] = {
-                        'first_name': ord['who_rejected']['first_name'],
-                        'last_name': ord['who_rejected']['last_name'],
-                        'phone_number': '',
-                        'id': ord['who_rejected']['id_number'],                        
-                        'rejection_explained_to': ord['who_rejected']['person_talked_to'],
-                        'reason_for_rejection': ord['who_rejected']['reason_for_rejection']                        
-                  }
-            end
-            OrderService.update_couch_order(couch_id,retr_order)
-	   [true,""]
+      #       if !ord['who_rejected'].blank?
+      #             retr_order['who_rejected'] = {
+      #                   'first_name': ord['who_rejected']['first_name'],
+      #                   'last_name': ord['who_rejected']['last_name'],
+      #                   'phone_number': '',
+      #                   'id': ord['who_rejected']['id_number'],                        
+      #                   'rejection_explained_to': ord['who_rejected']['person_talked_to'],
+      #                   'reason_for_rejection': ord['who_rejected']['reason_for_rejection']                        
+      #             }
+      #       end
+      #       OrderService.update_couch_order(couch_id,retr_order)
+	#    [true,""]
       end
 
       def self.query_order_by_tracking_number(tracking_number)
