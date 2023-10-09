@@ -1155,7 +1155,7 @@ module  OrderService
                                                 }
                                     }
                                     test_status[tst] = details                  
-                                    #rst = TestType.get_test_type_id(tt)
+                                    # rst = TestType.get_test_type_id(tt)
                                     rst2 = TestStatus.get_test_status_id('drawn')
                                     Test.create(
                                           :specimen_id => sp_obj.id,
@@ -1224,15 +1224,15 @@ module  OrderService
             obj.specimen_status_id =  sp_id = SpecimenStatus.find_by(:name => 'specimen_collected')['id']
             obj.save            
         
-            retr_order = OrderService.retrieve_order_from_couch(couch_id)          
-            if retr_order != "false"
-	    	retr_order['sample_type'] = specimen_type
-            	retr_order['receiving_facility'] = target_lab   
-            	retr_order['sample_status']      = 'specimen_collected'
-            	puts  "-----checking"
+            # retr_order = OrderService.retrieve_order_from_couch(couch_id)          
+            # if retr_order != "false"
+	    	# retr_order['sample_type'] = specimen_type
+            # 	retr_order['receiving_facility'] = target_lab   
+            # 	retr_order['sample_status']      = 'specimen_collected'
+            # 	puts  "-----checking"
      
-            	OrderService.update_couch_order(couch_id,retr_order)
-            end
+            # 	OrderService.update_couch_order(couch_id,retr_order)
+            # end
       end
 
 
@@ -1394,15 +1394,15 @@ module  OrderService
       def self.update_order(ord)
           return [false,"no tracking number"] if ord['tracking_number'].blank?
 	    status = ord['status']              
-          rejecter = {}  
-	    couch_id = ""
+          # rejecter = {}  
+	    # couch_id = ""
 	    #retr_order = OrderService.retrieve_order_from_couch(couch_id)
             #return [false,""] if retr_order == "false"
             st = SpecimenStatus.find_by_sql("SELECT id AS status_id FROM specimen_statuses WHERE name='#{status}'")
             return [false,"wrong parameter for specimen status"] if st.blank?
             status_id = st[0]['status_id']
             obj = Speciman.find_by(:tracking_number => ord['tracking_number'])
-            couch_id = obj['couch_id'] if !obj['couch_id'].blank?
+            # couch_id = obj['couch_id'] if !obj['couch_id'].blank?
             if !ord['specimen_type'].blank? 
                   sp_type = SpecimenType.find_by(:name => ord['specimen_type'])
                   if(!sp_type.blank?)      
@@ -1447,7 +1447,7 @@ module  OrderService
       #             }
       #       end
       #       OrderService.update_couch_order(couch_id,retr_order)
-	#    [true,""]
+	   [true,""]
       end
 
       def self.query_order_by_tracking_number(tracking_number)
