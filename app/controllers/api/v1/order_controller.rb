@@ -1,7 +1,6 @@
 require 'order_service.rb'
 require 'user_service.rb'
 require 'tracking_number_service.rb'
-require 'thread'
 require 'date'
 
 class API::V1::OrderController < ApplicationController
@@ -76,7 +75,6 @@ class API::V1::OrderController < ApplicationController
 									couch_id: st[2]
 								}
 						}
-					TrackingNumberService.prepare_next_tracking_number
 				else
 						response = {
 													status: 401,
@@ -459,7 +457,6 @@ render plain: response.to_json and return
 											couch_id: st[2]
 										}
 								}
-							TrackingNumberService.prepare_next_tracking_number
 						end										
 				end
 
