@@ -1,108 +1,60 @@
-require 'order_service.rb'
-require 'user_service.rb'
-require 'tracking_number_service.rb'
+require 'order_service'
+require 'user_service'
+require 'tracking_number_service'
 require 'date'
 
 class API::V1::OrderController < ApplicationController
 
 	def create_order
-	   
-		if(!params['district'])                                      
-			msg = "district not provided";                                      
-		elsif(!params['health_facility_name'])
-			msg = "health facility name not provided"
-		elsif (!params['requesting_clinician'])
-			msg = 'requesting clinician not provided'
-		elsif(!params['first_name'])
-			msg = "patient first name not provided"
-		elsif(!params['last_name'])
-			msg = "patient last name not provided"
-		elsif(!params['phone_number'])
-			msg = "patient phone number not provided"
-		elsif(!params['gender'])
-			msg = "patient gender not provided"
-		elsif(!params['national_patient_id'])
-			msg = "patient ID not provided"
-		elsif(!params['sample_type'])
-			msg = "sample type not provided"
-		elsif(!params['tests'])
-			msg = "tests not provided";
-		elsif(!params['date_sample_drawn'])
-			msg = "date for sample drawn not provided"
-		elsif(!params['sample_status'])
-			msg = "sample status not provided"
-		elsif(!params['sample_priority'])
-			msg = "sample priority level not provided"
-		elsif(!params['target_lab'])
-			msg = "target lab for sample not provided"
-		elsif(!params['order_location'])
-			msg = "sample order location not provided"
-		elsif(!params['who_order_test_first_name'])
-			msg = "first name for person ordering not provided"
-		elsif(!params['who_order_test_last_name'])
-			msg = "last name for person ordering not provided"
+	  required_params = %w[district health_facility_name requesting_clinician first_name last_name phone_number gender national_patient_id sample_type tests date_sample_drawn sample_status sample_priority target_lab order_location who_order_test_first_name who_order_test_last_name]
+
+	  missing_param = required_params.find { |param| params[param].blank? }
+
+	  if missing_param
+		response = {
+		status: 401,
+		error: true,
+		message: "#{missing_param.tr('_', ' ')} not provided",
+		data: {}
+		}
+	  else
+		if params['tracking_number'].present?
+			order_availability = OrderService.check_order(params['tracking_number'])
+			if order_availability
+				response = {
+				status: 200,
+				error: false,
+				message: 'Order already available',
+				data: { tracking_number: params['tracking_number'] }
+				}
+			else
+				tracking_number = params['tracking_number']
+			end
 		else
-			order_availability = false
-				if (params['tracking_number'] && !params['tracking_number'].blank?)
-					tracking_number = params['tracking_number']
-					order_availability = OrderService.check_order(tracking_number)
-					
-					if order_availability == true											
-						response = {
-							status: 200,
-							error: false,
-							message: 'order already available',
-							data: {
-									tracking_number: tracking_number
-								}
-						}			
-						render plain: response.to_json and return			
-					end
-				else
-					tracking_number = TrackingNumberService.generate_tracking_number
-				end
-									
-				st = OrderService.create_order(params, tracking_number)
-							
-				if st[0] == true
-
-					response = {
-							status: 200,
-							error: false,
-							message: 'order created successfuly',
-							data: {
-									tracking_number: st[1],
-									couch_id: st[2]
-								}
-						}
-				else
-						response = {
-													status: 401,
-													error: true,
-													message: st[1],
-													data: {
-
-													}
-										}
-
-				end										
+			tracking_number = TrackingNumberService.generate_tracking_number
 		end
+		result = OrderService.create_order(params, tracking_number)
 
-		if msg
+		if result[0]
+			response = {
+				status: 200,
+				error: false,
+				message: 'Order created successfully',
+				data: { tracking_number: result[1], couch_id: result[2] }
+			}
+		else
 			response = {
 				status: 401,
 				error: true,
-				message: msg,
-				data: {
-					
-				}
+				message: result[1],
+				data: {}
 			}
 		end
-puts "-------------------"							
-puts response.to_json
-puts "-------------------"
-render plain: response.to_json and return	
+	  end
+
+		render plain: response.to_json
 	end
+
 	
 	def check_if_dispatched
 	
