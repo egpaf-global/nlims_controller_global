@@ -23,7 +23,7 @@ module  OrderService
       sp_obj = create_specimen(tracking_number, common_data, params)
 
       # Create Visit
-      visit = create_visit(patient_obj.id, params[:order_location])
+      create_visit(patient_obj.id, params[:order_location])
 
       # Create Tests
       create_tests(params[:tests], sp_obj, patient_obj, common_data)
@@ -47,7 +47,7 @@ module  OrderService
 
   def self.validate_tests(tests)
     tests.each do |tst|
-      tst = check_test_name(tst)
+      tst = test_name_available?(tst)
       return [false, 'Test name not available in nlims'] if tst == false
     end
     nil
@@ -104,24 +104,27 @@ module  OrderService
   end
 
   def self.create_specimen(tracking_number, common_data, params)
-    Speciman.create(
-    tracking_number: tracking_number,
-    specimen_type_id: common_data[:sample_type].id,
-    specimen_status_id: common_data[:sample_status].id,
-    couch_id: '',
-    ward_id: common_data[:order_ward],
-    priority: params[:sample_priority],
-    drawn_by_id: params[:who_order_test_id],
-    drawn_by_name: "#{common_data[:drawn_by][:first_name]} #{common_data[:drawn_by][:last_name]}",
-    drawn_by_phone_number: common_data[:drawn_by][:phone_number],
-    target_lab: params[:target_lab],
-    art_start_date: common_data[:art_start_date],
-    sending_facility: params[:health_facility_name],
-    requested_by: params[:requesting_clinician],
-    district: params[:district],
-    date_created: params[:date_sample_drawn],
-    arv_number: common_data[:arv_number],
-    art_regimen: common_data[:art_regimen]
+    specimen = Speciman.find_by_tracking_number(tracking_number)
+    return specimen if specimen
+    
+    Speciman.find_or_create_by!(
+      tracking_number: tracking_number,
+      specimen_type_id: common_data[:sample_type].id,
+      specimen_status_id: common_data[:sample_status].id,
+      couch_id: '',
+      ward_id: common_data[:order_ward],
+      priority: params[:sample_priority],
+      drawn_by_id: params[:who_order_test_id],
+      drawn_by_name: "#{common_data[:drawn_by][:first_name]} #{common_data[:drawn_by][:last_name]}",
+      drawn_by_phone_number: common_data[:drawn_by][:phone_number],
+      target_lab: params[:target_lab],
+      art_start_date: common_data[:art_start_date],
+      sending_facility: params[:health_facility_name],
+      requested_by: params[:requesting_clinician],
+      district: params[:district],
+      date_created: params[:date_sample_drawn],
+      arv_number: common_data[:arv_number],
+      art_regimen: common_data[:art_regimen]
     )
   end
 
@@ -134,7 +137,7 @@ module  OrderService
     test_types = {}
 
     tests.each do |tst|
-      tst = check_test_name(tst)
+      tst = test_name_available?(tst)
       tst = tst.gsub('&amp;', '&')
       status = check_test(tst)
       details = {}
@@ -142,39 +145,39 @@ module  OrderService
         'status' => 'Drawn',
         'updated_by': common_data[:drawn_by]
       }
-
+     
       if status == false
         test_status[tst] = details
-        rst = TestType.get_test_type_id(tst)
-        rst2 = TestStatus.get_test_status_id('drawn')
+        test_type = TestType.get_test_type_id(tst)
+        test_status_id = TestStatus.get_test_status_id('drawn')
 
-        Test.create(
-        specimen_id: sp_obj.id,
-        test_type_id: rst,
-        patient_id: patient_obj.id,
-        created_by: "#{common_data[:drawn_by][:first_name]} #{common_data[:drawn_by][:last_name]}",
-        panel_id: '',
-        time_created: common_data[:time],
-        test_status_id: rst2
-        )
-      else
-        pa_id = PanelType.find_by(name: tst)
-        test_types = TestType.joins(panels: :panel_type)
-                          .where(panel_types: { id: pa_id.id })
-                          .select(:id)
-
-        test_types.each do |tt|
-          test_status[tst] = details
-          rst2 = TestStatus.get_test_status_id('drawn')
-
-          Test.create(
+        Test.find_or_create_by!(
           specimen_id: sp_obj.id,
-          test_type_id: tt.id,
+          test_type_id: test_type,
           patient_id: patient_obj.id,
           created_by: "#{common_data[:drawn_by][:first_name]} #{common_data[:drawn_by][:last_name]}",
           panel_id: '',
           time_created: common_data[:time],
-          test_status_id: rst2
+          test_status_id: test_status_id
+        )
+      else
+        pa_id = PanelType.find_by(name: tst)
+        test_types = TestType.joins(panels: :panel_type)
+                             .where(panel_types: { id: pa_id.id })
+                             .select(:id)
+
+        test_types.each do |tt|
+          test_status[tst] = details
+          test_status_id = TestStatus.get_test_status_id('drawn')
+
+          Test.find_or_create_by!(
+            specimen_id: sp_obj.id,
+            test_type_id: tt.id,
+            patient_id: patient_obj.id,
+            created_by: "#{common_data[:drawn_by][:first_name]} #{common_data[:drawn_by][:last_name]}",
+            panel_id: '',
+            time_created: common_data[:time],
+            test_status_id: test_status_id
           )
         end
       end
@@ -363,9 +366,9 @@ module  OrderService
     site_code_number
   end
 
-  def self.check_test_name(test)
-	   tst = TestType.find_by_sql("SELECT name AS tst_name FROM test_types WHERE name ='#{test}' LIMIT 1")
-    tst.length > 0 ? tst[0].tst_name : false
+  def self.test_name_available?(test)
+    tst = TestType.find_by_sql("SELECT name AS tst_name FROM test_types WHERE name ='#{test}' LIMIT 1")
+    tst.blank? ? false : tst[0].tst_name
   end
 
   def self.get_order_by_tracking_number_sql(track_number)
@@ -662,30 +665,30 @@ module  OrderService
             end
 
             facility_samples.push(
-                  {     tracking_number: ress.tracking_number,
-                        sample_type: ress.sample_type,
-                        specimen_status: ress.specimen_status,
-                        order_location: ress.order_location,
-                        date_created: ress.date_created,
-                        priority: ress.priority,
-                        receiving_lab: ress.target_lab,
-                        sending_lab: ress.health_facility,
-                        requested_by: ress.requested_by,
-                        sample_created_by: {
-                                      id: ress.drawe_number,
-                                      name: ress.drawer_name,
-                                      phone: ress.drawe_number
-                                    },
-                        patient: {
-                                      id: ress.pat_id,
-                                      name: ress.pat_name,
-                                      gender: ress.sex,
-                                      dob: ress.dob
-                                    },
+              {     tracking_number: ress.tracking_number,
+                    sample_type: ress.sample_type,
+                    specimen_status: ress.specimen_status,
+                    order_location: ress.order_location,
+                    date_created: ress.date_created,
+                    priority: ress.priority,
+                    receiving_lab: ress.target_lab,
+                    sending_lab: ress.health_facility,
+                    requested_by: ress.requested_by,
+                    sample_created_by: {
+                                  id: ress.drawe_number,
+                                  name: ress.drawer_name,
+                                  phone: ress.drawe_number
+                                },
+                    patient: {
+                                  id: ress.pat_id,
+                                  name: ress.pat_name,
+                                  gender: ress.sex,
+                                  dob: ress.dob
+                                },
 
 
-                        tests: tsts
-                  }
+                    tests: tsts
+              }
             )
             tsts = {}
 
@@ -785,18 +788,18 @@ module  OrderService
   def self.dispatch_sample(tracking_number,dispatcher, date_dispatched, dispatcher_type, delivery_location='pickup')
     if(delivery_location=='pickup')
       SpecimenDispatch.create(
-            tracking_number: tracking_number,
-            dispatcher: dispatcher,
-            date_dispatched: date_dispatched,
-            dispatcher_type_id: dispatcher_type
+        tracking_number: tracking_number,
+        dispatcher: dispatcher,
+        date_dispatched: date_dispatched,
+        dispatcher_type_id: dispatcher_type
       )
     else
       SpecimenDispatch.create(
-            tracking_number: tracking_number,
-            dispatcher: dispatcher,
-            date_dispatched: date_dispatched,
-            dispatcher_type_id: dispatcher_type,
-            delivery_location: delivery_location
+        tracking_number: tracking_number,
+        dispatcher: dispatcher,
+        date_dispatched: date_dispatched,
+        dispatcher_type_id: dispatcher_type,
+        delivery_location: delivery_location
       )
     end
     true
@@ -822,14 +825,14 @@ module  OrderService
 
       if patient_obj.blank?
         patient_obj = patient_obj.create(
-                          patient_number: npid,
-                          name: "#{params[:first_name]} #{params[:last_name]}",
-                          email: '' ,
-                          dob: params[:date_of_birth],
-                          gender: params[:gender],
-                          phone_number: params[:phone_number],
-                          address: "",
-                          external_patient_number: ""
+          patient_number: npid,
+          name: "#{params[:first_name]} #{params[:last_name]}",
+          email: '' ,
+          dob: params[:date_of_birth],
+          gender: params[:gender],
+          phone_number: params[:phone_number],
+          address: "",
+          external_patient_number: ""
 
                           )
 
@@ -880,30 +883,30 @@ module  OrderService
 
 
       sp_obj =  Speciman.create(
-                  :tracking_number => tracking_number,
-                  :specimen_type_id => 0,
-                  :specimen_status_id => sample_status_id,
-                  :couch_id => '',
-                  :ward_id => Ward.get_ward_id(params[:order_location]),
-                  :priority => params[:sample_priority],
-                  :drawn_by_id => params[:who_order_test_id],
-                  :drawn_by_name => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
-                  :drawn_by_phone_number => params[:who_order_test_phone_number],
-                  :target_lab => 'not_assigned',
-                  :art_start_date => art_start_date,
-                  :sending_facility => params[:health_facility_name],
-                  :requested_by => params[:requesting_clinician],
-                  :district => params[:district],
-                  :date_created => time,
-                  :arv_number => arv_number,
-                  :art_regimen => art_regimen
+        :tracking_number => tracking_number,
+        :specimen_type_id => 0,
+        :specimen_status_id => sample_status_id,
+        :couch_id => '',
+        :ward_id => Ward.get_ward_id(params[:order_location]),
+        :priority => params[:sample_priority],
+        :drawn_by_id => params[:who_order_test_id],
+        :drawn_by_name => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
+        :drawn_by_phone_number => params[:who_order_test_phone_number],
+        :target_lab => 'not_assigned',
+        :art_start_date => art_start_date,
+        :sending_facility => params[:health_facility_name],
+        :requested_by => params[:requesting_clinician],
+        :district => params[:district],
+        :date_created => time,
+        :arv_number => arv_number,
+        :art_regimen => art_regimen
             )
 
 
       res = Visit.create(
-               :patient_id => npid,
-               :visit_type_id => '',
-               :ward_id => Ward.get_ward_id(params[:order_location])
+        :patient_id => npid,
+        :visit_type_id => '',
+        :ward_id => Ward.get_ward_id(params[:order_location])
             )
       visit_id = res.id
 
@@ -926,13 +929,13 @@ module  OrderService
           rst2 = TestStatus.get_test_status_id('drawn')
 
           Test.create(
-                :specimen_id => sp_obj.id,
-                :test_type_id => rst,
-                :patient_id => patient_obj.id,
-                :created_by => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
-                :panel_id => '',
-                :time_created => time,
-                :test_status_id => rst2
+            :specimen_id => sp_obj.id,
+            :test_type_id => rst,
+            :patient_id => patient_obj.id,
+            :created_by => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
+            :panel_id => '',
+            :time_created => time,
+            :test_status_id => rst2
           )
         else
           pa_id = PanelType.where(name: tst).first
@@ -955,13 +958,13 @@ module  OrderService
             # rst = TestType.get_test_type_id(tt)
             rst2 = TestStatus.get_test_status_id('drawn')
             Test.create(
-                  :specimen_id => sp_obj.id,
-                  :test_type_id => tt.id,
-                  :patient_id => patient_obj.id,
-                  :created_by => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
-                  :panel_id => '',
-                  :time_created => time,
-                  :test_status_id => rst2
+              :specimen_id => sp_obj.id,
+              :test_type_id => tt.id,
+              :patient_id => patient_obj.id,
+              :created_by => "#{params[:who_order_test_first_name]} #{params[:who_order_test_last_name]}",
+              :panel_id => '',
+              :time_created => time,
+              :test_status_id => rst2
             )
           end
         end
@@ -977,24 +980,24 @@ module  OrderService
       end
 
       c_order  =  Order.create(
-                  tracking_number: tracking_number,
-                  sample_type: 'not_assigned',
-                  date_created: params[:date_sample_drawn],
-                  sending_facility: params[:health_facility_name],
-                  receiving_facility: 'not_assigned',
-                  tests: params[:tests],
-                  test_results: couch_tests,
-                  patient: patient,
-                  order_location: params[:order_location] ,
-                  districy: params[:district],
-                  priority: params[:sample_priority],
-                  who_order_test: who_order,
-                  sample_statuses: sample_status,
-                  test_statuses: test_status,
-                  sample_status: "specimen_not_collected",
-                  art_regimen: art_regimen,
-                  arv_number: arv_number,
-                  art_start_date: art_start_date
+        tracking_number: tracking_number,
+        sample_type: 'not_assigned',
+        date_created: params[:date_sample_drawn],
+        sending_facility: params[:health_facility_name],
+        receiving_facility: 'not_assigned',
+        tests: params[:tests],
+        test_results: couch_tests,
+        patient: patient,
+        order_location: params[:order_location] ,
+        districy: params[:district],
+        priority: params[:sample_priority],
+        who_order_test: who_order,
+        sample_statuses: sample_status,
+        test_statuses: test_status,
+        sample_status: "specimen_not_collected",
+        art_regimen: art_regimen,
+        arv_number: arv_number,
+        art_start_date: art_start_date
             )
 
       sp = Speciman.find_by(:tracking_number => tracking_number)
@@ -1144,12 +1147,12 @@ module  OrderService
     obj.specimen_status_id = status_id
     obj.save
     SpecimenStatusTrail.create(
-          :specimen_id => obj.id,
-          :specimen_status_id => status_id,
-          :time_updated => Time.new.strftime("%Y%m%d%H%M%S"),
-          :who_updated_id => ord['who_updated']['id'],
-          :who_updated_name => "#{ord['who_updated']['first_name']} #{ord['who_updated']['last_name']}",
-          :who_updated_phone_number => ord['who_updated']['phone_number'],
+      :specimen_id => obj.id,
+      :specimen_status_id => status_id,
+      :time_updated => Time.new.strftime("%Y%m%d%H%M%S"),
+      :who_updated_id => ord['who_updated']['id'],
+      :who_updated_name => "#{ord['who_updated']['first_name']} #{ord['who_updated']['last_name']}",
+      :who_updated_phone_number => ord['who_updated']['phone_number'],
     )
     [true,""]
   end

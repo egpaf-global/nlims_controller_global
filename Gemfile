@@ -34,10 +34,6 @@ gem 'apipie-rails'
 # gem 'rack-cors'
 
 gem 'rest-client'
-
-gem 'couchrest_model'
-gem 'socket.io-client-simple'
-gem 'sucker_punch'
 gem 'passenger'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
