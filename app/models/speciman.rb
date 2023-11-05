@@ -1,2 +1,0 @@
-class Speciman < ApplicationRecord
-end

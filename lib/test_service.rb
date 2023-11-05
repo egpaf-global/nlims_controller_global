@@ -207,7 +207,7 @@ module TestService
                          tst.save
 
    
-                         obj = Speciman.find_by(:tracking_number => tracking_number)
+                         obj = Specimen.find_by(:tracking_number => tracking_number)
                          couch_id = obj['couch_id'] if !obj['couch_id'].blank?
 
                          retr_order = OrderService.retrieve_order_from_couch(couch_id)
@@ -257,7 +257,7 @@ module TestService
   end
 
   def self.query_test_status(tracking_number)
-    spc_id = Speciman.find_by(:tracking_number => tracking_number)['id']
+    spc_id = Specimen.find_by(:tracking_number => tracking_number)['id']
     status = Test.find_by_sql("SELECT test_statuses.name,test_types.name AS tst_name FROM test_statuses INNER JOIN tests ON tests.test_status_id = test_statuses.id
 							INNER JOIN test_types ON test_types.id = tests.test_type_id
 							WHERE tests.specimen_id='#{spc_id}'
@@ -398,7 +398,7 @@ module TestService
 
       res1.each do |te|
 
-        res = Speciman.find_by_sql("SELECT measures.name AS measure_nam, measures.id AS me_id FROM measures
+        res = Specimen.find_by_sql("SELECT measures.name AS measure_nam, measures.id AS me_id FROM measures
     							INNER JOIN testtype_measures ON testtype_measures.measure_id = measures.id
     							INNER JOIN test_types ON test_types.id = testtype_measures.test_type_id
     							WHERE test_types.id = '#{te.tes_id}'

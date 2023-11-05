@@ -13,43 +13,34 @@ class API::V1::OrderController < ApplicationController
     missing_param = required_params.any? { |param| !params.key?(param) }
 
     if missing_param
-      response = {
-        status: 401,
-        error: true,
-        message: "#{missing_param.tr('_', ' ')} not provided",
-        data: {}
-      }
+      response = { status: 401, error: true, message: "#{missing_param.tr('_', ' ')} not provided", data: {} }
+      return response
+    end
+    if params['tracking_number'].present?
+      tracking_number = params['tracking_number']
     else
-      if params['tracking_number'].present?
-        order_availability = OrderService.check_order(params['tracking_number'])
-        if order_availability
-          tracking_number = params['tracking_number']
-        end
-      else
-        tracking_number = TrackingNumberService.generate_tracking_number
-      end
-      result = OrderService.create_order(params, tracking_number)
-
-      response = if result[0]
-                   {
-                     status: 200,
-                     error: false,
-                     message: 'Order created successfully',
-                     data: { tracking_number: result[1], couch_id: result[2] }
-                   }
-                 else
-                   {
-                     status: 401,
-                     error: true,
-                     message: result[1],
-                     data: {}
-                   }
-                 end
+      tracking_number = TrackingNumberService.generate_tracking_number
     end
 
+    result = OrderService.create_order(params, tracking_number)
+
+    response = if result[0]
+          {
+            status: 200,
+            error: false,
+            message: 'Order created successfully',
+            data: { tracking_number: result[1], couch_id: result[2] }
+          }
+          else
+          {
+            status: 401,
+            error: true,
+            message: result[1],
+            data: {}
+          }
+          end
     render plain: response.to_json
   end
-
 
   def check_if_dispatched
 
@@ -255,7 +246,7 @@ class API::V1::OrderController < ApplicationController
                 res = OrderService.check_if_dispatched(tracking_number,dispatcher_type_id.id)
                 if res == false
                   status = OrderService.dispatch_sample(tracking_number,dispatcher,date_dispatched,
-dispatcher_type_id.id, delivery_location)
+    dispatcher_type_id.id, delivery_location)
                   response = if status == false
                                {
                                  status: 401,
@@ -655,8 +646,6 @@ dispatcher_type_id.id, delivery_location)
     render plain: response.to_json and return
   end
 
-
-
   def query_results_by_tracking_number_site_code
 
     if params[:tracking_number]
@@ -696,7 +685,6 @@ dispatcher_type_id.id, delivery_location)
     render plain: response.to_json and return
   end
 
-
   def query_order_by_tracking_number
     if  params[:tracking_number]
 
@@ -734,8 +722,6 @@ dispatcher_type_id.id, delivery_location)
     end
     render plain: response.to_json and return
   end
-
-
 
   def query_order_by_tracking_number_site_code
     if  params[:tracking_number]
@@ -775,7 +761,4 @@ dispatcher_type_id.id, delivery_location)
 
     render plain: response.to_json and return
   end
-
-
-
 end
