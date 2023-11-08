@@ -10,10 +10,10 @@ module TrackingNumberService
   # Use a database transaction to ensure atomic updates
     tracking_number = nil
     TrackerJson.transaction do
-      tracker = TrackerJson.find_or_create_by(tracker_date: current_date)
-      counter = tracker.counter || 0
-      counter += 1
-      tracker.update(counter: counter)
+      tracker = TrackerJson.find_or_create_by(id: 1)
+      tracker = tracker.update(tracker: {"#{current_date}": 0}) if (tracker.tracker.blank? || tracker.tracker[current_date].blank?)
+      counter = tracker.tracker[current_date].to_i + 1
+      tracker.update(tracker: {"#{current_date}": counter})
       value = format('%03d', counter)
       tracking_number = "X#{site_code}#{year}#{month}#{day}#{value}"
     end
