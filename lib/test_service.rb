@@ -15,10 +15,7 @@ module TestService
     end
     if !sql_order == false
       order_id = sql_order.id
-      # couch_id = sql_order.couch_id
       test_name = params[:test_name]
-      # test_name = test_name.gsub("_", " ")
-      # retr_order = OrderService.retrieve_order_from_couch(couch_id)
 
       return [false, 'wrong parameter on test name provided'] if TestType.find_by_name(test_name).blank?
       if TestStatus.find_by_name(params[:test_status]).blank?
@@ -32,7 +29,6 @@ module TestService
 							      WHERE tests.specimen_id = '#{order_id}'
 								  AND test_types.name = '#{test_name}'").first.id
       test_status = TestStatus.where(name: params[:test_status]).first
-      # couch_id_updater = 0
       if !test_id.blank?
         checker = check_if_test_updated?(test_id, test_status.id)
         if checker == false
@@ -55,13 +51,10 @@ module TestService
                                  measure_id: measure.id).first.update(result: result_value,
                                                                       time_entered: result_date)
               end
-              # test_results_measures[measure_name] = { 'result_value': result_value }
             end
-            # results_measure[test_name] = test_results_measures
 
             test_status = TestStatus.where(name: params[:test_status]).first
             tst_update = Test.find(test_id)
-            # couch_id_updater = tst_update.test_status_id
             if tst_update.test_status_id == 9 && test_status.id == 3
               tst_update.test_status_id = test_status.id
               tst_update.save
@@ -176,58 +169,6 @@ module TestService
               end
 
           end
-
-        #   if !results_measure.blank?
-        #     # retr_order = OrderService.retrieve_order_from_couch(couch_id)
-
-        #     if retr_order != "false"
-
-        #       couch_test_statuses = retr_order['test_statuses'][test_name]
-        #       couch_test_statuses[time] =  details if !couch_test_statuses.blank?
-        #       retr_order['test_statuses'][test_name] =  couch_test_statuses
-
-        #       retr_order['test_results'][test_name] = {
-        #         'results': test_results_measures,
-        #         'date_result_entered': result_date,
-        #         'result_entered_by': {
-        #           :first_name => params[:who_updated]['first_name'],
-        #           :last_name => params[:who_updated]['last_name'],
-        #           :phone_number => '',
-        #           :id => params[:who_updated]['id_number']
-        #         }
-        #         }
-
-
-        #       if couch_id_updater == 9 && params[:test_status] == "started"
-        #         OrderService.update_couch_order(couch_id, retr_order)
-        #       elsif couch_id_updater == 3 && params[:test_status] == "completed"
-        #         OrderService.update_couch_order(couch_id, retr_order)
-        #       elsif couch_id_updater == 4 && params[:test_status] == "verified"
-        #         OrderService.update_couch_order(couch_id, retr_order)
-        #       elsif params[:test_status] == "test-rejected"
-        #         OrderService.update_couch_order(couch_id, retr_order)
-        #       end
-        #     end
-        #   else
-        #     retr_order = OrderService.retrieve_order_from_couch(couch_id)
-
-        #     if retr_order != "false"
-
-        #       couch_test_statuses = retr_order['test_statuses'][test_name]
-        #       couch_test_statuses[time] =  details if !couch_test_statuses.blank?
-        #       retr_order['test_statuses'][test_name] =  couch_test_statuses
-        #       if couch_id_updater == 9 && params[:test_status] == "started"
-        #         OrderService.update_couch_order(couch_id, retr_order)
-        #       elsif couch_id_updater == 3 && params[:test_status] == "completed"
-
-        #         OrderService.update_couch_order(couch_id, retr_order)
-        #       elsif couch_id_updater == 4 && params[:test_status] == "verified"
-        #         OrderService.update_couch_order(couch_id, retr_order)
-        #       elsif params[:test_status] == "test-rejected"
-        #         OrderService.update_couch_order(couch_id, retr_order)
-        #       end
-        #     end
-        #   end
           return [true, ""]
         else
           return [false, "test already updated with such state"]
@@ -265,25 +206,11 @@ module TestService
                          tst.date_result_given = date
                          tst.save
 
-       #check = ResultsAcknwoledge.find_by(:tracking_number => tracking_number, :acknwoledged_by => "emr_at_facility")
-         #if check.blank?
-       #   tr = ResultsAcknwoledge.create(
-             #	tracking_number: tracking_number,
-             #	test_id: res[0]['id'],
-             #	acknwoledged_at:  date,
-             #	result_date: date,
-             #	acknwoledged_by: "emr_at_facility",
-             #	acknwoledged_to_nlims: false,
-              #	 acknwoledment_level: 2
-       #      )
-       #end
-                         obj = Speciman.find_by(:tracking_number => tracking_number)
+   
+                         obj = Specimen.find_by(:tracking_number => tracking_number)
                          couch_id = obj['couch_id'] if !obj['couch_id'].blank?
 
                          retr_order = OrderService.retrieve_order_from_couch(couch_id)
-                 #puts "hello"
-                                 #puts retr_order
-                                 #raise retr_order.inspect
                          if !retr_order['tracking_number'].blank?
                          test_ackn = {}
                          test_ackn[test_name] = {
@@ -330,7 +257,7 @@ module TestService
   end
 
   def self.query_test_status(tracking_number)
-    spc_id = Speciman.find_by(:tracking_number => tracking_number)['id']
+    spc_id = Specimen.find_by(:tracking_number => tracking_number)['id']
     status = Test.find_by_sql("SELECT test_statuses.name,test_types.name AS tst_name FROM test_statuses INNER JOIN tests ON tests.test_status_id = test_statuses.id
 							INNER JOIN test_types ON test_types.id = tests.test_type_id
 							WHERE tests.specimen_id='#{spc_id}'
@@ -471,7 +398,7 @@ module TestService
 
       res1.each do |te|
 
-        res = Speciman.find_by_sql("SELECT measures.name AS measure_nam, measures.id AS me_id FROM measures
+        res = Specimen.find_by_sql("SELECT measures.name AS measure_nam, measures.id AS me_id FROM measures
     							INNER JOIN testtype_measures ON testtype_measures.measure_id = measures.id
     							INNER JOIN test_types ON test_types.id = testtype_measures.test_type_id
     							WHERE test_types.id = '#{te.tes_id}'

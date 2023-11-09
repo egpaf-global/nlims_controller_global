@@ -32,7 +32,7 @@ end
 
 def update_lims(acc_num)
   updated_ac_num = 'X' + @fc_code + acc_num[4..(acc_num.length)]
-  spec = Speciman.find_by(tracking_number: acc_num)
+  spec = Specimen.find_by(tracking_number: acc_num)
 
   if spec
 	  spec.update(tracking_number: updated_ac_num)
