@@ -71,9 +71,6 @@ test_types.each do |t|
 	data[t[1]] = {"short_name" => t[2], "test_category" => cat, "target_TAT" => t[4] }
     TestType.create(name: t[1], short_name: t[2], test_category_id: t[3], targetTAT: t[4],description: '', prevalence_threshold: '')
 end
-TestCatelog.create(_id: "test_types", test_type: data)
-
-
 
 specimen_types = [[1,'Sputum'],[2,'CSF'],[3,'Blood'],[4,'Pleural Fluid'],[5,'Ascitic Fluid'],[6,'Pericardial Fluid'],[7,'Peritoneal Fluid'],
 				  [8,'HVS'], [9,'Swabs'], [10,'Pus'], [11,'Stool'],[12,'Urine'],[13,'Other'],[15,'Semen'],[16,'Swab'],[17,'Synovial Fluid'],
@@ -85,7 +82,6 @@ specimen_types.each do |sp|
     data.push(sp[1])
     SpecimenType.create(name:sp[1], description: '')
 end
-TestCatelog.create(_id: "specimen_types", specimen_type: data)
 
 testtype_specimentypes = [ [1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[3,5],[3,6],[3,7],[3,8],[3,9],[3,10],[3,11],[3,12],[3,13],[3,17],[4,1],[4,2],[4,3],[4,4],[4,5],[4,6],[4,7],[4,8],[4,9],
 						   [4,10],[4,11],[4,12],[4,13],[4,15],[4,17],[5,2],[5,4],[5,5],[5,6],[5,7],[5,13],[5,17],[6,2],[7,1],[7,2],[7,4],[7,5],[7,6],[7,7],[8,2],[8,4],[8,5],[8,6],
@@ -106,9 +102,6 @@ puts 'loading test panels--------------'
 test_panels.each do |tp|
     PanelType.create(name: tp, short_name: '')
 end
-TestCatelog.create(_id: "test_panels", test_panel: test_panels )
-
-
 
 test_statuses = ['not-received','pending','started','completed','verified','voided','not-done','test-rejected','drawn','failed',]
 puts 'loading test statuses--------------'
@@ -119,16 +112,11 @@ test_statuses.each do |t|
 	)
 end
 
-TestCatelog.create(_id: "test_statuses", test_status: test_statuses )
-
 specimen_statuses = ['specimen_not_collected','specimen_accepted','specimen_rejected','specimen_collected']
 puts 'loading specimen statuses--------------'
 specimen_statuses.each do |sps|
 	SpecimenStatus.create(name:sps)
 end
-TestCatelog.create(_id: "specimen_statuses", specimen_status: specimen_statuses )
-
-
 
 wards = ['CWC','CWC HDU','CWB','OPD 2','Facilities','OPD 1','CWA','Theatre','Dialysis Unit','ICU','1A','1B','2B','2A','Oncology','3A','Skin','Dental',
 		'3A','3B','Labour','Dental','Skin','Eye','Under 5 Clinic','7B','7C','GYNAE','Casulty','EM OPD','EM HDU','EM LW',
@@ -137,18 +125,12 @@ puts 'loading wards--------------'
 wards.each do |w|
     Ward.create(name: w)
 end
-TestCatelog.create(_id: "wards", ward: wards )
-
-
 
 measure_types = ['Numeric Range','Alphanumeric Values','Autocomplete','Free Text']
 puts 'loading measure types--------------'
 measure_types.each do |mt|
     MeasureType.create(name: mt)
 end
-TestCatelog.create(_id: "measure_types", measure_type: measure_types )
-
-
 
 measures = [
 	[1,2,"BS for mps",],[2,2,"Grams stain",''],[3,2,"SERUM AMYLASE",''],[4,2,'calcium',''],[5,2,'SGOT',''],
@@ -231,7 +213,6 @@ measures = [
 measures.each do |me|
     Measure.create(name: me[2], unit: me[3], measure_type_id: me[1],description: '')
 end
-TestCatelog.create(_id: "measures", measure: measures )
 
 testtype_measures =[
 		[233,11,74],[234,11,75],[299,31,132],[309,20,115],[311,21,116],[349,1,52],[522,24,119],[523,16,99],
