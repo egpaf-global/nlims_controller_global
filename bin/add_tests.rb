@@ -135,7 +135,7 @@ excel.sheets.each do |department|
         description: 'French Version'
       )
     end
-    specimen_names = (row_data['Types d\'échantillons'] = 'Blood/Serum/Plasma').split('/')
+    specimen_names = (row_data['Types d\'échantillons'] = 'Sang/Blood/Serum/Plasma').split('/')
     specimen_type = SpecimenType.where(name: specimen_names)
 
     specimen_type.each do |specimen|
