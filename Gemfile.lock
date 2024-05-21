@@ -46,35 +46,20 @@ GEM
     builder (3.2.4)
     byebug (11.1.3)
     concurrent-ruby (1.2.2)
-    couchrest (2.0.1)
-      httpclient (~> 2.8)
-      mime-types (>= 1.15)
-      multi_json (~> 1.7)
-    couchrest_model (2.0.3)
-      activemodel (>= 4.0, >= 3.0)
-      couchrest (>= 1.2)
-      mime-types (>= 1.16)
-      tzinfo (>= 0.3.22)
     crass (1.0.6)
     digest (3.1.1)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
     erubi (1.12.0)
-    event_emitter (0.2.6)
     ffi (1.15.5)
     globalid (1.1.0)
       activesupport (>= 5.0)
     http-accept (1.7.0)
     http-cookie (1.0.5)
       domain_name (~> 0.5)
-    httparty (0.21.0)
-      mini_mime (>= 1.0.0)
-      multi_xml (>= 0.5.2)
-    httpclient (2.8.3)
     i18n (1.13.0)
       concurrent-ruby (~> 1.0)
     io-wait (0.3.0)
-    json (2.6.3)
     listen (3.1.5)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -94,8 +79,6 @@ GEM
     mini_mime (1.1.2)
     mini_portile2 (2.6.1)
     minitest (5.15.0)
-    multi_json (1.15.0)
-    multi_xml (0.6.0)
     mysql2 (0.5.5)
     net-imap (0.2.2)
       digest
@@ -162,11 +145,6 @@ GEM
     ruby-progressbar (1.13.0)
     ruby_dep (1.5.0)
     rubyzip (2.3.2)
-    socket.io-client-simple (1.2.1)
-      event_emitter
-      httparty
-      json
-      websocket-client-simple (~> 0.3.0)
     spring (2.1.1)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
@@ -179,8 +157,6 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     strscan (3.0.6)
-    sucker_punch (3.1.0)
-      concurrent-ruby (~> 1.0)
     thor (1.2.2)
     thread_safe (0.3.6)
     timeout (0.3.2)
@@ -189,10 +165,6 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.8.2)
-    websocket (1.2.9)
-    websocket-client-simple (0.3.1)
-      event_emitter
-      websocket
     websocket-driver (0.6.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -204,7 +176,6 @@ DEPENDENCIES
   apipie-rails
   bcrypt (~> 3.1.7)
   byebug
-  couchrest_model
   listen (>= 3.0.5, < 3.2)
   mysql2 (>= 0.3.18)
   parallel
@@ -214,14 +185,12 @@ DEPENDENCIES
   rest-client
   roo
   ruby-progressbar
-  socket.io-client-simple
   spring
   spring-watcher-listen (~> 2.0.0)
-  sucker_punch
   tzinfo-data
 
 RUBY VERSION
-   ruby 2.5.3p105
+   ruby 2.7.0p0
 
 BUNDLED WITH
    1.17.3
