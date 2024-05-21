@@ -6,7 +6,7 @@ git_source(:github) do |repo_name|
 end
 
 
-ruby '2.5.3'
+ruby '2.7.0'
 
 gem 'roo'
 
